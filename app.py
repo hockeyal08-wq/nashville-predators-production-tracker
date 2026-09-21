@@ -54,14 +54,14 @@ def load_club_skater_stats(season, game_type):
         plus_minus = s.get("plusMinus", 0)
         pim = s.get("penaltyMinutes", 0)
         
-        # Power Play & Short-Handed Counting Stats
+        # Power Play & Short-Handed Counting Stats (checking alternative key variants)
         pp_goals = s.get("powerPlayGoals", 0)
-        pp_assists = s.get("powerPlayAssists", 0)
-        pp_points = pp_goals + pp_assists
+        pp_assists = s.get("powerPlayAssists") or s.get("ppAssists") or 0
+        pp_points = s.get("powerPlayPoints") or (pp_goals + pp_assists)
         
         sh_goals = s.get("shorthandedGoals", 0)
-        sh_assists = s.get("shorthandedAssists", 0)
-        sh_points = sh_goals + sh_assists
+        sh_assists = s.get("shorthandedAssists") or s.get("shAssists") or 0
+        sh_points = s.get("shorthandedPoints") or (sh_goals + sh_assists)
         
         gw_goals = s.get("gameWinningGoals", 0)
 
@@ -72,8 +72,10 @@ def load_club_skater_stats(season, game_type):
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = round(fo_pct * 100, 4) if isinstance(fo_pct, float) and fo_pct <= 1.0 else round(float(fo_pct), 4)
 
-        # TOI Parsing Helper
+        # TOI Parsing Helper (handles seconds, MM:SS strings, or direct decimals)
         def parse_toi(val):
+            if not val:
+                return 0.0
             if isinstance(val, (int, float)):
                 return val / 60.0
             if isinstance(val, str) and ":" in val:
@@ -81,13 +83,27 @@ def load_club_skater_stats(season, game_type):
                 return int(parts[0]) + (int(parts[1]) / 60.0)
             return float(val) / 60.0 if str(val).replace(".", "").isdigit() else 0.0
 
-        toi_gp_min = parse_toi(s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0)
-        pp_toi_gp = parse_toi(s.get("ppTimeOnIcePerGame") or 0)
-        sh_toi_gp = parse_toi(s.get("shTimeOnIcePerGame") or 0)
+        # Look up all official NHL API variants for overall and special teams TOI
+        toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
+        pp_toi_raw = (
+            s.get("powerPlayTimeOnIcePerGame") or 
+            s.get("powerPlayToi") or 
+            s.get("ppTimeOnIcePerGame") or 
+            s.get("ppTimeOnIce") or 0
+        )
+        sh_toi_raw = (
+            s.get("shorthandedTimeOnIcePerGame") or 
+            s.get("shorthandedToi") or 
+            s.get("shTimeOnIcePerGame") or 
+            s.get("shTimeOnIce") or 0
+        )
+
+        toi_gp_min = parse_toi(toi_raw)
+        pp_toi_gp = parse_toi(pp_toi_raw)
+        sh_toi_gp = parse_toi(sh_toi_raw)
 
         total_toi_min = toi_gp_min * gp
         total_pp_toi_min = pp_toi_gp * gp
-        total_sh_toi_min = sh_toi_gp * gp
 
         # Per-60 rate conversions
         p60 = round((pts / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
