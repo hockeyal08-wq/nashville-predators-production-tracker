@@ -4,8 +4,73 @@ import requests
 
 st.set_page_config(page_title="Predators Skater Tracker", page_icon="🏒", layout="wide")
 
+# Custom CSS for flashy spotlight card and roster grid
+st.markdown("""
+<style>
+    .spotlight-card {
+        background: linear-gradient(135deg, rgba(254, 187, 0, 0.12) 0%, rgba(4, 30, 66, 0.88) 100%);
+        border: 2px solid #FFB81C;
+        border-radius: 16px;
+        padding: 24px 28px;
+        box-shadow: 0 8px 32px rgba(254, 187, 0, 0.22);
+        margin-bottom: 24px;
+        color: white;
+    }
+    .spotlight-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin: 0;
+        color: #FFB81C;
+        letter-spacing: -0.5px;
+    }
+    .badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 184, 28, 0.5);
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-right: 6px;
+        margin-top: 6px;
+        margin-bottom: 12px;
+    }
+    .stat-pill-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 14px;
+    }
+    .stat-pill {
+        background: rgba(10, 22, 40, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+    }
+    .stat-pill-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #94A3B8;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    .stat-pill-val {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #F8FAFC;
+        margin-top: 4px;
+    }
+    .stat-pill-sub {
+        font-size: 0.75rem;
+        color: #FFB81C;
+        margin-top: 2px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("🟡 Nashville Predators Skater Performance & Value Index")
-st.caption("Rate scoring, two-way effectiveness, and special-teams impact via NHL API")
+st.caption("Live player spotlight, two-way effectiveness ratings, and ice-time distributions via NHL API")
 
 # --- Sidebar Controls ---
 st.sidebar.header("Filter Settings")
@@ -165,62 +230,72 @@ if not df.empty:
         df = df[df["Pos"] == "D"].reset_index(drop=True)
 
 # --- Spotlight Header ---
-st.subheader("🔍 Skater Spotlight")
-
 if df.empty:
     st.info(f"No {game_type_label.lower()} stats recorded yet for {selected_season[:4]}-{selected_season[4:]}.")
 else:
-    # Maintain active selection in session state
     if "selected_player_id" not in st.session_state or st.session_state["selected_player_id"] not in df["PlayerId"].values:
         st.session_state["selected_player_id"] = int(df.iloc[0]["PlayerId"])
 
-    active_player = df[df["PlayerId"] == st.session_state["selected_player_id"]].iloc[0]
+    p = df[df["PlayerId"] == st.session_state["selected_player_id"]].iloc[0]
 
-    # Large spotlight banner
-    with st.container(border=True):
-        col_img, col_info, col_off, col_def, col_st = st.columns([1.2, 2.2, 1.8, 1.8, 1.8])
-        
-        with col_img:
-            st.image(active_player["Headshot"], width=130)
-            
-        with col_info:
-            st.markdown(f"## {active_player['Name']}")
-            st.markdown(f"**Position:** `{active_player['Pos']}` &nbsp;|&nbsp; **GP:** `{active_player['GP']}`")
-            st.markdown(f"⏱️ **TOI/GP:** `{active_player['TOI/GP']:.2f} min`")
-            
-        with col_off:
-            st.metric("Total Points", f"{active_player['PTS']} PTS", f"{active_player['G']}G, {active_player['A']}A")
-            st.write(f"🎯 **P/60:** `{active_player['P/60']:.4f}`")
-            st.write(f"⚡ **Off Score:** `{active_player['Off_Score']:.4f}`")
+    # Large Gold Glow Spotlight Banner
+    spotlight_html = f"""
+    <div class="spotlight-card">
+        <div style="display: flex; gap: 28px; align-items: center; flex-wrap: wrap;">
+            <div style="flex-shrink: 0; text-align: center;">
+                <img src="{p['Headshot']}" style="width: 175px; height: 175px; object-fit: cover; border-radius: 50%; border: 3px solid #FFB81C; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+            </div>
+            <div style="flex-grow: 1; min-width: 280px;">
+                <h1 class="spotlight-title">{p['Name']}</h1>
+                <div>
+                    <span class="badge">POSITION: {p['Pos']}</span>
+                    <span class="badge">GAMES PLAYED: {p['GP']}</span>
+                    <span class="badge">TOI/GP: {p['TOI/GP']:.2f} MIN</span>
+                </div>
+                <div class="stat-pill-container">
+                    <div class="stat-pill">
+                        <div class="stat-pill-label">Total Points</div>
+                        <div class="stat-pill-val">{p['PTS']}</div>
+                        <div class="stat-pill-sub">{p['G']}G, {p['A']}A</div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="stat-pill-label">Scoring Rate</div>
+                        <div class="stat-pill-val">{p['P/60']:.2f}</div>
+                        <div class="stat-pill-sub">Points / 60</div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="stat-pill-label">Offense Index</div>
+                        <div class="stat-pill-val">{p['Off_Score']:.4f}</div>
+                        <div class="stat-pill-sub">{p['PPG']} PPG</div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="stat-pill-label">Defense Index</div>
+                        <div class="stat-pill-val">{p['Def_Score']:.4f}</div>
+                        <div class="stat-pill-sub">{p['+/-']:+d} Net Diff</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    """
+    st.markdown(spotlight_html, unsafe_allow_html=True)
 
-        with col_def:
-            st.metric("Plus / Minus", f"{active_player['+/-']:+d}")
-            st.write(f"🛑 **PIM:** `{active_player['PIM']}`")
-            st.write(f"🛡️ **Def Score:** `{active_player['Def_Score']:.4f}`")
-
-        with col_st:
-            st.metric("Power Play Goals", f"{active_player['PPG']} PPG")
-            st.write(f"🚨 **PP Score:** `{active_player['PP_Score']:.4f}`")
-            st.write(f"🧱 **PK Score:** `{active_player['PK_Score']:.4f}`")
-
-    # --- Clickable Roster Card Carousel / Grid ---
-    st.markdown("### 👥 Click a Player Card to Inspect")
-    
-    # Render roster cards in rows of 6
+    # --- Clickable Roster Grid ---
+    st.markdown("### 👥 Select a Skater to Spotlight")
     num_cols = 6
     for i in range(0, len(df), num_cols):
         cols = st.columns(num_cols)
         for j, col in enumerate(cols):
             idx = i + j
             if idx < len(df):
-                p = df.iloc[idx]
+                skater = df.iloc[idx]
                 with col:
                     with st.container(border=True):
-                        st.image(p["Headshot"], use_container_width=True)
-                        st.caption(f"**{p['Name']}** ({p['Pos']})")
-                        st.caption(f"{p['PTS']} PTS | {p['GP']} GP")
-                        if st.button("Inspect", key=f"btn_{p['PlayerId']}", use_container_width=True):
-                            st.session_state["selected_player_id"] = int(p["PlayerId"])
+                        st.image(skater["Headshot"], use_container_width=True)
+                        st.caption(f"**{skater['Name']}** ({skater['Pos']})")
+                        st.caption(f"{skater['PTS']} PTS | {skater['GP']} GP")
+                        if st.button("Spotlight", key=f"btn_{skater['PlayerId']}", use_container_width=True):
+                            st.session_state["selected_player_id"] = int(skater["PlayerId"])
                             st.rerun()
 
 st.divider()
