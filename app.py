@@ -86,8 +86,6 @@ def load_club_skater_stats(season, game_type):
         # Composite Effectiveness Ratings
         off_score = round(p60 + (sog60 * 0.25) + ((pp_goals / gp) * 1.5), 4) if gp > 0 else 0.0
         def_score = round((pm60 * 1.5) + (toi_gp_min * 0.1) + ((sh_goals / gp) * 2.0) - (pim60 * 0.2), 4) if gp > 0 else 0.0
-        
-        # Dedicated Special Teams Effectiveness
         pp_score = round(((pp_goals / gp) * 3.0) + (sog60 * 0.1), 4) if gp > 0 else 0.0
         pk_score = round((toi_gp_min * 0.05) + ((sh_goals / gp) * 4.0) - (pim60 * 0.1), 4) if gp > 0 else 0.0
 
@@ -96,6 +94,7 @@ def load_club_skater_stats(season, game_type):
         last_name = s.get("lastName", {}).get("default", "")
 
         rows.append({
+            "PlayerId": player_id,
             "Headshot": s.get("headshot", f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png"),
             "Name": f"{first_name} {last_name}",
             "Pos": s.get("positionCode", "N/A"),
@@ -165,22 +164,64 @@ if not df.empty:
     elif position_filter == "Defensemen":
         df = df[df["Pos"] == "D"].reset_index(drop=True)
 
-# --- Top Scorers Summary Cards ---
-st.subheader("🏆 Top Producers")
+# --- Spotlight Header ---
+st.subheader("🔍 Skater Spotlight")
 
 if df.empty:
-    st.info(f"No {game_type_label.lower()} stats recorded yet for {selected_season[:4]}-{selected_season[4:]}. Live box scores will populate here as regular season play starts.")
+    st.info(f"No {game_type_label.lower()} stats recorded yet for {selected_season[:4]}-{selected_season[4:]}.")
 else:
-    top_cols = st.columns(min(3, len(df)))
-    for i in range(min(3, len(df))):
-        p = df.iloc[i]
-        with top_cols[i]:
-            st.image(p["Headshot"], width=125)
-            st.markdown(f"### {p['Name']}")
-            st.write(f"**Pos:** {p['Pos']} | **GP:** {p['GP']} | **+/-:** `{p['+/-']:+d}`")
-            st.metric(label="Total Points", value=f"{p['PTS']} PTS", delta=f"{p['G']}G, {p['A']}A")
-            st.markdown(f"⚡ **Off:** `{p['Off_Score']:.4f}` | 🛡️ **Def:** `{p['Def_Score']:.4f}`")
-            st.caption(f"🎯 PP: `{p['PP_Score']:.4f}` | 🧱 PK: `{p['PK_Score']:.4f}`")
+    # Maintain active selection in session state
+    if "selected_player_id" not in st.session_state or st.session_state["selected_player_id"] not in df["PlayerId"].values:
+        st.session_state["selected_player_id"] = int(df.iloc[0]["PlayerId"])
+
+    active_player = df[df["PlayerId"] == st.session_state["selected_player_id"]].iloc[0]
+
+    # Large spotlight banner
+    with st.container(border=True):
+        col_img, col_info, col_off, col_def, col_st = st.columns([1.2, 2.2, 1.8, 1.8, 1.8])
+        
+        with col_img:
+            st.image(active_player["Headshot"], width=130)
+            
+        with col_info:
+            st.markdown(f"## {active_player['Name']}")
+            st.markdown(f"**Position:** `{active_player['Pos']}` &nbsp;|&nbsp; **GP:** `{active_player['GP']}`")
+            st.markdown(f"⏱️ **TOI/GP:** `{active_player['TOI/GP']:.2f} min`")
+            
+        with col_off:
+            st.metric("Total Points", f"{active_player['PTS']} PTS", f"{active_player['G']}G, {active_player['A']}A")
+            st.write(f"🎯 **P/60:** `{active_player['P/60']:.4f}`")
+            st.write(f"⚡ **Off Score:** `{active_player['Off_Score']:.4f}`")
+
+        with col_def:
+            st.metric("Plus / Minus", f"{active_player['+/-']:+d}")
+            st.write(f"🛑 **PIM:** `{active_player['PIM']}`")
+            st.write(f"🛡️ **Def Score:** `{active_player['Def_Score']:.4f}`")
+
+        with col_st:
+            st.metric("Power Play Goals", f"{active_player['PPG']} PPG")
+            st.write(f"🚨 **PP Score:** `{active_player['PP_Score']:.4f}`")
+            st.write(f"🧱 **PK Score:** `{active_player['PK_Score']:.4f}`")
+
+    # --- Clickable Roster Card Carousel / Grid ---
+    st.markdown("### 👥 Click a Player Card to Inspect")
+    
+    # Render roster cards in rows of 6
+    num_cols = 6
+    for i in range(0, len(df), num_cols):
+        cols = st.columns(num_cols)
+        for j, col in enumerate(cols):
+            idx = i + j
+            if idx < len(df):
+                p = df.iloc[idx]
+                with col:
+                    with st.container(border=True):
+                        st.image(p["Headshot"], use_container_width=True)
+                        st.caption(f"**{p['Name']}** ({p['Pos']})")
+                        st.caption(f"{p['PTS']} PTS | {p['GP']} GP")
+                        if st.button("Inspect", key=f"btn_{p['PlayerId']}", use_container_width=True):
+                            st.session_state["selected_player_id"] = int(p["PlayerId"])
+                            st.rerun()
 
 st.divider()
 
