@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 
+# Page setup
 st.set_page_config(page_title="Predators Skater Tracker", page_icon="🏒", layout="wide")
 
 st.title("🟡 Nashville Predators Skater Tracker")
@@ -9,10 +10,11 @@ st.caption("Live production, ice-time share, and scoring rates via NHL API")
 
 # --- Sidebar Controls ---
 st.sidebar.header("Filter Settings")
+
 selected_season = st.sidebar.selectbox(
     "Select Season",
-    options=["20252026", "20242025", "20232024"],
-    index=0
+    options=["20262027", "20252026", "20242025", "20232024"],
+    index=0  # Defaults to 2026-2027
 )
 
 game_type_label = st.sidebar.radio(
@@ -25,7 +27,7 @@ game_type_code = "2" if game_type_label == "Regular Season" else "1"
 BASE_URL = "https://api-web.nhle.com/v1"
 TEAM_TRICODE = "NSH"
 
-@st.cache_data(ttl=900)
+@st.cache_data(ttl=900)  # Caches for 15 minutes for live game-day updates
 def load_club_skater_stats(season, game_type):
     url = f"{BASE_URL}/club-stats/{TEAM_TRICODE}/{season}/{game_type}"
     res = requests.get(url)
@@ -43,8 +45,10 @@ def load_club_skater_stats(season, game_type):
         assists = s.get("assists", 0)
         shots = s.get("shots", 0)
         
-        # Robust parser for NHL TOI formats
+        # Check all possible NHL API keys for time on ice
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
+        
+        # Parse whether TOI is returned as seconds (numeric), "MM:SS" (string), or decimal
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
         elif isinstance(toi_raw, str) and ":" in toi_raw:
@@ -81,9 +85,11 @@ def load_club_skater_stats(season, game_type):
 with st.spinner("Fetching stats..."):
     df = load_club_skater_stats(selected_season, game_type_code)
 
+# --- Top Scorers Cards Row ---
 st.subheader("🏆 Top Producers")
+
 if df.empty:
-    st.info(f"No {game_type_label.lower()} games logged yet for {selected_season[:4]}-{selected_season[4:]}.")
+    st.info(f"No {game_type_label.lower()} games logged yet for {selected_season[:4]}-{selected_season[4:]}. Once games start and box scores submit, production metrics will populate here.")
 else:
     top_cols = st.columns(min(3, len(df)))
     for i in range(min(3, len(df))):
@@ -97,6 +103,7 @@ else:
 
 st.divider()
 
+# --- Full Team Leaderboard Table ---
 st.subheader("📋 Skater Leaderboard")
 if not df.empty:
     st.dataframe(
