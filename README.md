@@ -13,5 +13,5 @@ A Python analytics pipeline that fetches game-by-game data directly from the NHL
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/hockeyal08-wq/nashville-predators-production-tracker.git(https://github.com/hockeyal08-wq/nashville-predators-production-tracker.git)
+git clone https://github.com/hockeyal08-wq/nashville-predators-production-tracker.git
 cd nashville-predators-production-tracker
