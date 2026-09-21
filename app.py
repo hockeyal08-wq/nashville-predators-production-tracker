@@ -5,7 +5,7 @@ import requests
 st.set_page_config(page_title="Predators Skater Tracker", page_icon="🏒", layout="wide")
 
 st.title("🟡 Nashville Predators Skater Performance & Value Index")
-st.caption("Rate scoring, two-way effectiveness, and special-teams impact via NHL API")
+st.caption("Rate scoring, two-way effectiveness, and special-teams impact via NHL Stats API")
 
 # --- Sidebar Controls ---
 st.sidebar.header("Filter Settings")
@@ -29,18 +29,25 @@ position_filter = st.sidebar.selectbox(
     index=0
 )
 
-BASE_URL = "https://api-web.nhle.com/v1"
 TEAM_TRICODE = "NSH"
 
 @st.cache_data(ttl=900)
 def load_club_skater_stats(season, game_type):
-    url = f"{BASE_URL}/club-stats/{TEAM_TRICODE}/{season}/{game_type}"
-    res = requests.get(url)
+    url = "https://api.nhle.com/stats/rest/en/skater/summary"
+    params = {
+        "isAggregate": "false",
+        "isGame": "false",
+        "sort": '[{"property":"points","direction":"DESC"}]',
+        "cayenneExp": f'teamTriCode="{TEAM_TRICODE}" and seasonId={season} and gameTypeId={game_type}'
+    }
+    
+    headers = {"User-Agent": "Mozilla/5.0"}
+    res = requests.get(url, params=params, headers=headers)
     if res.status_code != 200:
         return pd.DataFrame()
     
     data = res.json()
-    skaters = data.get("skaters", [])
+    skaters = data.get("data", [])
     if not skaters:
         return pd.DataFrame()
 
@@ -54,58 +61,55 @@ def load_club_skater_stats(season, game_type):
         plus_minus = s.get("plusMinus", 0)
         pim = s.get("penaltyMinutes", 0)
         
-        # Power Play and Short-Handed Counting Stats
-        pp_goals = s.get("powerPlayGoals", 0)
-        pp_assists = s.get("powerPlayAssists", 0)
-        pp_points = pp_goals + pp_assists
+        # Special Teams Counting Stats (Directly populated from Stats API)
+        pp_goals = s.get("ppGoals", 0)
+        pp_assists = s.get("ppIndividualAssists", 0)
+        pp_points = s.get("ppPoints", 0)
         
-        sh_goals = s.get("shorthandedGoals", 0)
-        sh_assists = s.get("shorthandedAssists", 0)
-        sh_points = sh_goals + sh_assists
+        sh_goals = s.get("shGoals", 0)
+        sh_assists = s.get("shIndividualAssists", 0)
+        sh_points = s.get("shPoints", 0)
         
         gw_goals = s.get("gameWinningGoals", 0)
 
         # Percentages
-        sh_pct = s.get("shootingPctg", 0.0)
-        sh_pct = round(sh_pct * 100, 4) if isinstance(sh_pct, float) and sh_pct <= 1.0 else round(float(sh_pct), 4)
+        sh_pct = round(s.get("shootingPct", 0.0) * 100, 4)
+        fo_pct = round(s.get("faceoffWinPct", 0.0) * 100, 4)
 
-        fo_pct = s.get("faceoffWinningPctg", 0.0)
-        fo_pct = round(fo_pct * 100, 4) if isinstance(fo_pct, float) and fo_pct <= 1.0 else round(float(fo_pct), 4)
+        # Ice Time Metrics (Returned as total seconds)
+        total_toi_sec = s.get("timeOnIce", 0)
+        total_pp_toi_sec = s.get("ppTimeOnIce", 0)
+        total_sh_toi_sec = s.get("shTimeOnIce", 0)
 
-        # TOI Parsing
-        toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
-        if isinstance(toi_raw, (int, float)):
-            toi_gp_min = toi_raw / 60.0
-        elif isinstance(toi_raw, str) and ":" in toi_raw:
-            parts = toi_raw.split(":")
-            toi_gp_min = int(parts[0]) + (int(parts[1]) / 60.0)
-        else:
-            toi_gp_min = float(toi_raw) / 60.0 if str(toi_raw).replace(".", "").isdigit() else 0.0
+        total_toi_min = total_toi_sec / 60.0
+        total_pp_toi_min = total_pp_toi_sec / 60.0
+        total_sh_toi_min = total_sh_toi_sec / 60.0
 
-        total_toi_min = toi_gp_min * gp
+        toi_gp_min = (total_toi_min / gp) if gp > 0 else 0.0
+        pp_toi_gp = (total_pp_toi_min / gp) if gp > 0 else 0.0
+        sh_toi_gp = (total_sh_toi_min / gp) if gp > 0 else 0.0
 
         # Per-60 rate conversions
         p60 = round((pts / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
         sog60 = round((shots / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
         pm60 = round((plus_minus / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
         pim60 = round((pim / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
+        ppp60 = round((pp_points / total_pp_toi_min) * 60, 4) if total_pp_toi_min > 0 else 0.0
 
-        # Composite Effectiveness Ratings
+        # Unified Analytic Scores
         off_score = round(p60 + (sog60 * 0.25) + ((pp_points / gp) * 0.5), 4) if gp > 0 else 0.0
         def_score = round((pm60 * 1.5) + (toi_gp_min * 0.1) + ((sh_goals / gp) * 1.0) - (pim60 * 0.2), 4) if gp > 0 else 0.0
-        
-        # Special Teams Ratings (Per Game Production and Role Discipline)
-        pp_score = round(((pp_points / gp) * 1.0) + ((pp_goals / gp) * 0.5), 4) if gp > 0 else 0.0
-        pk_score = round(((sh_points / gp) * 2.0) + ((sh_goals / gp) * 1.0) - ((pim / gp) * 0.05), 4) if gp > 0 else 0.0
+        pp_score = round(ppp60 + ((pp_goals / gp) * 2.0), 4) if gp > 0 else 0.0
+        pk_score = round((sh_toi_gp * 1.5) + ((sh_points / gp) * 2.0) - ((pim / gp) * 0.25), 4) if gp > 0 else 0.0
 
         player_id = s.get("playerId")
-        first_name = s.get("firstName", {}).get("default", "")
-        last_name = s.get("lastName", {}).get("default", "")
+        player_name = s.get("skaterFullName", "Unknown Player")
+        pos = s.get("positionCode", "N/A")
 
         rows.append({
-            "Headshot": s.get("headshot", f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png"),
-            "Name": f"{first_name} {last_name}",
-            "Pos": s.get("positionCode", "N/A"),
+            "Headshot": f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png",
+            "Name": player_name,
+            "Pos": pos,
             "GP": int(gp),
             "G": int(goals),
             "A": int(assists),
@@ -123,9 +127,12 @@ def load_club_skater_stats(season, game_type):
             "GWG": int(gw_goals),
             "FO%": fo_pct,
             "TOI/GP": round(toi_gp_min, 4),
+            "PP_TOI/GP": round(pp_toi_gp, 4),
+            "SH_TOI/GP": round(sh_toi_gp, 4),
             "P/60": p60,
             "SOG/60": sog60,
             "+/- /60": pm60,
+            "PPP/60": ppp60,
             "Off_Score": off_score,
             "Def_Score": def_score,
             "PP_Score": pp_score,
@@ -168,7 +175,7 @@ def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0
                 
     return styler_df
 
-with st.spinner("Fetching player analytics..."):
+with st.spinner("Fetching official NHL stats..."):
     df = load_club_skater_stats(selected_season, game_type_code)
 
 if not df.empty:
@@ -208,7 +215,10 @@ format_4dec = {
     "P/60": "{:.4f}",
     "SOG/60": "{:.4f}",
     "+/- /60": "{:.4f}",
+    "PPP/60": "{:.4f}",
     "TOI/GP": "{:.4f}",
+    "PP_TOI/GP": "{:.4f}",
+    "SH_TOI/GP": "{:.4f}",
     "SH%": "{:.4f}%",
     "FO%": "{:.4f}%"
 }
@@ -243,10 +253,10 @@ if not df.empty:
 
     with tab3:
         st.markdown("**Ranked by Special Teams Impact (`PP_Score` & `PK_Score`):**")
-        st_df = df[["Name", "Pos", "GP", "PP_Score", "PK_Score", "PPP", "PPG", "PPA", "SHP", "SHG", "SHA", "PIM", "TOI/GP"]].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
+        st_df = df[["Name", "Pos", "GP", "PP_Score", "PK_Score", "PPP/60", "PP_TOI/GP", "PPP", "PPG", "PPA", "SH_TOI/GP", "SHP", "SHG", "SHA", "PIM"]].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
         styled_st = (
             st_df.style
-            .apply(lambda _: apply_outlier_styling(st_df, ["PP_Score", "PK_Score", "PPP", "PPG", "SHP", "SHG"], min_gp=5), axis=None)
+            .apply(lambda _: apply_outlier_styling(st_df, ["PP_Score", "PK_Score", "PPP/60", "PP_TOI/GP", "SH_TOI/GP", "PPP"], min_gp=5), axis=None)
             .format(format_4dec)
         )
         st.dataframe(styled_st, use_container_width=True, hide_index=True)
@@ -254,8 +264,8 @@ if not df.empty:
     with tab4:
         comp_df = df[[
             "Name", "Pos", "GP", "Off_Score", "Def_Score", "PP_Score", "PK_Score",
-            "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "SOG", "SH%", "PIM", 
-            "PPG", "PPA", "PPP", "SHG", "SHA", "SHP", "GWG", "FO%"
+            "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "PP_TOI/GP", "SH_TOI/GP",
+            "SOG", "SH%", "PIM", "PPG", "PPA", "PPP", "SHG", "SHA", "SHP", "GWG", "FO%"
         ]].sort_values(by="PTS", ascending=False).reset_index(drop=True)
         styled_comp = (
             comp_df.style
