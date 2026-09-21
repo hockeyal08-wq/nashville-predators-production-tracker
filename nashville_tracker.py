@@ -142,6 +142,6 @@ if __name__ == "__main__":
     if not df_games.empty:
         summary_table = generate_skater_summary(df_games)
         print("\n--- Nashville Predators Production Summary ---")
-        print(summary_table[["name", "position", "GP", "G", "A", "PTS", "P/60", "TOI/GP"]].head(10))
+        print(summary_table[["name", "position", "GP", "G", "A", "PTS", "P/60", "TOI/GP"]].to_string())
         
         plot_top_producers(df_games, top_n=5)
