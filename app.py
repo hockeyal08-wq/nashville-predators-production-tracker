@@ -84,11 +84,8 @@ def load_club_skater_stats(season, game_type):
         pm60 = round((plus_minus / total_toi_min) * 60, 2) if total_toi_min > 0 else 0.0
         pim60 = round((pim / total_toi_min) * 60, 2) if total_toi_min > 0 else 0.0
 
-        # --- Composite Ratings ---
-        # Offensive Rating: Points rate (weight: 1.0) + Shot generation rate (weight: 0.25) + PP production per GP (weight: 0.5)
+        # Composite Ratings
         off_score = round(p60 + (sog60 * 0.25) + ((pp_points / gp) * 0.5), 2) if gp > 0 else 0.0
-
-        # Defensive Rating: Net on-ice goal rate (weight: 1.5) + Heavy TOI workload baseline (weight: 0.1) + PK short-handed output - Penalty cost
         def_score = round((pm60 * 1.5) + (toi_gp_min * 0.1) + ((sh_goals / gp) * 1.0) - (pim60 * 0.2), 2) if gp > 0 else 0.0
 
         player_id = s.get("playerId")
@@ -125,7 +122,37 @@ def load_club_skater_stats(season, game_type):
         df = df[df["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
     return df
 
-with st.spinner("Fetching stats..."):
+# --- Styling Helper for Outliers ---
+def style_outliers(series, high_q=0.85, low_q=0.15, reverse=False):
+    """Highlights top performers in soft green and bottom performers in soft red."""
+    if len(series.dropna()) < 3:
+        return ['' for _ in series]
+    
+    high_thresh = series.quantile(high_q)
+    low_thresh = series.quantile(low_q)
+    
+    styles = []
+    for val in series:
+        if pd.isna(val):
+            styles.append('')
+        elif not reverse:
+            if val >= high_thresh:
+                styles.append('background-color: rgba(34, 197, 94, 0.35); font-weight: bold;')
+            elif val <= low_thresh:
+                styles.append('background-color: rgba(239, 68, 68, 0.35); font-weight: bold;')
+            else:
+                styles.append('')
+        else:
+            # When lower is better (e.g. PIM rate)
+            if val <= low_thresh:
+                styles.append('background-color: rgba(34, 197, 94, 0.35); font-weight: bold;')
+            elif val >= high_thresh:
+                styles.append('background-color: rgba(239, 68, 68, 0.35); font-weight: bold;')
+            else:
+                styles.append('')
+    return styles
+
+with st.spinner("Fetching player analytics..."):
     df = load_club_skater_stats(selected_season, game_type_code)
 
 if not df.empty:
@@ -153,31 +180,29 @@ else:
 
 st.divider()
 
-# --- Tabbed Analytical Views ---
+# --- Tabbed Analytical Views with Heatmap Outliers ---
 st.subheader("📊 Roster Effectiveness & Advanced Leaderboards")
+st.caption("🟢 **Green:** Top 15% tier | 🔴 **Red:** Bottom 15% tier across the roster")
 
 if not df.empty:
     tab1, tab2, tab3 = st.tabs(["⚡ Offensive Impact (Off_Score)", "🛡️ Defensive Impact (Def_Score)", "📋 Complete Statistics"])
 
     with tab1:
         st.markdown("**Ranked by `Off_Score` (P/60 + SOG/60 + Power Play Generation):**")
-        st.dataframe(
-            df[["Name", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPP", "GWG"]].sort_values(by="Off_Score", ascending=False),
-            use_container_width=True,
-            hide_index=True
-        )
+        off_df = df[["Name", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPP", "GWG"]].sort_values(by="Off_Score", ascending=False)
+        
+        styled_off = off_df.style.apply(style_outliers, subset=["Off_Score", "P/60", "SOG/60", "PTS", "SH%"], axis=0)
+        st.dataframe(styled_off, use_container_width=True, hide_index=True)
 
     with tab2:
         st.markdown("**Ranked by `Def_Score` (On-Ice Goal Differential per 60 + TOI Burden - Penalty Discipline):**")
-        st.dataframe(
-            df[["Name", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG", "FO%"]].sort_values(by="Def_Score", ascending=False),
-            use_container_width=True,
-            hide_index=True
-        )
+        def_df = df[["Name", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG", "FO%"]].sort_values(by="Def_Score", ascending=False)
+        
+        styled_def = def_df.style.apply(style_outliers, subset=["Def_Score", "+/- /60", "TOI/GP", "+/-", "FO%"], axis=0)
+        st.dataframe(styled_def, use_container_width=True, hide_index=True)
 
     with tab3:
-        st.dataframe(
-            df[["Name", "Pos", "GP", "Off_Score", "Def_Score", "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "SOG", "SH%", "PIM", "PPG", "PPP", "SHG", "GWG", "FO%"]].sort_values(by="PTS", ascending=False),
-            use_container_width=True,
-            hide_index=True
-        )
+        comp_df = df[["Name", "Pos", "GP", "Off_Score", "Def_Score", "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "SOG", "SH%", "PIM", "PPG", "PPP", "SHG", "GWG", "FO%"]].sort_values(by="PTS", ascending=False)
+        
+        styled_comp = comp_df.style.apply(style_outliers, subset=["Off_Score", "Def_Score", "PTS", "+/-", "P/60", "TOI/GP"], axis=0)
+        st.dataframe(styled_comp, use_container_width=True, hide_index=True)
