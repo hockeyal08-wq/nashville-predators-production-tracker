@@ -53,18 +53,22 @@ def load_club_skater_stats(season, game_type):
         shots = s.get("shots", 0)
         plus_minus = s.get("plusMinus", 0)
         pim = s.get("penaltyMinutes", 0)
+        
+        # Power Play Points calculation (PPG + PPA)
         pp_goals = s.get("powerPlayGoals", 0)
-        pp_points = s.get("powerPlayPoints", 0)
+        pp_assists = s.get("powerPlayAssists", 0)
+        pp_points = pp_goals + pp_assists
+        
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
         # Shooting %
         sh_pct = s.get("shootingPctg", 0.0)
-        sh_pct = round(sh_pct * 100, 2) if isinstance(sh_pct, float) and sh_pct <= 1.0 else round(float(sh_pct), 2)
+        sh_pct = round(sh_pct * 100, 4) if isinstance(sh_pct, float) and sh_pct <= 1.0 else round(float(sh_pct), 4)
 
         # Faceoff Win %
         fo_pct = s.get("faceoffWinningPctg", 0.0)
-        fo_pct = round(fo_pct * 100, 2) if isinstance(fo_pct, float) and fo_pct <= 1.0 else round(float(fo_pct), 2)
+        fo_pct = round(fo_pct * 100, 4) if isinstance(fo_pct, float) and fo_pct <= 1.0 else round(float(fo_pct), 4)
 
         # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
@@ -79,14 +83,14 @@ def load_club_skater_stats(season, game_type):
         total_toi_min = toi_gp_min * gp
 
         # Per-60 rate conversions
-        p60 = round((pts / total_toi_min) * 60, 2) if total_toi_min > 0 else 0.0
-        sog60 = round((shots / total_toi_min) * 60, 2) if total_toi_min > 0 else 0.0
-        pm60 = round((plus_minus / total_toi_min) * 60, 2) if total_toi_min > 0 else 0.0
-        pim60 = round((pim / total_toi_min) * 60, 2) if total_toi_min > 0 else 0.0
+        p60 = round((pts / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
+        sog60 = round((shots / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
+        pm60 = round((plus_minus / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
+        pim60 = round((pim / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
 
         # Composite Ratings
-        off_score = round(p60 + (sog60 * 0.25) + ((pp_points / gp) * 0.5), 2) if gp > 0 else 0.0
-        def_score = round((pm60 * 1.5) + (toi_gp_min * 0.1) + ((sh_goals / gp) * 1.0) - (pim60 * 0.2), 2) if gp > 0 else 0.0
+        off_score = round(p60 + (sog60 * 0.25) + ((pp_points / gp) * 0.5), 4) if gp > 0 else 0.0
+        def_score = round((pm60 * 1.5) + (toi_gp_min * 0.1) + ((sh_goals / gp) * 1.0) - (pim60 * 0.2), 4) if gp > 0 else 0.0
 
         player_id = s.get("playerId")
         first_name = s.get("firstName", {}).get("default", "")
@@ -109,7 +113,7 @@ def load_club_skater_stats(season, game_type):
             "SHG": int(sh_goals),
             "GWG": int(gw_goals),
             "FO%": fo_pct,
-            "TOI/GP": round(toi_gp_min, 2),
+            "TOI/GP": round(toi_gp_min, 4),
             "P/60": p60,
             "SOG/60": sog60,
             "+/- /60": pm60,
@@ -176,25 +180,24 @@ else:
             st.markdown(f"### {p['Name']}")
             st.write(f"**Pos:** {p['Pos']} | **GP:** {p['GP']} | **+/-:** `{p['+/-']:+d}`")
             st.metric(label="Total Points", value=f"{p['PTS']} PTS", delta=f"{p['G']}G, {p['A']}A")
-            st.markdown(f"⚡ **Off Rating:** `{p['Off_Score']:.2f}` | 🛡️ **Def Rating:** `{p['Def_Score']:.2f}`")
-            st.caption(f"⏱️ TOI/GP: {p['TOI/GP']:.2f}m | 🎯 P/60: {p['P/60']:.2f}")
+            st.markdown(f"⚡ **Off Rating:** `{p['Off_Score']:.4f}` | 🛡️ **Def Rating:** `{p['Def_Score']:.4f}`")
+            st.caption(f"⏱️ TOI/GP: {p['TOI/GP']:.4f}m | 🎯 P/60: {p['P/60']:.4f}")
 
 st.divider()
 
-# --- Tabbed Analytical Views with 2-Decimal Precision ---
+# --- Tabbed Analytical Views with 4-Decimal Precision ---
 st.subheader("📊 Roster Effectiveness & Advanced Leaderboards")
 st.caption("🟢 **Green:** Top 15% tier | 🔴 **Red:** Bottom 15% tier (Minimum 5 GP required to qualify)")
 
-# Standard dictionary mapping every floating-point metric to exactly two decimal places
-format_2dec = {
-    "Off_Score": "{:.2f}",
-    "Def_Score": "{:.2f}",
-    "P/60": "{:.2f}",
-    "SOG/60": "{:.2f}",
-    "+/- /60": "{:.2f}",
-    "TOI/GP": "{:.2f}",
-    "SH%": "{:.2f}%",
-    "FO%": "{:.2f}%"
+format_4dec = {
+    "Off_Score": "{:.4f}",
+    "Def_Score": "{:.4f}",
+    "P/60": "{:.4f}",
+    "SOG/60": "{:.4f}",
+    "+/- /60": "{:.4f}",
+    "TOI/GP": "{:.4f}",
+    "SH%": "{:.4f}%",
+    "FO%": "{:.4f}%"
 }
 
 if not df.empty:
@@ -206,7 +209,7 @@ if not df.empty:
         styled_off = (
             off_df.style
             .apply(lambda _: apply_outlier_styling(off_df, ["Off_Score", "P/60", "SOG/60", "PTS", "SH%"], min_gp=5), axis=None)
-            .format(format_2dec)
+            .format(format_4dec)
         )
         st.dataframe(styled_off, use_container_width=True, hide_index=True)
 
@@ -216,7 +219,7 @@ if not df.empty:
         styled_def = (
             def_df.style
             .apply(lambda _: apply_outlier_styling(def_df, ["Def_Score", "+/- /60", "TOI/GP", "+/-", "FO%"], min_gp=5), axis=None)
-            .format(format_2dec)
+            .format(format_4dec)
         )
         st.dataframe(styled_def, use_container_width=True, hide_index=True)
 
@@ -225,6 +228,6 @@ if not df.empty:
         styled_comp = (
             comp_df.style
             .apply(lambda _: apply_outlier_styling(comp_df, ["Off_Score", "Def_Score", "PTS", "+/-", "P/60", "TOI/GP"], min_gp=5), axis=None)
-            .format(format_2dec)
+            .format(format_4dec)
         )
         st.dataframe(styled_comp, use_container_width=True, hide_index=True)
