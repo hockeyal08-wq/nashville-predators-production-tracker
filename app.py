@@ -7,19 +7,30 @@ st.set_page_config(page_title="Predators Skater Tracker", page_icon="🏒", layo
 st.title("🟡 Nashville Predators Skater Tracker")
 st.caption("Live production, ice-time share, and scoring rates via NHL API")
 
+# --- Sidebar Controls ---
+st.sidebar.header("Filter Settings")
+
+# 1. Season selector including current and prior campaigns
 selected_season = st.sidebar.selectbox(
     "Select Season",
-    options=["20242025", "20232024"],
+    options=["20262027", "20252026", "20242025", "20232024"],
+    index=0  # Defaults to 2026-2027
+)
+
+# 2. Game Type: Preseason (1) vs Regular Season (2)
+game_type_label = st.sidebar.radio(
+    "Game Type",
+    options=["Regular Season", "Preseason"],
     index=0
 )
+game_type_code = "2" if game_type_label == "Regular Season" else "1"
 
 BASE_URL = "https://api-web.nhle.com/v1"
 TEAM_TRICODE = "NSH"
 
-@st.cache_data(ttl=3600)
-def load_club_skater_stats(season):
-    # Single endpoint fetching the entire club's skater stats at once
-    url = f"{BASE_URL}/club-stats/{TEAM_TRICODE}/{season}/2"
+@st.cache_data(ttl=900)  # Caches for 15 minutes during the season so games update quickly
+def load_club_skater_stats(season, game_type):
+    url = f"{BASE_URL}/club-stats/{TEAM_TRICODE}/{season}/{game_type}"
     res = requests.get(url)
     if res.status_code != 200:
         return pd.DataFrame()
@@ -35,7 +46,7 @@ def load_club_skater_stats(season):
         assists = s.get("assists", 0)
         shots = s.get("shots", 0)
         
-        # Parse average TOI per game (format "MM:SS")
+        # Parse average TOI per game (MM:SS)
         toi_str = s.get("avgToi", "00:00")
         parts = toi_str.split(":")
         toi_gp_min = int(parts[0]) + (int(parts[1]) / 60.0) if len(parts) == 2 else 0.0
@@ -62,15 +73,15 @@ def load_club_skater_stats(season):
         
     df = pd.DataFrame(rows)
     if not df.empty:
-        df = df.sort_values(by="PTS", ascending=False).reset_index(drop=True)
+        df = df[df["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
     return df
 
 with st.spinner("Fetching stats..."):
-    df = load_club_skater_stats(selected_season)
+    df = load_club_skater_stats(selected_season, game_type_code)
 
 st.subheader("🏆 Top Producers")
 if df.empty:
-    st.warning("No skater data returned for this selection.")
+    st.info(f"No {game_type_label.lower()} games logged yet for {selected_season[:4]}-{selected_season[4:]}. As soon as the puck drops and box scores submit, production metrics will populate here.")
 else:
     top_cols = st.columns(min(3, len(df)))
     for i in range(min(3, len(df))):
