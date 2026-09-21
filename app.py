@@ -27,20 +27,16 @@ game_type_code = "2" if game_type_label == "Regular Season" else "1"
 BASE_URL = "https://api-web.nhle.com/v1"
 TEAM_TRICODE = "NSH"
 
-@st.cache_data(ttl=300)  # Caches for 5 minutes during live game stretches
+@st.cache_data(ttl=600)  # Caches for 10 minutes so new games refresh automatically
 def load_club_skater_stats(season, game_type):
-    # 1. Primary endpoint query
+    # Strict endpoint call for the exact season and game type selected
     url = f"{BASE_URL}/club-stats/{TEAM_TRICODE}/{season}/{game_type}"
     res = requests.get(url)
-    data = res.json() if res.status_code == 200 else {}
+    if res.status_code != 200:
+        return pd.DataFrame()
+    
+    data = res.json()
     skaters = data.get("skaters", [])
-
-    # 2. Live fallback if early-season/preseason summary is not compiled yet
-    if not skaters and season == "20262027":
-        fallback_res = requests.get(f"{BASE_URL}/club-stats/{TEAM_TRICODE}/now")
-        if fallback_res.status_code == 200:
-            skaters = fallback_res.json().get("skaters", [])
-
     if not skaters:
         return pd.DataFrame()
 
@@ -52,7 +48,7 @@ def load_club_skater_stats(season, game_type):
         assists = s.get("assists", 0)
         shots = s.get("shots", 0)
 
-        # TOI parsing handling numeric seconds, MM:SS strings, and decimal representations
+        # Parse TOI handling numeric seconds, MM:SS strings, and decimal representations
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
@@ -84,6 +80,7 @@ def load_club_skater_stats(season, game_type):
 
     df = pd.DataFrame(rows)
     if not df.empty:
+        # Keep players with at least 1 game played in that specific game type
         df = df[df["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
     return df
 
@@ -94,7 +91,7 @@ with st.spinner("Fetching stats..."):
 st.subheader("🏆 Top Producers")
 
 if df.empty:
-    st.info(f"No {game_type_label.lower()} games logged yet for {selected_season[:4]}-{selected_season[4:]}. As soon as the official box scores sync, production metrics will populate here.")
+    st.info(f"No {game_type_label.lower()} games logged yet for {selected_season[:4]}-{selected_season[4:]}. Production cards and the table will populate as games are submitted.")
 else:
     top_cols = st.columns(min(3, len(df)))
     for i in range(min(3, len(df))):
