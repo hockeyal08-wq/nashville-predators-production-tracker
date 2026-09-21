@@ -17,19 +17,19 @@ selected_season = st.sidebar.selectbox(
     index=0  # Defaults to 2026-2027
 )
 
+# NHL Club Stats only supports Regular Season (2) and Playoffs (3)
 game_type_label = st.sidebar.radio(
     "Game Type",
-    options=["Regular Season", "Preseason"],
+    options=["Regular Season", "Playoffs"],
     index=0
 )
-game_type_code = "2" if game_type_label == "Regular Season" else "1"
+game_type_code = "2" if game_type_label == "Regular Season" else "3"
 
 BASE_URL = "https://api-web.nhle.com/v1"
 TEAM_TRICODE = "NSH"
 
-@st.cache_data(ttl=600)  # Caches for 10 minutes so new games refresh automatically
+@st.cache_data(ttl=900)  # Caches for 15 minutes during the season
 def load_club_skater_stats(season, game_type):
-    # Strict endpoint call for the exact season and game type selected
     url = f"{BASE_URL}/club-stats/{TEAM_TRICODE}/{season}/{game_type}"
     res = requests.get(url)
     if res.status_code != 200:
@@ -80,7 +80,6 @@ def load_club_skater_stats(season, game_type):
 
     df = pd.DataFrame(rows)
     if not df.empty:
-        # Keep players with at least 1 game played in that specific game type
         df = df[df["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
     return df
 
