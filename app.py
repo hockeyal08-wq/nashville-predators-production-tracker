@@ -9,15 +9,12 @@ st.caption("Live production, ice-time share, and scoring rates via NHL API")
 
 # --- Sidebar Controls ---
 st.sidebar.header("Filter Settings")
-
-# 1. Season selector including current and prior campaigns
 selected_season = st.sidebar.selectbox(
     "Select Season",
-    options=["20262027", "20252026", "20242025", "20232024"],
-    index=0  # Defaults to 2026-2027
+    options=["20252026", "20242025", "20232024"],
+    index=0
 )
 
-# 2. Game Type: Preseason (1) vs Regular Season (2)
 game_type_label = st.sidebar.radio(
     "Game Type",
     options=["Regular Season", "Preseason"],
@@ -28,7 +25,7 @@ game_type_code = "2" if game_type_label == "Regular Season" else "1"
 BASE_URL = "https://api-web.nhle.com/v1"
 TEAM_TRICODE = "NSH"
 
-@st.cache_data(ttl=900)  # Caches for 15 minutes during the season so games update quickly
+@st.cache_data(ttl=900)
 def load_club_skater_stats(season, game_type):
     url = f"{BASE_URL}/club-stats/{TEAM_TRICODE}/{season}/{game_type}"
     res = requests.get(url)
@@ -46,11 +43,16 @@ def load_club_skater_stats(season, game_type):
         assists = s.get("assists", 0)
         shots = s.get("shots", 0)
         
-        # Parse average TOI per game (MM:SS)
-        toi_str = s.get("avgToi", "00:00")
-        parts = toi_str.split(":")
-        toi_gp_min = int(parts[0]) + (int(parts[1]) / 60.0) if len(parts) == 2 else 0.0
-        
+        # Robust parser for NHL TOI formats
+        toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
+        if isinstance(toi_raw, (int, float)):
+            toi_gp_min = toi_raw / 60.0
+        elif isinstance(toi_raw, str) and ":" in toi_raw:
+            parts = toi_raw.split(":")
+            toi_gp_min = int(parts[0]) + (int(parts[1]) / 60.0)
+        else:
+            toi_gp_min = float(toi_raw) / 60.0 if str(toi_raw).replace(".", "").isdigit() else 0.0
+            
         total_toi_min = toi_gp_min * gp
         p60 = round((pts / total_toi_min) * 60, 2) if total_toi_min > 0 else 0.0
         
@@ -81,7 +83,7 @@ with st.spinner("Fetching stats..."):
 
 st.subheader("🏆 Top Producers")
 if df.empty:
-    st.info(f"No {game_type_label.lower()} games logged yet for {selected_season[:4]}-{selected_season[4:]}. As soon as the puck drops and box scores submit, production metrics will populate here.")
+    st.info(f"No {game_type_label.lower()} games logged yet for {selected_season[:4]}-{selected_season[4:]}.")
 else:
     top_cols = st.columns(min(3, len(df)))
     for i in range(min(3, len(df))):
