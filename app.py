@@ -4,8 +4,8 @@ import requests
 
 st.set_page_config(page_title="Predators Skater Tracker", page_icon="🏒", layout="wide")
 
-st.title("🟡 Nashville Predators Skater Tracker")
-st.caption("Live offensive production, defensive impact, and ice-time distributions via NHL API")
+st.title("🟡 Nashville Predators Skater Performance & Value Index")
+st.caption("Rate scoring, two-way effectiveness models, and ice-time distributions via NHL API")
 
 # --- Sidebar Controls ---
 st.sidebar.header("Filter Settings")
@@ -57,20 +57,14 @@ def load_club_skater_stats(season, game_type):
         pp_points = s.get("powerPlayPoints", 0)
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
-        
-        # Shooting Pct
-        sh_pct = s.get("shootingPctg", 0.0)
-        if isinstance(sh_pct, float) and sh_pct <= 1.0:
-            sh_pct = round(sh_pct * 100, 1)
-        else:
-            sh_pct = round(float(sh_pct), 1)
 
-        # Faceoff Win Pct
+        # Shooting %
+        sh_pct = s.get("shootingPctg", 0.0)
+        sh_pct = round(sh_pct * 100, 1) if isinstance(sh_pct, float) and sh_pct <= 1.0 else round(float(sh_pct), 1)
+
+        # Faceoff Win %
         fo_pct = s.get("faceoffWinningPctg", 0.0)
-        if isinstance(fo_pct, float) and fo_pct <= 1.0:
-            fo_pct = round(fo_pct * 100, 1)
-        else:
-            fo_pct = round(float(fo_pct), 1)
+        fo_pct = round(fo_pct * 100, 1) if isinstance(fo_pct, float) and fo_pct <= 1.0 else round(float(fo_pct), 1)
 
         # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
@@ -83,17 +77,28 @@ def load_club_skater_stats(season, game_type):
             toi_gp_min = float(toi_raw) / 60.0 if str(toi_raw).replace(".", "").isdigit() else 0.0
 
         total_toi_min = toi_gp_min * gp
+
+        # Per-60 rate conversions
         p60 = round((pts / total_toi_min) * 60, 2) if total_toi_min > 0 else 0.0
+        sog60 = round((shots / total_toi_min) * 60, 2) if total_toi_min > 0 else 0.0
+        pm60 = round((plus_minus / total_toi_min) * 60, 2) if total_toi_min > 0 else 0.0
+        pim60 = round((pim / total_toi_min) * 60, 2) if total_toi_min > 0 else 0.0
+
+        # --- Composite Ratings ---
+        # Offensive Rating: Points rate (weight: 1.0) + Shot generation rate (weight: 0.25) + PP production per GP (weight: 0.5)
+        off_score = round(p60 + (sog60 * 0.25) + ((pp_points / gp) * 0.5), 2) if gp > 0 else 0.0
+
+        # Defensive Rating: Net on-ice goal rate (weight: 1.5) + Heavy TOI workload baseline (weight: 0.1) + PK short-handed output - Penalty cost
+        def_score = round((pm60 * 1.5) + (toi_gp_min * 0.1) + ((sh_goals / gp) * 1.0) - (pim60 * 0.2), 2) if gp > 0 else 0.0
 
         player_id = s.get("playerId")
         first_name = s.get("firstName", {}).get("default", "")
         last_name = s.get("lastName", {}).get("default", "")
-        pos = s.get("positionCode", "N/A")
 
         rows.append({
             "Headshot": s.get("headshot", f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png"),
             "Name": f"{first_name} {last_name}",
-            "Pos": pos,
+            "Pos": s.get("positionCode", "N/A"),
             "GP": gp,
             "G": goals,
             "A": assists,
@@ -107,8 +112,12 @@ def load_club_skater_stats(season, game_type):
             "SHG": sh_goals,
             "GWG": gw_goals,
             "FO%": fo_pct,
+            "TOI/GP": round(toi_gp_min, 1),
             "P/60": p60,
-            "TOI/GP": round(toi_gp_min, 1)
+            "SOG/60": sog60,
+            "+/- /60": pm60,
+            "Off_Score": off_score,
+            "Def_Score": def_score
         })
 
     df = pd.DataFrame(rows)
@@ -116,10 +125,9 @@ def load_club_skater_stats(season, game_type):
         df = df[df["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
     return df
 
-with st.spinner("Fetching player analytics..."):
+with st.spinner("Fetching stats..."):
     df = load_club_skater_stats(selected_season, game_type_code)
 
-# Filter by position
 if not df.empty:
     if position_filter == "Forwards":
         df = df[df["Pos"].isin(["C", "L", "R", "F"])].reset_index(drop=True)
@@ -130,7 +138,7 @@ if not df.empty:
 st.subheader("🏆 Top Producers")
 
 if df.empty:
-    st.info(f"No {game_type_label.lower()} stats recorded yet for {selected_season[:4]}-{selected_season[4:]}.")
+    st.info(f"No {game_type_label.lower()} stats recorded yet for {selected_season[:4]}-{selected_season[4:]}. Live box scores will populate here as regular season play starts.")
 else:
     top_cols = st.columns(min(3, len(df)))
     for i in range(min(3, len(df))):
@@ -140,35 +148,36 @@ else:
             st.markdown(f"### {p['Name']}")
             st.write(f"**Pos:** {p['Pos']} | **GP:** {p['GP']} | **+/-:** `{p['+/-']:+d}`")
             st.metric(label="Total Points", value=f"{p['PTS']} PTS", delta=f"{p['G']}G, {p['A']}A")
-            st.write(f"⏱️ **TOI/GP:** {p['TOI/GP']} min | 🎯 **P/60:** {p['P/60']}")
+            st.markdown(f"⚡ **Off Rating:** `{p['Off_Score']}` | 🛡️ **Def Rating:** `{p['Def_Score']}`")
+            st.caption(f"⏱️ TOI/GP: {p['TOI/GP']}m | 🎯 P/60: {p['P/60']}")
 
 st.divider()
 
 # --- Tabbed Analytical Views ---
-st.subheader("📊 Roster Performance & Effectiveness")
+st.subheader("📊 Roster Effectiveness & Advanced Leaderboards")
 
 if not df.empty:
-    tab1, tab2, tab3 = st.tabs(["⚡ Offensive Efficiency", "🛡️ Defensive & Two-Way Impact", "📋 All Skater Stats"])
+    tab1, tab2, tab3 = st.tabs(["⚡ Offensive Impact (Off_Score)", "🛡️ Defensive Impact (Def_Score)", "📋 Complete Statistics"])
 
     with tab1:
-        st.markdown("**Finishing, shot conversion, power-play generation, and scoring rates per 60 minutes.**")
+        st.markdown("**Ranked by `Off_Score` (P/60 + SOG/60 + Power Play Generation):**")
         st.dataframe(
-            df[["Name", "Pos", "GP", "G", "A", "PTS", "P/60", "SOG", "SH%", "PPG", "PPP", "GWG"]].sort_values(by="P/60", ascending=False),
+            df[["Name", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPP", "GWG"]].sort_values(by="Off_Score", ascending=False),
             use_container_width=True,
             hide_index=True
         )
 
     with tab2:
-        st.markdown("**Ice-time burdens, penalty discipline, net goal differential, short-handed scoring, and faceoff share.**")
+        st.markdown("**Ranked by `Def_Score` (On-Ice Goal Differential per 60 + TOI Burden - Penalty Discipline):**")
         st.dataframe(
-            df[["Name", "Pos", "GP", "TOI/GP", "+/-", "PIM", "SHG", "FO%"]].sort_values(by="TOI/GP", ascending=False),
+            df[["Name", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG", "FO%"]].sort_values(by="Def_Score", ascending=False),
             use_container_width=True,
             hide_index=True
         )
 
     with tab3:
         st.dataframe(
-            df[["Name", "Pos", "GP", "G", "A", "PTS", "+/-", "SOG", "SH%", "P/60", "TOI/GP", "PIM", "PPG", "PPP", "SHG", "GWG", "FO%"]],
+            df[["Name", "Pos", "GP", "Off_Score", "Def_Score", "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "SOG", "SH%", "PIM", "PPG", "PPP", "SHG", "GWG", "FO%"]].sort_values(by="PTS", ascending=False),
             use_container_width=True,
             hide_index=True
         )
