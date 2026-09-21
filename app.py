@@ -1,4 +1,3 @@
-Python
 import streamlit as st
 import pandas as pd
 import requests
@@ -7,7 +6,6 @@ PREDS_LOGO_URL = "https://assets.nhle.com/logos/nhl/svg/NSH_light.svg"
 
 st.set_page_config(
     page_title="Nashville Predators Hockey Operations Dashboard",
-    page_icon=PREDS_LOGO_URL,
     layout="wide"
 )
 
