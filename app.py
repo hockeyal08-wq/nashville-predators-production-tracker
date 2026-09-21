@@ -1,82 +1,127 @@
+Python
 import streamlit as st
 import pandas as pd
 import requests
 
-st.set_page_config(page_title="Predators Skater Tracker", page_icon="🏒", layout="wide")
+PREDS_LOGO_URL = "https://assets.nhle.com/logos/nhl/svg/NSH_light.svg"
 
-# Custom CSS for flashy spotlight card and roster grid
-st.markdown("""
+st.set_page_config(
+    page_title="Nashville Predators Hockey Operations Dashboard",
+    page_icon=PREDS_LOGO_URL,
+    layout="wide"
+)
+
+# Custom executive styling: Navy/Gold palette, subtle borders, clean typography
+st.markdown(f"""
 <style>
-    .spotlight-card {
-        background: linear-gradient(135deg, rgba(254, 187, 0, 0.12) 0%, rgba(4, 30, 66, 0.88) 100%);
-        border: 2px solid #FFB81C;
-        border-radius: 16px;
-        padding: 24px 28px;
-        box-shadow: 0 8px 32px rgba(254, 187, 0, 0.22);
+    .reportview-container .main .block-container {{
+        padding-top: 2rem;
+    }}
+    .header-container {{
+        display: flex;
+        align-items: center;
+        gap: 20px;
         margin-bottom: 24px;
-        color: white;
-    }
-    .spotlight-title {
-        font-size: 2.2rem;
+        border-bottom: 2px solid rgba(255, 184, 28, 0.3);
+        padding-bottom: 16px;
+    }}
+    .header-logo {{
+        width: 80px;
+        height: auto;
+        object-fit: contain;
+    }}
+    .header-title-box h1 {{
+        font-size: 2rem;
         font-weight: 800;
+        letter-spacing: -0.5px;
+        margin: 0;
+        color: #FFFFFF;
+    }}
+    .header-subtitle {{
+        font-size: 0.95rem;
+        color: #94A3B8;
+        margin-top: 4px;
+        font-weight: 500;
+    }}
+    .spotlight-card {{
+        background: linear-gradient(135deg, rgba(4, 30, 66, 0.92) 0%, rgba(10, 22, 40, 0.95) 100%);
+        border: 1px solid rgba(255, 184, 28, 0.45);
+        border-radius: 12px;
+        padding: 24px 28px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        margin-bottom: 28px;
+        color: white;
+    }}
+    .spotlight-title {{
+        font-size: 2rem;
+        font-weight: 700;
         margin: 0;
         color: #FFB81C;
         letter-spacing: -0.5px;
-    }
-    .badge {
+    }}
+    .badge {{
         display: inline-block;
-        background: rgba(255, 255, 255, 0.15);
-        border: 1px solid rgba(255, 184, 28, 0.5);
-        border-radius: 6px;
-        padding: 4px 10px;
-        font-size: 0.85rem;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 184, 28, 0.35);
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 0.8rem;
         font-weight: 600;
         margin-right: 6px;
         margin-top: 6px;
-        margin-bottom: 12px;
-    }
-    .stat-pill-container {
+        margin-bottom: 14px;
+        letter-spacing: 0.5px;
+    }}
+    .stat-pill-container {{
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 12px;
-        margin-top: 14px;
-    }
-    .stat-pill {
-        background: rgba(10, 22, 40, 0.65);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 10px;
-        padding: 12px;
-        text-align: center;
-    }
-    .stat-pill-label {
-        font-size: 0.75rem;
+        margin-top: 10px;
+    }}
+    .stat-pill {{
+        background: rgba(4, 30, 66, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 10px 14px;
+        text-align: left;
+    }}
+    .stat-pill-label {{
+        font-size: 0.7rem;
         text-transform: uppercase;
         color: #94A3B8;
         font-weight: 600;
         letter-spacing: 0.5px;
-    }
-    .stat-pill-val {
-        font-size: 1.35rem;
+    }}
+    .stat-pill-val {{
+        font-size: 1.3rem;
         font-weight: 700;
-        color: #F8FAFC;
-        margin-top: 4px;
-    }
-    .stat-pill-sub {
+        color: #FFFFFF;
+        margin-top: 2px;
+    }}
+    .stat-pill-sub {{
         font-size: 0.75rem;
         color: #FFB81C;
         margin-top: 2px;
-    }
+    }}
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🟡 Nashville Predators Skater Performance & Value Index")
-st.caption("Live player spotlight, two-way effectiveness ratings, and ice-time distributions via NHL API")
+# Executive Header with Official Franchise Vector Logo
+st.markdown(f"""
+<div class="header-container">
+    <img src="{PREDS_LOGO_URL}" class="header-logo" alt="Nashville Predators">
+    <div class="header-title-box">
+        <h1>Nashville Predators | Skater Analytics & Performance Index</h1>
+        <div class="header-subtitle">Hockey Operations Evaluation: Production Efficiency, Role Workload, and Two-Way Models</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # --- Sidebar Controls ---
 st.sidebar.header("Filter Settings")
 
 selected_season = st.sidebar.selectbox(
-    "Select Season",
+    "Season",
     options=["20262027", "20252026", "20242025", "20232024"],
     index=0
 )
@@ -220,7 +265,7 @@ def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0
                 
     return styler_df
 
-with st.spinner("Fetching player analytics..."):
+with st.spinner("Loading NHL operations data..."):
     df = load_club_skater_stats(selected_season, game_type_code)
 
 if not df.empty:
@@ -231,47 +276,53 @@ if not df.empty:
 
 # --- Spotlight Header ---
 if df.empty:
-    st.info(f"No {game_type_label.lower()} stats recorded yet for {selected_season[:4]}-{selected_season[4:]}.")
+    st.info(f"No {game_type_label.lower()} data recorded for {selected_season[:4]}-{selected_season[4:]}.")
 else:
     if "selected_player_id" not in st.session_state or st.session_state["selected_player_id"] not in df["PlayerId"].values:
         st.session_state["selected_player_id"] = int(df.iloc[0]["PlayerId"])
 
     p = df[df["PlayerId"] == st.session_state["selected_player_id"]].iloc[0]
 
-    # Large Gold Glow Spotlight Banner
+    # Executive Spotlight Showcase
     spotlight_html = f"""
     <div class="spotlight-card">
-        <div style="display: flex; gap: 28px; align-items: center; flex-wrap: wrap;">
+        <div style="display: flex; gap: 24px; align-items: center; flex-wrap: wrap;">
             <div style="flex-shrink: 0; text-align: center;">
-                <img src="{p['Headshot']}" style="width: 175px; height: 175px; object-fit: cover; border-radius: 50%; border: 3px solid #FFB81C; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+                <img src="{p['Headshot']}" style="width: 140px; height: 140px; object-fit: cover; border-radius: 50%; border: 2px solid #FFB81C; box-shadow: 0 4px 16px rgba(0,0,0,0.6);">
             </div>
             <div style="flex-grow: 1; min-width: 280px;">
-                <h1 class="spotlight-title">{p['Name']}</h1>
-                <div>
-                    <span class="badge">POSITION: {p['Pos']}</span>
-                    <span class="badge">GAMES PLAYED: {p['GP']}</span>
-                    <span class="badge">TOI/GP: {p['TOI/GP']:.2f} MIN</span>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h2 class="spotlight-title">{p['Name']}</h2>
+                        <div>
+                            <span class="badge">POS: {p['Pos']}</span>
+                            <span class="badge">GP: {p['GP']}</span>
+                            <span class="badge">TOI/GP: {p['TOI/GP']:.2f} MIN</span>
+                            <span class="badge">SOG: {p['SOG']}</span>
+                        </div>
+                    </div>
+                    <img src="{PREDS_LOGO_URL}" style="width: 50px; opacity: 0.85;" alt="Predators">
                 </div>
                 <div class="stat-pill-container">
                     <div class="stat-pill">
-                        <div class="stat-pill-label">Total Points</div>
-                        <div class="stat-pill-val">{p['PTS']}</div>
+                        <div class="stat-pill-label">Scoring Production</div>
+                        <div class="stat-pill-val">{p['PTS']} PTS</div>
                         <div class="stat-pill-sub">{p['G']}G, {p['A']}A</div>
                     </div>
                     <div class="stat-pill">
-                        <div class="stat-pill-label">Scoring Rate</div>
-                        <div class="stat-pill-val">{p['P/60']:.2f}</div>
-                        <div class="stat-pill-sub">Points / 60</div>
+                        <div class="stat-pill-label">Rate Scoring (P/60)</div>
+                        <div class="stat-pill-val">{p['P/60']:.4f}</div>
+                        <div class="stat-pill-sub">{p['SH%']:.2f}% Finishing</div>
                     </div>
                     <div class="stat-pill">
-                        <div class="stat-pill-label">Offense Index</div>
+                        <div class="stat-pill-label">Offensive Score</div>
                         <div class="stat-pill-val">{p['Off_Score']:.4f}</div>
-                        <div class="stat-pill-sub">{p['PPG']} PPG</div>
+                        <div class="stat-pill-sub">{p['PPG']} Power Play G</div>
                     </div>
                     <div class="stat-pill">
-                        <div class="stat-pill-label">Defense Index</div>
+                        <div class="stat-pill-label">Defensive Score</div>
                         <div class="stat-pill-val">{p['Def_Score']:.4f}</div>
-                        <div class="stat-pill-sub">{p['+/-']:+d} Net Diff</div>
+                        <div class="stat-pill-sub">{p['+/-']:+d} Differential</div>
                     </div>
                 </div>
             </div>
@@ -280,8 +331,8 @@ else:
     """
     st.markdown(spotlight_html, unsafe_allow_html=True)
 
-    # --- Clickable Roster Grid ---
-    st.markdown("### 👥 Select a Skater to Spotlight")
+    # --- Interactive Roster Selector Grid ---
+    st.markdown("#### Roster Selection")
     num_cols = 6
     for i in range(0, len(df), num_cols):
         cols = st.columns(num_cols)
@@ -292,17 +343,17 @@ else:
                 with col:
                     with st.container(border=True):
                         st.image(skater["Headshot"], use_container_width=True)
-                        st.caption(f"**{skater['Name']}** ({skater['Pos']})")
-                        st.caption(f"{skater['PTS']} PTS | {skater['GP']} GP")
-                        if st.button("Spotlight", key=f"btn_{skater['PlayerId']}", use_container_width=True):
+                        st.caption(f"**{skater['Name']}** | {skater['Pos']}")
+                        st.caption(f"{skater['PTS']} PTS ({skater['GP']} GP)")
+                        if st.button("Select", key=f"btn_{skater['PlayerId']}", use_container_width=True):
                             st.session_state["selected_player_id"] = int(skater["PlayerId"])
                             st.rerun()
 
 st.divider()
 
 # --- Tabbed Analytical Views with 4-Decimal Precision ---
-st.subheader("📊 Roster Effectiveness & Advanced Leaderboards")
-st.caption("🟢 **Green:** Top 15% tier | 🔴 **Red:** Bottom 15% tier (Minimum 5 GP required to qualify)")
+st.subheader("Roster Performance & Advanced Indices")
+st.caption("Green: Top 15% tier | Red: Bottom 15% tier (Minimum 5 GP required to qualify)")
 
 format_4dec = {
     "Off_Score": "{:.4f}",
@@ -319,14 +370,14 @@ format_4dec = {
 
 if not df.empty:
     tab1, tab2, tab3, tab4 = st.tabs([
-        "⚡ Offensive Impact", 
-        "🛡️ Defensive Impact", 
-        "🚨 Special Teams (PP & PK)", 
-        "📋 Complete Statistics"
+        "Offensive Impact", 
+        "Defensive Impact", 
+        "Special Teams Performance", 
+        "Complete Skater Statistics"
     ])
 
     with tab1:
-        st.markdown("**Ranked by `Off_Score` (P/60 + SOG/60 + PP Finishing):**")
+        st.markdown("**Ranked by Offensive Score (`Off_Score`):**")
         off_df = df[["Name", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
         styled_off = (
             off_df.style
@@ -336,7 +387,7 @@ if not df.empty:
         st.dataframe(styled_off, use_container_width=True, hide_index=True)
 
     with tab2:
-        st.markdown("**Ranked by `Def_Score` (On-Ice Goal Differential per 60 + TOI Burden - Penalty Discipline):**")
+        st.markdown("**Ranked by Defensive Score (`Def_Score`):**")
         def_df = df[["Name", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG", "FO%"]].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
         styled_def = (
             def_df.style
