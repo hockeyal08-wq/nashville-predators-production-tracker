@@ -1,4 +1,3 @@
-Python
 import streamlit as st
 import pandas as pd
 import requests
@@ -30,7 +29,7 @@ position_filter = st.sidebar.selectbox(
     index=0
 )
 
-BASE_URL = "https://api-web.nhle.com/v1"
+BASE_URL = "[https://api-web.nhle.com/v1](https://api-web.nhle.com/v1)"
 TEAM_TRICODE = "NSH"
 
 @st.cache_data(ttl=900)
@@ -94,7 +93,7 @@ def load_club_skater_stats(season, game_type):
         last_name = s.get("lastName", {}).get("default", "")
 
         rows.append({
-            "Headshot": s.get("headshot", f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png"),
+            "Headshot": s.get("headshot", f"[https://assets.nhle.com/mugs/nhl/latest/](https://assets.nhle.com/mugs/nhl/latest/){player_id}.png"),
             "Name": f"{first_name} {last_name}",
             "Pos": s.get("positionCode", "N/A"),
             "GP": int(gp),
@@ -186,7 +185,6 @@ st.divider()
 st.subheader("📊 Roster Effectiveness & Advanced Leaderboards")
 st.caption("🟢 **Green:** Top 15% tier | 🔴 **Red:** Bottom 15% tier (Minimum 5 GP required to qualify)")
 
-# Mapping floating-point stats to exactly 4 decimal places
 format_4dec = {
     "Off_Score": "{:.4f}",
     "Def_Score": "{:.4f}",
