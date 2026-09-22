@@ -493,181 +493,72 @@ if current_page == "Line Combinations":
     st.stop()
 
 # ==============================================================================
-# PAGE 2: TRADE DEADLINE & TARGET INTELLIGENCE
+# PAGE 2: TRADE DEADLINE & REALISTIC BUY TARGET INTELLIGENCE
 # ==============================================================================
 if current_page == "Trade Intelligence":
-    st.subheader("NHL Trade Deadline: Realistic Seller Targets, Depth Pieces & Cap Strategy")
-    st.caption("Targeting distressed assets on non-contending rosters, expiring pending 2027 UFAs, and bottom-six playoff grinders[cite: 1, 2].")
+    st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
+    st.caption("Active evaluations of available top-six wingers and shutdown depth pieces to reinforce Nashville's playoff push.")
 
-    # Cap Positioning Banner
-    st.info(
-        "**Nashville Financial Leverage:** With **$8.75M in current uncommitted cap space** (~$20.4M day-of-deadline buying room), "
-        "Nashville can easily take on high-salaried top-six talent without sending money back, or act as a 3rd-party retention broker "
-        "to acquire additional 2027 draft assets."
-    )
-
-    # Strategy Selector
-    t_strat_cols = st.columns(3)
-    with t_strat_cols[0]:
-        with st.container(border=True):
-            st.markdown("### 🟢 BUY SCENARIO")
-            st.markdown("""
-            * **Goal**: Win-now upgrade around Forsberg, Stamkos, and Josi.
-            * **Needs**: Elite scoring center/winger on a rebuilding seller or shutdown right-shot top-4 D[cite: 1, 2].
-            * **Cost Willingness**: 2027 1st-Round Pick, 2028 2nd-Round Pick, AHL prospect depth.
-            """)
-    with t_strat_cols[1]:
-        with st.container(border=True):
-            st.markdown("### 🔴 SELL SCENARIO")
-            st.markdown("""
-            * **Goal**: Maximize asset yield if Nashville is out of the wildcard race.
-            * **Chips**: Ryan O'Reilly (50% retained = $2.25M), Colton ($4.0M), Kerfoot ($3.0M), Lyubushkin ($3.25M).
-            * **Projected Return**: 1st-Round Pick + Top-Tier B-prospect.
-            """)
-    with t_strat_cols[2]:
-        with st.container(border=True):
-            st.markdown("### 🟡 HOLD SCENARIO")
-            st.markdown("""
-            * **Goal**: Preserve the pipeline and cap structure.
-            * **Action**: Protect Matthew Wood and Tanner Molendyk. Add only inexpensive depth (<$2.0M) for penalty killing.
-            """)
-
-    st.divider()
-
-    # REALISTIC TARGETS MATRIX: Stars on bad teams, pending UFAs, and depth grinders
+    # VETTED ACQUISITION TARGETS DATABASE (Strictly active, non-retired, non-extended external players)
     realistic_targets = [
-        # --- STARS / TOP-SIX TALENT ON REBUILDING/RETOOLING TEAMS ---
+        # --- TOP-SIX WINGERS & FORWARDS ON REBUILDING / SELLER TEAMS ---
         {
-            "Player": "Trevor Zegras", "Pos": "C/LW", "Team": "ANA", "Cap_Hit": 5.75, "Status": "Pending UFA '27",
+            "Player": "Bryan Rust", "Pos": "RW", "Team": "PIT", "Cap_Hit": 5.125, "Status": "Signed thru '28 (Trade Block)",
             "Category": "Star on Rebuilding Team", "Deadline_Posture": "Top BUY Target",
-            "Brunette_Fit": 94, "Archetype": "Dynamic Playmaker / High-Slot Vision",
-            "Tactical_Scouting": "Ducks rebuild creates availability. Elite vision that complements Stamkos' one-timer; slots seamlessly as Nashville's 1C/2C playmaking engine."
+            "Brunette_Fit": 95, "Archetype": "Proven Playoff Top-Line Winger / Relentless Motor",
+            "Tactical_Scouting": "Two-time Stanley Cup champion actively made available as Pittsburgh cycles through a multi-year retool. World-class forechecking speed and high-compete board work that fits Andrew Brunette's system seamlessly."
         },
         {
-            "Player": "Boone Jenner", "Pos": "C/LW", "Team": "CBJ", "Cap_Hit": 3.75, "Status": "Pending UFA '27",
-            "Category": "Star on Rebuilding Team", "Deadline_Posture": "Top BUY Target",
-            "Brunette_Fit": 96, "Archetype": "Heavy 200-Ft Net-Front Power Center",
-            "Tactical_Scouting": "Blue Jackets captain entering final year[cite: 1, 2]. Dominant faceoff operator (57%+) and relentless net-front presence who excels in Brunette's low cycle scheme."
+            "Player": "Rickard Rakell", "Pos": "RW/LW", "Team": "PIT", "Cap_Hit": 5.00, "Status": "Pending UFA '28",
+            "Category": "Star on Rebuilding Team", "Deadline_Posture": "BUY Target",
+            "Brunette_Fit": 92, "Archetype": "High-Volume Release / Skill Finisher",
+            "Tactical_Scouting": "Perennial trade-block fixture on a non-contending Penguins roster. Generates rapid rush shots that would take defensive pressure off Steven Stamkos on the second line."
         },
         {
-            "Player": "Lawson Crouse", "Pos": "LW", "Team": "UTA", "Cap_Hit": 4.30, "Status": "Pending UFA '27",
-            "Category": "Star on Rebuilding Team", "Deadline_Posture": "Top BUY Target",
-            "Brunette_Fit": 93, "Archetype": "6'4\" Physical Power Forward / Board Finisher",
-            "Tactical_Scouting": "Heavy forechecker who punishes opposing breakouts. Provides the snarl and crease protection to ride shotgun on Line 2 with Bourque and Stamkos."
-        },
-        {
-            "Player": "Jordan Kyrou", "Pos": "RW/LW", "Team": "STL", "Cap_Hit": 8.125, "Status": "Term (Trade Block)",
-            "Category": "Star on Rebuilding Team", "Deadline_Posture": "Blockbuster BUY",
-            "Brunette_Fit": 91, "Archetype": "Elite Neutral-Zone Transition Rush Finisher",
-            "Tactical_Scouting": "If St. Louis pivots to a deeper rebuild, Kyrou's speed transforms Nashville's transition game. Nashville has the full cap room to absorb his hit clean."
-        },
-        {
-            "Player": "Alex DeBrincat", "Pos": "LW/RW", "Team": "DET", "Cap_Hit": 7.875, "Status": "Pending UFA '27",
-            "Category": "Star on Rebuilding Team", "Deadline_Posture": "BUY Rental / Extension",
-            "Brunette_Fit": 95, "Archetype": "High-Volume Release / Backdoor Finisher",
-            "Tactical_Scouting": "Pending 2027 UFA if Detroit slips from wildcard contention[cite: 1, 2]. World-class perimeter shot that pairs lethally with Roman Josi's rover distributions."
+            "Player": "Mikael Granlund", "Pos": "C/LW", "Team": "SJS", "Cap_Hit": 5.00, "Status": "Expiring Rental",
+            "Category": "Star on Rebuilding Team", "Deadline_Posture": "Rental BUY Target",
+            "Brunette_Fit": 93, "Archetype": "High-IQ Playmaker / Power Play Distributor",
+            "Tactical_Scouting": "Familiar face to Nashville hockey ops. Carrying heavy offensive zone minutes on San Jose as an expiring rental; elite facilitator for secondary power-play units."
         },
 
-        # --- TOP-4 DEFENSIVE UPGRADES ON SELLERS ---
-        {
-            "Player": "Mario Ferraro", "Pos": "LD/RD", "Team": "SJS", "Cap_Hit": 3.25, "Status": "Pending UFA '27",
-            "Category": "Top-4 Defensive Upgrade", "Deadline_Posture": "Top BUY Target",
-            "Brunette_Fit": 95, "Archetype": "High-Motor Shot Blocker / Mobile Eraser",
-            "Tactical_Scouting": "San Jose's blueline workhorse. Plays with maximum urgency, kills penalties, and can slide onto Pair 1 or 2 to let Josi pinch without risk."
-        },
-        {
-            "Player": "Connor Murphy", "Pos": "RD", "Team": "CHI", "Cap_Hit": 4.40, "Status": "Pending UFA '27",
-            "Category": "Top-4 Defensive Upgrade", "Deadline_Posture": "BUY Target",
-            "Brunette_Fit": 90, "Archetype": "6'4\" Right-Shot Shutdown Anchor",
-            "Tactical_Scouting": "Chicago seller chip. Gives Nashville legitimate size and crease-clearing box-outs on the right side behind Josi and Perbix."
-        },
+        # --- SHUTDOWN DEFENSEMEN ON EXPIRING / SELLER TEAMS ---
         {
             "Player": "Will Borgen", "Pos": "RD", "Team": "SEA", "Cap_Hit": 2.70, "Status": "Pending UFA '27",
             "Category": "Top-4 Defensive Upgrade", "Deadline_Posture": "Value BUY",
-            "Brunette_Fit": 91, "Archetype": "Heavy Physical RD / Hard-Puck Retrieval",
-            "Tactical_Scouting": "Low-maintenance, highly physical right defenseman who suppresses rush chances. Ideal tactical upgrade for defensive-zone starts."
+            "Brunette_Fit": 91, "Archetype": "Heavy Physical Shutdown RD / Clean Exit",
+            "Tactical_Scouting": "Under-the-radar right defenseman who suppresses neutral-zone rush entries at a top-tier rate. Highly cost-effective upgrade."
         },
 
-        # --- ROLE PLAYERS, BOTTOM-SIX & DEPTH SPECIALISTS ---
+        # --- ROLE PLAYERS, BOTTOM-SIX & SPECIAL TEAMS SPECIALISTS ---
         {
-            "Player": "Scott Laughton", "Pos": "C/LW", "Team": "PHI", "Cap_Hit": 3.00, "Status": "Pending UFA '27",
-            "Category": "Role & Depth Piece", "Deadline_Posture": "High Priority BUY",
-            "Brunette_Fit": 95, "Archetype": "Swiss-Army Knife 200-Ft Pest / PK Ace",
-            "Tactical_Scouting": "Perennial trade target on rebuilding Philly. Kills penalties, plays any forward position, and brings playoff intensity to Nashville's bottom six."
+            "Player": "Noel Acciari", "Pos": "C/RW", "Team": "PIT", "Cap_Hit": 2.00, "Status": "Expiring Contract",
+            "Category": "Role & Depth Piece", "Deadline_Posture": "Value BUY",
+            "Brunette_Fit": 94, "Archetype": "Hard-Nosed Playoff Wall / PK Shot Blocker",
+            "Tactical_Scouting": "One of the most fearless checking centers in hockey. Wins key defensive-zone draws, blocks point shots, and brings instant identity to Nashville's 4th line."
         },
         {
-            "Player": "Frank Vatrano", "Pos": "RW/LW", "Team": "ANA", "Cap_Hit": 3.65, "Status": "Pending UFA '27",
-            "Category": "Role & Depth Piece", "Deadline_Posture": "Middle-Six BUY",
-            "Brunette_Fit": 92, "Archetype": "Shoot-First Volume Winger / High Slot",
-            "Tactical_Scouting": "Ducks pending UFA. Fills a 3rd-line scoring winger role with aggressive physical forechecking and secondary power-play punch."
-        },
-        {
-            "Player": "Brandon Tanev", "Pos": "LW", "Team": "SEA", "Cap_Hit": 3.50, "Status": "Pending UFA '27",
-            "Category": "Role & Depth Piece", "Deadline_Posture": "Energy BUY",
-            "Brunette_Fit": 94, "Archetype": "Elite Speed F1 Forechecker / Turnover Machine",
-            "Tactical_Scouting": "One of the most disruptive forecheckers in hockey. Tailor-made for Andrew Brunette's high-pressure 1-2-2 trapping scheme."
-        },
-        {
-            "Player": "David Savard", "Pos": "RD", "Team": "MTL", "Cap_Hit": 3.50, "Status": "Pending UFA '27",
-            "Category": "Role & Depth Piece", "Deadline_Posture": "Depth Veteran BUY",
-            "Brunette_Fit": 86, "Archetype": "Veteran Crease-Clearing RD / Shot Blocker",
-            "Tactical_Scouting": "Montreal rebuild rental. Stanley Cup champion blueliner who eats heavy defensive minutes and PK time in tight playoff contests."
-        },
-        {
-            "Player": "Barclay Goodrow", "Pos": "C/LW", "Team": "SJS", "Cap_Hit": 3.64, "Status": "Pending UFA '27",
-            "Category": "Role & Depth Piece", "Deadline_Posture": "Bottom-Six BUY",
-            "Brunette_Fit": 91, "Archetype": "Two-Time Cup Champion / Defensive Wall",
-            "Tactical_Scouting": "San Jose veteran depth. Elite faceoff and defensive-zone suppression grinder suited for late-game defensive holds."
-        },
-        {
-            "Player": "Joel Armia", "Pos": "RW", "Team": "MTL", "Cap_Hit": 3.40, "Status": "Pending UFA '27",
+            "Player": "Joel Armia", "Pos": "RW", "Team": "MTL", "Cap_Hit": 3.40, "Status": "Expiring Contract",
             "Category": "Role & Depth Piece", "Deadline_Posture": "PK Specialist BUY",
-            "Brunette_Fit": 88, "Archetype": "6'3\" Board-Battle Monster / Elite Shorthanded Threat",
-            "Tactical_Scouting": "One of the best takeaway and puck-protection wingers in the NHL. Massively upgrades Nashville's 4th line and penalty kill."
-        },
-
-        # --- NASHVILLE PREDATORS INTERNAL SELL CHIPS ---
-        {
-            "Player": "Ryan O'Reilly", "Pos": "C", "Team": "NSH", "Cap_Hit": 4.50, "Status": "Pending UFA '27",
-            "Category": "Preds Sell Chip", "Deadline_Posture": "Premier SELL Asset",
-            "Brunette_Fit": 96, "Archetype": "Conn Smythe 200-Ft Master / Clutch Center",
-            "Tactical_Scouting": "If Nashville sells, retaining 50% down to $2.25M makes ROR the undisputed #1 center on the rental market, easily fetching a 1st-round pick + premium prospect."
-        },
-        {
-            "Player": "Ross Colton", "Pos": "LW/C", "Team": "NSH", "Cap_Hit": 4.00, "Status": "Pending UFA '27",
-            "Category": "Preds Sell Chip", "Deadline_Posture": "SELL or HOLD",
-            "Brunette_Fit": 90, "Archetype": "Middle-Six Aggressor / Stanley Cup Pedigree",
-            "Tactical_Scouting": "Versatile forward with Cup ring. Can fetch a solid 2nd-round pick from contenders looking for middle-six scoring depth."
-        },
-        {
-            "Player": "Alexander Kerfoot", "Pos": "LW/C", "Team": "NSH", "Cap_Hit": 3.00, "Status": "Pending UFA '27",
-            "Category": "Preds Sell Chip", "Deadline_Posture": "Rental SELL",
-            "Brunette_Fit": 87, "Archetype": "Utility Speed Forward / PK Depth",
-            "Tactical_Scouting": "Expiring contract. Highly reliable 4th-line addition for contenders, returning a 3rd or 4th-round draft pick."
-        },
-        {
-            "Player": "Ilya Lyubushkin", "Pos": "RD", "Team": "NSH", "Cap_Hit": 3.25, "Status": "Pending UFA '27",
-            "Category": "Preds Sell Chip", "Deadline_Posture": "Rental SELL",
-            "Brunette_Fit": 84, "Archetype": "Heavy Hitting Playoff RD",
-            "Tactical_Scouting": "Teams always overpay for physical right-handed defensemen at the deadline. Reliable 2nd/3rd-round pick return."
+            "Brunette_Fit": 89, "Archetype": "6'3\" Low-Cycle Puck Protector / Short-Handed Weapon",
+            "Tactical_Scouting": "Elite takeaway winger who uses his large frame to dominate board battles. High-impact addition for late-game defensive leads and penalty killing."
         }
     ]
 
     target_df = pd.DataFrame(realistic_targets)
 
-    # Filtering Controls
+    # Interactive Filtering Controls
     f_cols = st.columns([1.2, 1.2, 1.2, 1.4])
     with f_cols[0]:
-        cat_opts = ["All Categories", "Star on Rebuilding Team", "Top-4 Defensive Upgrade", "Role & Depth Piece", "Preds Sell Chip"]
+        cat_opts = ["All Categories", "Star on Rebuilding Team", "Top-4 Defensive Upgrade", "Role & Depth Piece"]
         sel_cat = st.selectbox("Target Category", cat_opts)
     with f_cols[1]:
-        pos_opts = ["All Positions", "Centers (C)", "Wingers (LW/RW)", "Defensemen (D)"]
+        pos_opts = ["All Positions", "Centers (C)", "Wingers (RW/LW)", "Defensemen (RD/LD)"]
         sel_pos = st.selectbox("Position", pos_opts)
     with f_cols[2]:
-        strat_opts = ["All Postures", "BUY", "SELL", "HOLD"]
+        strat_opts = ["All Postures", "BUY Target", "Rental BUY Target", "Value BUY", "PK Specialist BUY"]
         sel_strat = st.selectbox("Deadline Posture", strat_opts)
     with f_cols[3]:
-        min_fit = st.slider("Min Brunette Scheme Fit", min_value=80, max_value=98, value=85)
+        min_fit = st.slider("Min Brunette Scheme Fit", min_value=85, max_value=96, value=88)
 
     # Filter Application
     filtered_df = target_df[target_df["Brunette_Fit"] >= min_fit].copy()
@@ -677,15 +568,15 @@ if current_page == "Trade Intelligence":
 
     if sel_pos == "Centers (C)":
         filtered_df = filtered_df[filtered_df["Pos"].str.contains("C")]
-    elif sel_pos == "Wingers (LW/RW)":
+    elif sel_pos == "Wingers (RW/LW)":
         filtered_df = filtered_df[filtered_df["Pos"].str.contains("LW|RW")]
-    elif sel_pos == "Defensemen (D)":
+    elif sel_pos == "Defensemen (RD/LD)":
         filtered_df = filtered_df[filtered_df["Pos"].str.contains("D")]
 
     if sel_strat != "All Postures":
-        filtered_df = filtered_df[filtered_df["Deadline_Posture"].str.contains(sel_strat)]
+        filtered_df = filtered_df[filtered_df["Deadline_Posture"].str.contains(sel_strat.split()[0])]
 
-    st.markdown("#### Real-Time Trade Market & Scheme Evaluation Table")
+    st.markdown("#### Real-Time Acquisition Target Registry")
     
     st.dataframe(
         filtered_df[[
