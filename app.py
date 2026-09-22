@@ -40,65 +40,6 @@ st.markdown("""
         max-width: 95% !important;
     }
 
-    /* ============================================================ */
-    /* BULLETPROOF SELECTBOX STYLING (KILLS THE WHITE BOX)          */
-    /* ============================================================ */
-    
-    /* Target every container layer inside selectbox */
-    .stSelectbox div[data-baseweb="select"],
-    .stSelectbox div[data-baseweb="select"] > div,
-    .stSelectbox div[data-baseweb="select"] > div:first-child,
-    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {
-        background-color: #061F47 !important;
-        background: #061F47 !important;
-        border: 2px solid #FFB81C !important;
-        border-radius: 10px !important;
-    }
-
-    /* Selected Value Text: Crisp High-Contrast Pure White */
-    .stSelectbox [data-baseweb="select"] *,
-    .stSelectbox [data-baseweb="select"] span,
-    .stSelectbox [data-baseweb="select"] div {
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-        font-weight: 700 !important;
-        font-size: 1rem !important;
-        opacity: 1 !important;
-    }
-
-    /* Dropdown Arrow Icon */
-    .stSelectbox [data-baseweb="select"] svg {
-        fill: #FFB81C !important;
-    }
-
-    /* Dropdown Options Popup Menu */
-    div[data-baseweb="popover"],
-    div[data-baseweb="popover"] > div,
-    div[data-baseweb="menu"],
-    ul[role="listbox"] {
-        background-color: #061F47 !important;
-        border: 2px solid #FFB81C !important;
-        border-radius: 8px !important;
-    }
-    ul[role="listbox"] li {
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-        font-weight: 600 !important;
-        background-color: transparent !important;
-    }
-    ul[role="listbox"] li:hover,
-    ul[role="listbox"] li[aria-selected="true"] {
-        background-color: #FFB81C !important;
-        color: #041E42 !important;
-        -webkit-text-fill-color: #041E42 !important;
-    }
-
-    /* Radio button active dot color: Predators Gold */
-    [data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > label input:checked + div {
-        background-color: #FFB81C !important;
-        border-color: #FFB81C !important;
-    }
-
     /* Header Container */
     .header-container {
         display: flex;
@@ -203,12 +144,17 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* Navigation Button Bar */
+    /* ============================================================ */
+    /* PREDATORS GOLD ROUNDED BUTTONS (ACTIVE & INACTIVE)           */
+    /* ============================================================ */
+    
+    /* Inactive Buttons: Navy background + 2px Gold border + White Text */
     div[data-testid="stButton"] button[kind="secondary"] {
         background-color: #061F47 !important;
         border: 2px solid #FFB81C !important;
         border-radius: 10px !important;
         color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
         font-weight: 700 !important;
         font-size: 0.95rem !important;
         padding: 8px 16px !important;
@@ -219,15 +165,29 @@ st.markdown("""
         background-color: rgba(255, 184, 28, 0.2) !important;
         box-shadow: 0 0 12px rgba(255, 184, 28, 0.5) !important;
     }
+
+    /* Active Buttons: Solid Predators Gold fill + Dark Navy Text */
     div[data-testid="stButton"] button[kind="primary"] {
         background-color: #FFB81C !important;
         border: 2px solid #FFB81C !important;
         border-radius: 10px !important;
         color: #041E42 !important;
+        -webkit-text-fill-color: #041E42 !important;
         font-weight: 800 !important;
         font-size: 0.95rem !important;
         padding: 8px 16px !important;
         box-shadow: 0 4px 14px rgba(255, 184, 28, 0.45) !important;
+    }
+
+    /* Sidebar Label Styling */
+    .filter-label {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #FFB81C;
+        margin-top: 14px;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
     /* Sleek Dataframe Container Styling */
@@ -251,35 +211,70 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Sidebar Controls ---
-st.sidebar.header("Filter Settings")
+# --- Sidebar Controls (Interactive Gold & Navy Buttons) ---
+st.sidebar.markdown("### Filter Settings")
 
-season_display_map = {
-    "20262027": "26/27",
-    "20252026": "25/26",
-    "20242025": "24/25",
-    "20232024": "23/24"
+# 1. Season Selection
+st.sidebar.markdown('<div class="filter-label">Season</div>', unsafe_allow_html=True)
+season_map = {
+    "26/27": "20262027",
+    "25/26": "20252026",
+    "24/25": "20242025",
+    "23/24": "20232024"
 }
+if "selected_season_label" not in st.session_state:
+    st.session_state["selected_season_label"] = "26/27"
 
-selected_season = st.sidebar.selectbox(
-    "Season",
-    options=list(season_display_map.keys()),
-    index=0,
-    format_func=lambda s: season_display_map.get(s, s)
-)
+s_cols = st.sidebar.columns(2)
+for i, label in enumerate(["26/27", "25/26", "24/25", "23/24"]):
+    with s_cols[i % 2]:
+        btn_type = "primary" if st.session_state["selected_season_label"] == label else "secondary"
+        if st.button(label, key=f"btn_season_{label}", type=btn_type, use_container_width=True):
+            st.session_state["selected_season_label"] = label
+            st.rerun()
 
-game_type_label = st.sidebar.radio(
-    "Game Type",
-    options=["Regular Season", "Playoffs"],
-    index=0
-)
+selected_season = season_map[st.session_state["selected_season_label"]]
+
+# 2. Game Type Selection
+st.sidebar.markdown('<div class="filter-label">Game Type</div>', unsafe_allow_html=True)
+if "selected_game_type" not in st.session_state:
+    st.session_state["selected_game_type"] = "Regular Season"
+
+gt_cols = st.sidebar.columns(2)
+for i, gt in enumerate(["Regular Season", "Playoffs"]):
+    with gt_cols[i]:
+        btn_type = "primary" if st.session_state["selected_game_type"] == gt else "secondary"
+        if st.button(gt, key=f"btn_gt_{gt}", type=btn_type, use_container_width=True):
+            st.session_state["selected_game_type"] = gt
+            st.rerun()
+
+game_type_label = st.session_state["selected_game_type"]
 game_type_code = "2" if game_type_label == "Regular Season" else "3"
 
-position_filter = st.sidebar.selectbox(
-    "Position Group",
-    options=["All Skaters", "Forwards", "Defensemen"],
-    index=0
-)
+# 3. Position Group Selection
+st.sidebar.markdown('<div class="filter-label">Position Group</div>', unsafe_allow_html=True)
+if "selected_pos_group" not in st.session_state:
+    st.session_state["selected_pos_group"] = "All Skaters"
+
+btn_type_all = "primary" if st.session_state["selected_pos_group"] == "All Skaters" else "secondary"
+if st.sidebar.button("All Skaters", key="btn_pos_all", type=btn_type_all, use_container_width=True):
+    st.session_state["selected_pos_group"] = "All Skaters"
+    st.rerun()
+
+pos_sub_cols = st.sidebar.columns(2)
+with pos_sub_cols[0]:
+    btn_type_f = "primary" if st.session_state["selected_pos_group"] == "Forwards" else "secondary"
+    if st.button("Forwards", key="btn_pos_f", type=btn_type_f, use_container_width=True):
+        st.session_state["selected_pos_group"] = "Forwards"
+        st.rerun()
+
+with pos_sub_cols[1]:
+    btn_type_d = "primary" if st.session_state["selected_pos_group"] == "Defensemen" else "secondary"
+    if st.button("Defensemen", key="btn_pos_d", type=btn_type_d, use_container_width=True):
+        st.session_state["selected_pos_group"] = "Defensemen"
+        st.rerun()
+
+position_filter = st.session_state["selected_pos_group"]
 
 BASE_URL = "https://api-web.nhle.com/v1"
 TEAM_TRICODE = "NSH"
@@ -310,12 +305,14 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
+        # Raw percentage decimals
         sh_pct = s.get("shootingPctg", 0.0)
         sh_pct = float(sh_pct) if sh_pct is not None else 0.0
 
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = float(fo_pct) if fo_pct is not None else 0.0
 
+        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
@@ -384,7 +381,7 @@ if not df.empty:
 
 # --- Spotlight Header ---
 if df.empty:
-    st.info(f"No {game_type_label.lower()} data recorded for {season_display_map.get(selected_season, selected_season)}.")
+    st.info(f"No {game_type_label.lower()} data recorded for {st.session_state['selected_season_label']}.")
 else:
     if "selected_player_id" not in st.session_state or st.session_state["selected_player_id"] not in df["PlayerId"].values:
         st.session_state["selected_player_id"] = int(df.iloc[0]["PlayerId"])
