@@ -153,11 +153,7 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* ============================================================ */
-    /* CUSTOM NAVIGATION BUTTON BAR                                 */
-    /* ============================================================ */
-    
-    /* Default / Unselected Buttons: Bright Yellow Rounded Border + Pure White Text */
+    /* Navigation Button Bar */
     div[data-testid="stButton"] button[kind="secondary"] {
         background-color: #061F47 !important;
         border: 2px solid #FFB81C !important;
@@ -173,8 +169,6 @@ st.markdown("""
         background-color: rgba(255, 184, 28, 0.2) !important;
         box-shadow: 0 0 12px rgba(255, 184, 28, 0.5) !important;
     }
-
-    /* Active / Selected Button: Solid Predators Gold Fill + Dark Navy Text */
     div[data-testid="stButton"] button[kind="primary"] {
         background-color: #FFB81C !important;
         border: 2px solid #FFB81C !important;
@@ -184,6 +178,14 @@ st.markdown("""
         font-size: 0.95rem !important;
         padding: 8px 16px !important;
         box-shadow: 0 4px 14px rgba(255, 184, 28, 0.45) !important;
+    }
+    
+    /* Sleek Dataframe Container Styling */
+    [data-testid="stDataFrame"] {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 184, 28, 0.3);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -250,12 +252,14 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
+        # Raw percentage decimals (0.0 to 1.0)
         sh_pct = s.get("shootingPctg", 0.0)
-        sh_pct = round(sh_pct * 100, 4) if isinstance(sh_pct, float) and sh_pct <= 1.0 else round(float(sh_pct), 4)
+        sh_pct = float(sh_pct) if sh_pct is not None else 0.0
 
         fo_pct = s.get("faceoffWinningPctg", 0.0)
-        fo_pct = round(fo_pct * 100, 4) if isinstance(fo_pct, float) and fo_pct <= 1.0 else round(float(fo_pct), 4)
+        fo_pct = float(fo_pct) if fo_pct is not None else 0.0
 
+        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
@@ -283,8 +287,8 @@ def load_club_skater_stats(season, game_type):
 
         rows.append({
             "PlayerId": player_id,
-            "Headshot": s.get("headshot", f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png"),
-            "Name": f"{first_name} {last_name}",
+            "Photo": s.get("headshot", f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png"),
+            "Skater": f"{first_name} {last_name}",
             "Pos": s.get("positionCode", "N/A"),
             "GP": int(gp),
             "G": int(goals),
@@ -298,7 +302,7 @@ def load_club_skater_stats(season, game_type):
             "SHG": int(sh_goals),
             "GWG": int(gw_goals),
             "FO%": fo_pct,
-            "TOI/GP": round(toi_gp_min, 4),
+            "TOI/GP": round(toi_gp_min, 2),
             "P/60": p60,
             "SOG/60": sog60,
             "+/- /60": pm60,
@@ -312,37 +316,6 @@ def load_club_skater_stats(season, game_type):
     if not df.empty:
         df = df[df["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
     return df
-
-# --- Soft Green (Top 15%) & Soft Red (Bottom 15%) Table Outliers ---
-def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0.15):
-    """Clean data presentation: Soft green for top 15%, soft red for bottom 15%."""
-    styler_df = pd.DataFrame('', index=data_df.index, columns=data_df.columns)
-    eligible_mask = data_df["GP"] >= min_gp
-    eligible_df = data_df[eligible_mask]
-
-    for col in cols_to_style:
-        if col not in data_df.columns:
-            continue
-            
-        eligible_vals = eligible_df[col].dropna()
-        if len(eligible_vals) < 3:
-            continue
-            
-        high_thresh = eligible_vals.quantile(high_q)
-        low_thresh = eligible_vals.quantile(low_q)
-
-        for idx in data_df.index:
-            if not eligible_mask.loc[idx]:
-                continue
-            val = data_df.loc[idx, col]
-            if pd.isna(val):
-                continue
-            if val >= high_thresh:
-                styler_df.loc[idx, col] = 'background-color: rgba(34, 197, 94, 0.35); color: #041E42; font-weight: bold;'
-            elif val <= low_thresh:
-                styler_df.loc[idx, col] = 'background-color: rgba(239, 68, 68, 0.40); color: #FFFFFF; font-weight: bold;'
-                
-    return styler_df
 
 with st.spinner("Loading NHL operations data..."):
     df = load_club_skater_stats(selected_season, game_type_code)
@@ -366,12 +339,12 @@ else:
     <div class="spotlight-card">
         <div style="display: flex; gap: 28px; align-items: center; flex-wrap: wrap;">
             <div style="flex-shrink: 0; text-align: center;">
-                <img src="{p['Headshot']}" style="width: 145px; height: 145px; object-fit: cover; border-radius: 50%; border: 2px solid #FFB81C; box-shadow: 0 6px 18px rgba(0,0,0,0.65);">
+                <img src="{p['Photo']}" style="width: 145px; height: 145px; object-fit: cover; border-radius: 50%; border: 2px solid #FFB81C; box-shadow: 0 6px 18px rgba(0,0,0,0.65);">
             </div>
             <div style="flex-grow: 1; min-width: 280px;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div>
-                        <h2 class="spotlight-title">{p['Name']}</h2>
+                        <h2 class="spotlight-title">{p['Skater']}</h2>
                         <div>
                             <span class="badge">POS: {p['Pos']}</span>
                             <span class="badge">GP: {p['GP']}</span>
@@ -390,7 +363,7 @@ else:
                     <div class="stat-pill">
                         <div class="stat-pill-label">Rate Scoring (P/60)</div>
                         <div class="stat-pill-val">{p['P/60']:.4f}</div>
-                        <div class="stat-pill-sub">{p['SH%']:.2f}% Finishing</div>
+                        <div class="stat-pill-sub">{(p['SH%'] * 100):.2f}% Finishing</div>
                     </div>
                     <div class="stat-pill">
                         <div class="stat-pill-label">Offensive Score</div>
@@ -420,8 +393,8 @@ else:
                 skater = df.iloc[idx]
                 with col:
                     with st.container(border=True):
-                        st.image(skater["Headshot"], use_container_width=True)
-                        st.caption(f"**{skater['Name']}** | {skater['Pos']}")
+                        st.image(skater["Photo"], use_container_width=True)
+                        st.caption(f"**{skater['Skater']}** | {skater['Pos']}")
                         st.caption(f"{skater['PTS']} PTS ({skater['GP']} GP)")
                         if st.button("Select", key=f"btn_{skater['PlayerId']}", use_container_width=True):
                             st.session_state["selected_player_id"] = int(skater["PlayerId"])
@@ -429,24 +402,8 @@ else:
 
 st.divider()
 
-# --- Tabbed Analytical Views with 4-Decimal Precision ---
+# --- Tabbed Analytical Views with Professional Column Configurations ---
 st.subheader("Roster Performance & Advanced Indices")
-
-# Styled yellow benchmark line
-st.markdown('<div class="benchmark-caption">⚡ Benchmark Tiers: Green = Top 15% percentile | Red = Bottom 15% percentile (Minimum 5 GP required)</div>', unsafe_allow_html=True)
-
-format_4dec = {
-    "Off_Score": "{:.4f}",
-    "Def_Score": "{:.4f}",
-    "PP_Score": "{:.4f}",
-    "PK_Score": "{:.4f}",
-    "P/60": "{:.4f}",
-    "SOG/60": "{:.4f}",
-    "+/- /60": "{:.4f}",
-    "TOI/GP": "{:.4f}",
-    "SH%": "{:.4f}%",
-    "FO%": "{:.4f}%"
-}
 
 if not df.empty:
     if "active_tab_view" not in st.session_state:
@@ -469,45 +426,52 @@ if not df.empty:
 
     active_view = st.session_state["active_tab_view"]
 
+    # Shared Column Configurations for Executive Display
+    base_column_config = {
+        "Photo": st.column_config.ImageColumn("", width="small"),
+        "Skater": st.column_config.TextColumn("Player", width="medium"),
+        "Pos": st.column_config.TextColumn("Pos", width="small"),
+        "GP": st.column_config.NumberColumn("GP", format="%d"),
+        "PTS": st.column_config.NumberColumn("PTS", format="%d"),
+        "G": st.column_config.NumberColumn("G", format="%d"),
+        "A": st.column_config.NumberColumn("A", format="%d"),
+        "SOG": st.column_config.NumberColumn("SOG", format="%d"),
+        "+/-": st.column_config.NumberColumn("+/-", format="%+d"),
+        "PIM": st.column_config.NumberColumn("PIM", format="%d"),
+        "TOI/GP": st.column_config.NumberColumn("TOI/GP", format="%.2f m"),
+        "SH%": st.column_config.ProgressColumn("SH%", min_value=0.0, max_value=0.35, format="%.1f%%"),
+        "FO%": st.column_config.ProgressColumn("FO%", min_value=0.0, max_value=0.75, format="%.1f%%"),
+        "P/60": st.column_config.ProgressColumn("P/60", min_value=0.0, max_value=float(df["P/60"].max() or 4.0), format="%.2f"),
+        "Off_Score": st.column_config.ProgressColumn("Offensive Impact", min_value=0.0, max_value=float(df["Off_Score"].max() or 6.0), format="%.2f"),
+        "Def_Score": st.column_config.ProgressColumn("Defensive Impact", min_value=float(df["Def_Score"].min() or -3.0), max_value=float(df["Def_Score"].max() or 5.0), format="%.2f"),
+        "PP_Score": st.column_config.ProgressColumn("PP Impact", min_value=0.0, max_value=float(df["PP_Score"].max() or 5.0), format="%.2f"),
+        "PK_Score": st.column_config.ProgressColumn("PK Impact", min_value=0.0, max_value=float(df["PK_Score"].max() or 4.0), format="%.2f"),
+    }
+
     if active_view == "Offensive Impact":
         st.markdown("**Ranked by Offensive Impact:**")
-        off_df = df[["Name", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
-        styled_off = (
-            off_df.style
-            .apply(lambda _: apply_outlier_styling(off_df, ["Off_Score", "P/60", "SOG/60", "PTS", "SH%"], min_gp=5), axis=None)
-            .format(format_4dec)
-        )
-        st.dataframe(styled_off, use_container_width=True, hide_index=True)
+        cols = ["Photo", "Skater", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]
+        off_view = df[cols].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
+        st.dataframe(off_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Defensive Impact":
         st.markdown("**Ranked by Defensive Impact:**")
-        def_df = df[["Name", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG", "FO%"]].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
-        styled_def = (
-            def_df.style
-            .apply(lambda _: apply_outlier_styling(def_df, ["Def_Score", "+/- /60", "TOI/GP", "+/-", "FO%"], min_gp=5), axis=None)
-            .format(format_4dec)
-        )
-        st.dataframe(styled_def, use_container_width=True, hide_index=True)
+        cols = ["Photo", "Skater", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG", "FO%"]
+        def_view = df[cols].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
+        st.dataframe(def_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Special Teams Performance":
         st.markdown("**Ranked by Special Teams Impact:**")
-        st_df = df[["Name", "Pos", "GP", "PP_Score", "PK_Score", "PPG", "SHG", "PIM", "TOI/GP"]].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
-        styled_st = (
-            st_df.style
-            .apply(lambda _: apply_outlier_styling(st_df, ["PP_Score", "PK_Score", "PPG", "SHG"], min_gp=5), axis=None)
-            .format(format_4dec)
-        )
-        st.dataframe(styled_st, use_container_width=True, hide_index=True)
+        cols = ["Photo", "Skater", "Pos", "GP", "PP_Score", "PK_Score", "PPG", "SHG", "PIM", "TOI/GP"]
+        st_view = df[cols].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
+        st.dataframe(st_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Complete Skater Statistics":
-        comp_df = df[[
-            "Name", "Pos", "GP", "Off_Score", "Def_Score", "PP_Score", "PK_Score",
+        st.markdown("**Complete Skater Statistics:**")
+        cols = [
+            "Photo", "Skater", "Pos", "GP", "Off_Score", "Def_Score", "PP_Score", "PK_Score",
             "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "SOG", "SH%", "PIM", 
             "PPG", "SHG", "GWG", "FO%"
-        ]].sort_values(by="PTS", ascending=False).reset_index(drop=True)
-        styled_comp = (
-            comp_df.style
-            .apply(lambda _: apply_outlier_styling(comp_df, ["Off_Score", "Def_Score", "PP_Score", "PK_Score", "PTS", "+/-", "P/60", "TOI/GP"], min_gp=5), axis=None)
-            .format(format_4dec)
-        )
-        st.dataframe(styled_comp, use_container_width=True, hide_index=True)
+        ]
+        comp_view = df[cols].sort_values(by="PTS", ascending=False).reset_index(drop=True)
+        st.dataframe(comp_view, column_config=base_column_config, use_container_width=True, hide_index=True)
