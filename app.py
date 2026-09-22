@@ -860,7 +860,16 @@ def load_club_stats(season, game_type):
         gs = g.get("gamesStarted", 0)
         wins = g.get("wins", 0)
         losses = g.get("losses", 0)
-        ot_losses = g.get("otLosses") if g.get("otLosses") is not None else g.get("ot", 0)
+        
+        # Robust OTL mapping with difference fallback for archived seasons
+        ot_losses = g.get("otLosses")
+        if ot_losses is None:
+            ot_losses = g.get("ot")
+        if ot_losses is None:
+            ot_losses = g.get("overtimeLosses", 0)
+        if ot_losses == 0 and gp > (wins + losses):
+            ot_losses = gp - (wins + losses)
+
         sa = g.get("shotsAgainst", 0)
         ga = g.get("goalsAgainst", 0)
         sv = g.get("saves", 0)
