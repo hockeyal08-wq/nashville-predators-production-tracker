@@ -369,7 +369,7 @@ with p_cols[2]:
 current_page = st.session_state["current_page"]
 
 # ==============================================================================
-# VERIFIED HEADSHOT OVERRIDES
+# VERIFIED HEADSHOT OVERRIDES (Guaranteed exact IDs for your preds roster)
 # ==============================================================================
 VERIFIED_MANUAL_HEADSHOTS = {
     "Steven Stamkos": "https://assets.nhle.com/mugs/nhl/latest/8474564.png",
@@ -509,7 +509,7 @@ if current_page == "Trade Intelligence":
     st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
     st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses (NMC/NTC-free).")
 
-    # VETTED ACQUISITION TARGETS DATABASE WITH EXPLICIT MANUALLY ADDED ICONS
+    # VETTED ACQUISITION TARGETS DATABASE WITH MANUAL ICONS AND ACCURATE CDN URLs
     realistic_targets = [
         # --- TOP-SIX FORWARDS ---
         {
