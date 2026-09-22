@@ -633,7 +633,7 @@ if current_page == "Trade Intelligence":
             with c2:
                 st.markdown(f"### **{row['Player']}** ({row['Pos']})")
                 st.caption(f"**Tier:** {row['Category']} | **Cap Hit:** ${row['Cap_Hit']:.3f}M")
-                st.markdown(f"**Action:** {row['Deadline_Posture']}")
+                st.markdown(f"**Role:** {row['Deadline_Posture']}")
                 st.markdown(f"**Scheme Fit:** {row['Brunette_Fit']}/100")
             with c3:
                 st.markdown(f"**Analytics Profile:** `{row['P_GP']} P/GP` | `{row['SOG_GP']} SOG/GP`")
