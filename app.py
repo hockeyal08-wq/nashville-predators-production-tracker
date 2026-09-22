@@ -66,6 +66,33 @@ st.markdown(f"""
         transition: all 0.2s ease-in-out !important;
     }}
 
+    [data-testid="stSidebarCollapseButton"] button:hover,
+    [data-testid="collapsedControl"] button:hover {{
+        background-color: #FFB81C !important;
+        box-shadow: 0 0 16px rgba(255, 184, 28, 0.7) !important;
+        transform: scale(1.05);
+    }}
+
+    [data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="stSidebarCollapseButton"] svg *,
+    [data-testid="collapsedControl"] svg,
+    [data-testid="collapsedControl"] svg * {{
+        opacity: 1 !important;
+        visibility: visible !important;
+        fill: #FFB81C !important;
+        stroke: #FFB81C !important;
+        color: #FFB81C !important;
+    }}
+
+    [data-testid="stSidebarCollapseButton"] button:hover svg,
+    [data-testid="stSidebarCollapseButton"] button:hover svg *,
+    [data-testid="collapsedControl"] button:hover svg,
+    [data-testid="collapsedControl"] button:hover svg * {{
+        fill: #041E42 !important;
+        stroke: #041E42 !important;
+        color: #041E42 !important;
+    }}
+
     .header-container {{
         display: flex;
         align-items: center;
@@ -200,7 +227,13 @@ st.markdown(f"""
         padding: 14px 12px;
         text-align: center;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+        transition: transform 0.2s ease, border-color 0.2s ease;
         margin-bottom: 12px;
+    }}
+    .nhl-player-card:hover {{
+        transform: translateY(-2px);
+        border-color: #FFB81C;
+        box-shadow: 0 6px 18px rgba(255, 184, 28, 0.35);
     }}
     .nhl-mug {{
         width: 86px;
@@ -216,21 +249,27 @@ st.markdown(f"""
         font-size: 0.78rem;
         font-weight: 800;
         color: #FFB81C;
+        letter-spacing: 0.5px;
     }}
     .nhl-name {{
         font-size: 1.05rem;
         font-weight: 800;
         color: #FFFFFF;
-        margin: 2px 0;
+        margin: 2px 0 2px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }}
     .nhl-cap-line {{
         font-size: 0.78rem;
         color: #38BDF8;
         font-weight: 800;
+        margin-bottom: 3px;
     }}
     .nhl-tag {{
         font-size: 0.72rem;
         color: #94A3B8;
+        font-weight: 600;
     }}
 
     .line-header-banner {{
@@ -242,6 +281,7 @@ st.markdown(f"""
         color: #FFFFFF;
         margin-top: 14px;
         margin-bottom: 10px;
+        letter-spacing: 0.3px;
         border-radius: 4px;
         display: flex;
         justify-content: space-between;
@@ -259,6 +299,8 @@ st.markdown(f"""
         border-radius: 10px !important;
         color: #FFFFFF !important;
         font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        padding: 8px 16px !important;
     }}
     div[data-testid="stButton"] button[kind="primary"] {{
         background-color: #FFB81C !important;
@@ -266,6 +308,8 @@ st.markdown(f"""
         border-radius: 10px !important;
         color: #041E42 !important;
         font-weight: 800 !important;
+        font-size: 0.95rem !important;
+        padding: 8px 16px !important;
     }}
 
     .filter-label {{
@@ -275,6 +319,7 @@ st.markdown(f"""
         margin-top: 14px;
         margin-bottom: 6px;
         text-transform: uppercase;
+        letter-spacing: 0.5px;
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -296,20 +341,28 @@ if "current_page" not in st.session_state:
 
 p_cols = st.sidebar.columns(3)
 with p_cols[0]:
-    if st.button("Skater Hub", key="btn_nav_skaters", type="primary" if st.session_state["current_page"] == "Skater Analytics" else "secondary", use_container_width=True):
+    btn_p1 = "primary" if st.session_state["current_page"] == "Skater Analytics" else "secondary"
+    if st.button("Skater Hub", key="btn_nav_skaters", type=btn_p1, use_container_width=True):
         st.session_state["current_page"] = "Skater Analytics"
         st.rerun()
+
 with p_cols[1]:
-    if st.button("26/27 Lines", key="btn_nav_lines", type="primary" if st.session_state["current_page"] == "Line Combinations" else "secondary", use_container_width=True):
+    btn_p2 = "primary" if st.session_state["current_page"] == "Line Combinations" else "secondary"
+    if st.button("26/27 Lines", key="btn_nav_lines", type=btn_p2, use_container_width=True):
         st.session_state["current_page"] = "Line Combinations"
         st.rerun()
+
 with p_cols[2]:
-    if st.button("Target Ops", key="btn_nav_trades", type="primary" if st.session_state["current_page"] == "Trade Intelligence" else "secondary", use_container_width=True):
+    btn_p3 = "primary" if st.session_state["current_page"] == "Trade Intelligence" else "secondary"
+    if st.button("Target Ops", key="btn_nav_trades", type=btn_p3, use_container_width=True):
         st.session_state["current_page"] = "Trade Intelligence"
         st.rerun()
 
 current_page = st.session_state["current_page"]
 
+# ==============================================================================
+# VERIFIED HEADSHOT OVERRIDES
+# ==============================================================================
 VERIFIED_MANUAL_HEADSHOTS = {
     "Steven Stamkos": "https://assets.nhle.com/mugs/nhl/latest/8474564.png",
     "Jonathan Marchessault": "https://assets.nhle.com/mugs/nhl/latest/8476539.png",
@@ -326,29 +379,34 @@ def resolve_player_headshot(player_name, fallback_id=None):
     return PREDS_LOGO_URL
 
 # ==============================================================================
-# PAGE 1: LINE COMBINATIONS
+# PAGE 1: 26/27 LINE COMBINATIONS (WITH SALARY CAP LINES)
 # ==============================================================================
 if current_page == "Line Combinations":
     st.subheader("26/27 Projected Line Combinations & Salary Distribution")
     st.caption("Tactical Alignment: Andrew Brunette 1-2-2 High-Pace Forecheck | Official Cap Ceiling: $104.0M")
 
+    # Financial Ledger Strip
     st.markdown("""
     <div class="cap-strip">
         <div class="cap-cell">
             <div class="cap-cell-label">Cap Ceiling (26/27)</div>
             <div class="cap-cell-value">$104.00M</div>
+            <div class="cap-cell-sub">NHL Official Upper Limit</div>
         </div>
         <div class="cap-cell">
             <div class="cap-cell-label">Active 20-Man Cap Hit</div>
             <div class="cap-cell-value">$95.25M</div>
+            <div class="cap-cell-sub">Roster Cap Obligation</div>
         </div>
         <div class="cap-cell">
             <div class="cap-cell-label">Accrued Cap Space</div>
             <div class="cap-cell-value">$8.75M</div>
+            <div class="cap-cell-sub">Current Free Cap Space</div>
         </div>
         <div class="cap-cell">
             <div class="cap-cell-label">Deadline Purchasing Power</div>
             <div class="cap-cell-value">~$20.4M</div>
+            <div class="cap-cell-sub">Pro-Rated Day-of-Deadline Cap</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -365,45 +423,53 @@ if current_page == "Line Combinations":
         </div>
         """, unsafe_allow_html=True)
 
+    # Forward Line 1
     st.markdown('<div class="line-header-banner"><span>FORWARD LINE 1 | MATCHUP & HEAVY CYCLE</span><span class="line-cap-total">Line Cap: $18.50M</span></div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     render_nhl_player_cap(c1, 9, "Filip Forsberg", "LW", "Sniper / Cycle Touch", 8476887, "$8.50M", "UFA '30")
     render_nhl_player_cap(c2, 90, "Ryan O'Reilly", "C", "200-Ft Anchor / Ozone Draws", 8475158, "$4.50M", "UFA '27")
     render_nhl_player_cap(c3, 81, "Jonathan Marchessault", "RW", "Perimeter Release / Boards", 8476539, "$5.50M", "UFA '29")
 
+    # Forward Line 2
     st.markdown('<div class="line-header-banner"><span>FORWARD LINE 2 | RUSH STRIKE & HIGH-SLOT FINISHING</span><span class="line-cap-total">Line Cap: $12.35M</span></div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     render_nhl_player_cap(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer", 8474564, "$8.00M", "UFA '28")
     render_nhl_player_cap(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor", 8482142, "$3.40M", "RFA '29")
     render_nhl_player_cap(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484241, "$0.95M", "ELC '28")
 
+    # Forward Line 3
     st.markdown('<div class="line-header-banner"><span>FORWARD LINE 3 | RELENTLESS F1/F2 FORECHECK & TURNOVER CREATION</span><span class="line-cap-total">Line Cap: $9.85M</span></div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     render_nhl_player_cap(c1, 79, "Ross Colton", "LW", "Puck-Hound / Physical Pressure", 8479525, "$4.00M", "UFA '27")
     render_nhl_player_cap(c2, 18, "Jack Drury", "C", "Neutral-Zone Transition Detail", 8480835, "$2.85M", "UFA '28")
     render_nhl_player_cap(c3, 21, "Nils Hoglander", "RW", "5v5 Motor / Cycle Finisher", 8481535, "$3.00M", "UFA '28")
 
+    # Forward Line 4
     st.markdown('<div class="line-header-banner"><span>FORWARD LINE 4 | TRANSITION PACE & DEFENSIVE IQ</span><span class="line-cap-total">Line Cap: $4.90M</span></div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     render_nhl_player_cap(c1, 14, "Alexander Kerfoot", "LW", "Two-Way Versatility", 8477021, "$3.00M", "UFA '27")
     render_nhl_player_cap(c2, 51, "Vitali Pinchuk", "C", "6'3\" Transition Frame", 8486189, "$0.95M", "ELC '28")
     render_nhl_player_cap(c3, 89, "Ozzy Wiesblatt", "RW", "North-South Energy / Agitator", 8482103, "$0.95M", "RFA '27")
 
+    # Defensive Pairing 1
     st.markdown('<div class="line-header-banner"><span>DEFENSIVE PAIRING 1 | ELITE DUAL-THREAT TRANSITION</span><span class="line-cap-total">Pair Cap: $14.05M</span></div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
     render_nhl_player_cap(d1, 41, "Nicolas Hague", "LD", "6'6\" Physical Anchor / Box-Outs", 8480051, "$5.00M", "UFA '29")
     render_nhl_player_cap(d2, 58, "Roman Josi", "RD", "Weak-Side Activation / Rush Rover", 8474600, "$9.05M", "UFA '28")
 
+    # Defensive Pairing 2
     st.markdown('<div class="line-header-banner"><span>DEFENSIVE PAIRING 2 | TWO-WAY RUSH SUPPRESSION</span><span class="line-cap-total">Pair Cap: $9.82M</span></div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
     render_nhl_player_cap(d1, 76, "Brady Skjei", "LD", "Exit Skating / Mobility", 8476869, "$7.00M", "UFA '31")
     render_nhl_player_cap(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout", 8480249, "$2.82M", "UFA '27")
 
-    st.markdown('<div class="line-header-banner"><span>DEFENSIVE PAIRING 3 | MOBILITY & CREASE PROTECTION</span><span class="line-cap-total">Line Cap: $4.55M</span></div>', unsafe_allow_html=True)
+    # Defensive Pairing 3
+    st.markdown('<div class="line-header-banner"><span>DEFENSIVE PAIRING 3 | MOBILITY & CREASE PROTECTION</span><span class="line-cap-total">Pair Cap: $4.55M</span></div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
     render_nhl_player_cap(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater", 8482482, "$1.30M", "RFA '28")
     render_nhl_player_cap(d2, 46, "Ilya Lyubushkin", "RD", "Physical Net-Front Suppression", 8480950, "$3.25M", "UFA '27")
 
+    # Goaltending Tandem
     st.markdown('<div class="line-header-banner"><span>GOALTENDING TANDEM</span><span class="line-cap-total">Tandem Cap: $10.23M</span></div>', unsafe_allow_html=True)
     g1, g2 = st.columns(2)
     render_nhl_player_cap(g1, 74, "Juuse Saros", "G", "Starting Goaltender (Franchise Anchor)", 8477424, "$7.74M", "UFA '33")
@@ -412,95 +478,173 @@ if current_page == "Line Combinations":
     st.stop()
 
 # ==============================================================================
-# PAGE 2: TRADE INTELLIGENCE
+# PAGE 2: TRADE DEADLINE & REALISTIC BUY TARGET INTELLIGENCE (CARD GRID)
 # ==============================================================================
 if current_page == "Trade Intelligence":
     st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
-    st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses.")
+    st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses (NMC/NTC-free).")
 
     realistic_targets = [
         {
-            "Team_Logo": TEAM_LOGOS["PIT"], "Player": "Bryan Rust", "Team": "PIT", "Pos": "RW",
-            "Cap_Hit": 5.125, "Status": "Signed thru '28", "Category": "Top-Six Forward",
-            "Deadline_Posture": "🟢 Top BUY Target", "Role_Success": "Top-Six Winger | Core Playoff Scoring Catalyst",
-            "Brunette_Fit": 95, "P_GP": 0.90, "SOG_GP": 2.54, "Proj_Pts": 72, "Chem_Fit": "Line 2 RW alongside Stamkos & Bourque"
+            "Team_Logo": TEAM_LOGOS["PIT"],
+            "Player": "Bryan Rust", 
+            "Team": "PIT", 
+            "Pos": "RW",
+            "Cap_Hit": 5.125, 
+            "Status": "Signed thru '28 (Trade Block)",
+            "Category": "Top-Six Forward", 
+            "Deadline_Posture": "🟢 Top BUY Target",
+            "Role_Success": "Top-Six Winger | Core Playoff Scoring Catalyst & Forecheck Engine",
+            "Brunette_Fit": 95, 
+            "P_GP": 0.82,
+            "SOG_GP": 3.10,
+            "Chem_Fit": "Line 2 RW alongside Stamkos & Bourque | High F1 Forecheck Motor"
         },
         {
-            "Team_Logo": TEAM_LOGOS["PIT"], "Player": "Rickard Rakell", "Team": "PIT", "Pos": "RW",
-            "Cap_Hit": 5.00, "Status": "Pending UFA '28", "Category": "Top-Six Forward",
-            "Deadline_Posture": "🟢 BUY Target", "Role_Success": "Top-Six Winger | Secondary Scoring Push",
-            "Brunette_Fit": 92, "P_GP": 0.80, "SOG_GP": 2.77, "Proj_Pts": 64, "Chem_Fit": "PP2 Unit Quarterback / High-Slot Release"
+            "Team_Logo": TEAM_LOGOS["PIT"],
+            "Player": "Rickard Rakell", 
+            "Team": "PIT", 
+            "Pos": "RW",
+            "Cap_Hit": 5.00, 
+            "Status": "Pending UFA '28 (No NMC)",
+            "Category": "Top-Six Forward", 
+            "Deadline_Posture": "🟢 BUY Target",
+            "Role_Success": "Top-Six Winger | Secondary Scoring Push & PP2 Quarterback",
+            "Brunette_Fit": 92, 
+            "P_GP": 0.74,
+            "SOG_GP": 3.35,
+            "Chem_Fit": "PP2 Unit Quarterback / High-Volume High-Slot Release"
         },
         {
-            "Team_Logo": TEAM_LOGOS["ANA"], "Player": "Mikael Granlund", "Team": "ANA", "Pos": "C",
-            "Cap_Hit": 7.00, "Status": "Signed thru '28", "Category": "Top-Six Forward",
-            "Deadline_Posture": "🔵 Secondary Scorer", "Role_Success": "Middle-Six Playmaker | Transition Stabilizer",
-            "Brunette_Fit": 93, "P_GP": 0.70, "SOG_GP": 2.02, "Proj_Pts": 57, "Chem_Fit": "Middle-Six Playmaker / Zone-Entry Anchor"
+            "Team_Logo": TEAM_LOGOS["ANA"],
+            "Player": "Mikael Granlund", 
+            "Team": "ANA", 
+            "Pos": "C",
+            "Cap_Hit": 7.00, 
+            "Status": "Signed thru '28",
+            "Category": "Top-Six Forward", 
+            "Deadline_Posture": "🔵 Secondary Scorer",
+            "Role_Success": "Middle-Six Playmaker | Transition Stabilizer & Play Driver",
+            "Brunette_Fit": 93, 
+            "P_GP": 0.85,
+            "SOG_GP": 2.40,
+            "Chem_Fit": "Middle-Six Playmaker / Zone-Entry Transition Anchor"
         },
         {
-            "Team_Logo": TEAM_LOGOS["SEA"], "Player": "Will Borgen", "Team": "SEA", "Pos": "RD",
-            "Cap_Hit": 2.70, "Status": "Pending UFA '27", "Category": "Top-4 Defensive Upgrade",
-            "Deadline_Posture": "🟡 Value BUY", "Role_Success": "Shutdown Defenseman | Pair 3 Anchor",
-            "Brunette_Fit": 91, "P_GP": 0.31, "SOG_GP": 1.10, "Proj_Pts": 25, "Chem_Fit": "Pairing 3 RD with Wilsby / Shot Suppression"
+            "Team_Logo": TEAM_LOGOS["SEA"],
+            "Player": "Will Borgen", 
+            "Team": "SEA", 
+            "Pos": "RD",
+            "Cap_Hit": 2.70, 
+            "Status": "Pending UFA '27 (No NMC)",
+            "Category": "Top-4 Defensive Upgrade", 
+            "Deadline_Posture": "🟡 Value BUY",
+            "Role_Success": "Shutdown Defenseman | Pair 3 Anchor & Rush Suppression Specialist",
+            "Brunette_Fit": 91, 
+            "P_GP": 0.24,
+            "SOG_GP": 1.15,
+            "Chem_Fit": "Pairing 3 RD with Wilsby / Heavy Physical Shot Suppression"
         },
         {
-            "Team_Logo": TEAM_LOGOS["PHI"], "Player": "Noel Acciari", "Team": "PHI", "Pos": "C",
-            "Cap_Hit": 1.40, "Status": "Signed thru '28", "Category": "Bottom-Six / PK Depth",
-            "Deadline_Posture": "🟡 Depth Grinder", "Role_Success": "Checking Forward | PK1 Anchor",
-            "Brunette_Fit": 94, "P_GP": 0.28, "SOG_GP": 1.35, "Proj_Pts": 22, "Chem_Fit": "Line 4 Center / PK1 Shield / DZ Draws"
+            "Team_Logo": TEAM_LOGOS["PHI"],
+            "Player": "Noel Acciari", 
+            "Team": "PHI", 
+            "Pos": "C",
+            "Cap_Hit": 1.40, 
+            "Status": "Signed thru '28",
+            "Category": "Bottom-Six / PK Depth", 
+            "Deadline_Posture": "🟡 Depth Grinder",
+            "Role_Success": "Checking Forward | PK1 Anchor & Defensive Zone Draw Specialist",
+            "Brunette_Fit": 94, 
+            "P_GP": 0.35,
+            "SOG_GP": 1.75,
+            "Chem_Fit": "Line 4 Center / PK1 Shield / Defensive Zone Faceoff Specialist"
         },
         {
-            "Team_Logo": TEAM_LOGOS["MTL"], "Player": "Joel Armia", "Team": "MTL", "Pos": "RW",
-            "Cap_Hit": 3.40, "Status": "Expiring Contract", "Category": "Bottom-Six / PK Depth",
-            "Deadline_Posture": "🔵 PK Specialist BUY", "Role_Success": "Penalty Killer / Forechecker | Board Battle Protector",
-            "Brunette_Fit": 89, "P_GP": 0.38, "SOG_GP": 1.85, "Proj_Pts": 30, "Chem_Fit": "Line 3/4 Board Battle Protector / SH Threat"
+            "Team_Logo": TEAM_LOGOS["MTL"],
+            "Player": "Joel Armia", 
+            "Team": "MTL", 
+            "Pos": "RW",
+            "Cap_Hit": 3.40, 
+            "Status": "Expiring Contract (No NMC)",
+            "Category": "Bottom-Six / PK Depth", 
+            "Deadline_Posture": "🔵 PK Specialist BUY",
+            "Role_Success": "Penalty Killer / Forechecker | Board Battle Protector & Late-Lead Guard",
+            "Brunette_Fit": 89, 
+            "P_GP": 0.42,
+            "SOG_GP": 2.05,
+            "Chem_Fit": "Line 3/4 Board Battle Protector / Short-Handed Threat"
         }
     ]
 
     target_df = pd.DataFrame(realistic_targets)
 
     f_cols = st.columns([1.2, 1.2, 1.2, 1.4])
-    with f_cols[0]: sel_cat = st.selectbox("Target Category", ["All Categories", "Top-Six Forward", "Top-4 Defensive Upgrade", "Bottom-Six / PK Depth"])
-    with f_cols[1]: sel_pos = st.selectbox("Position", ["All Positions", "Centers (C)", "Wingers (RW/LW)", "Defensemen (RD/LD)"])
-    with f_cols[2]: sel_strat = st.selectbox("Deadline Posture", ["All Postures", "BUY Target", "Secondary Scorer", "Value BUY", "Depth Grinder", "PK Specialist BUY"])
-    with f_cols[3]: min_fit = st.slider("Min Brunette Scheme Fit", min_value=85, max_value=96, value=88)
+    with f_cols[0]:
+        cat_opts = ["All Categories", "Top-Six Forward", "Top-4 Defensive Upgrade", "Bottom-Six / PK Depth"]
+        sel_cat = st.selectbox("Target Category", cat_opts)
+    with f_cols[1]:
+        pos_opts = ["All Positions", "Centers (C)", "Wingers (RW/LW)", "Defensemen (RD/LD)"]
+        sel_pos = st.selectbox("Position", pos_opts)
+    with f_cols[2]:
+        strat_opts = ["All Postures", "BUY Target", "Secondary Scorer", "Value BUY", "Depth Grinder", "PK Specialist BUY"]
+        sel_strat = st.selectbox("Deadline Posture", strat_opts)
+    with f_cols[3]:
+        min_fit = st.slider("Min Brunette Scheme Fit", min_value=85, max_value=96, value=88)
 
     filtered_df = target_df[target_df["Brunette_Fit"] >= min_fit].copy()
-    if sel_cat != "All Categories": filtered_df = filtered_df[filtered_df["Category"] == sel_cat]
-    if sel_pos == "Centers (C)": filtered_df = filtered_df[filtered_df["Pos"].str.contains("C")]
-    elif sel_pos == "Wingers (RW/LW)": filtered_df = filtered_df[filtered_df["Pos"].str.contains("LW|RW")]
-    elif sel_pos == "Defensemen (RD/LD)": filtered_df = filtered_df[filtered_df["Pos"].str.contains("D")]
-    if sel_strat != "All Postures": filtered_df = filtered_df[filtered_df["Deadline_Posture"].str.contains(sel_strat.split()[-1])]
+
+    if sel_cat != "All Categories":
+        filtered_df = filtered_df[filtered_df["Category"] == sel_cat]
+
+    if sel_pos == "Centers (C)":
+        filtered_df = filtered_df[filtered_df["Pos"].str.contains("C")]
+    elif sel_pos == "Wingers (RW/LW)":
+        filtered_df = filtered_df[filtered_df["Pos"].str.contains("LW|RW")]
+    elif sel_pos == "Defensemen (RD/LD)":
+        filtered_df = filtered_df[filtered_df["Pos"].str.contains("D")]
+
+    if sel_strat != "All Postures":
+        filtered_df = filtered_df[filtered_df["Deadline_Posture"].str.contains(sel_strat.split()[-1])]
 
     st.markdown("#### Real-Time Acquisition Target Registry (NMC-Free)")
+    
     for i, row in filtered_df.iterrows():
         with st.container(border=True):
             c1, c2, c3 = st.columns([1.2, 3.5, 5])
-            with c1: st.image(row["Team_Logo"], width=90)
+            with c1:
+                st.image(row["Team_Logo"], width=90)
             with c2:
                 st.markdown(f"### **{row['Player']}** ({row['Pos']})")
                 st.caption(f"**Tier:** {row['Category']} | **Cap Hit:** ${row['Cap_Hit']:.3f}M")
-                st.markdown(f"**Role:** {row['Role_Success']}")
+                st.markdown(f"**Role & Postsuccess:** {row['Role_Success']}")
                 st.markdown(f"**Scheme Fit:** {row['Brunette_Fit']}/100")
             with c3:
-                st.markdown(f"**Projections & Rate Stats:** `{row['P_GP']} P/GP` | `{row['SOG_GP']} SOG/GP` | **Point Proj:** `{row['Proj_Pts']} PTS`")
+                st.markdown(f"**Analytics Profile:** `{row['P_GP']} P/GP` | `{row['SOG_GP']} SOG/GP`")
                 st.info(f"**Line Chemistry Fit:** {row['Chem_Fit']}")
 
     st.stop()
 
 # ==============================================================================
-# PAGE 3: SKATER & GOALTENDER ANALYTICS HUB
+# PAGE 3: SKATER & GOALTENDER ANALYTICS & PERFORMANCE HUB
 # ==============================================================================
+
 st.sidebar.markdown("### Filter Settings")
 
-season_map = {"26/27": "20262027", "25/26": "20252026", "24/25": "20242025", "23/24": "20232024"}
+season_map = {
+    "26/27": "20262027",
+    "25/26": "20252026",
+    "24/25": "20242025",
+    "23/24": "20232024"
+}
 if "selected_season_label" not in st.session_state:
     st.session_state["selected_season_label"] = "25/26"
 
 s_cols = st.sidebar.columns(2)
 for i, label in enumerate(["26/27", "25/26", "24/25", "23/24"]):
     with s_cols[i % 2]:
-        if st.button(label, key=f"btn_season_{label}", type="primary" if st.session_state["selected_season_label"] == label else "secondary", use_container_width=True):
+        btn_type = "primary" if st.session_state["selected_season_label"] == label else "secondary"
+        if st.button(label, key=f"btn_season_{label}", type=btn_type, use_container_width=True):
             st.session_state["selected_season_label"] = label
             st.rerun()
 
@@ -513,7 +657,8 @@ if "selected_game_type" not in st.session_state:
 gt_cols = st.sidebar.columns(2)
 for i, gt in enumerate(["Regular Season", "Playoffs"]):
     with gt_cols[i]:
-        if st.button(gt, key=f"btn_gt_{gt}", type="primary" if st.session_state["selected_game_type"] == gt else "secondary", use_container_width=True):
+        btn_type = "primary" if st.session_state["selected_game_type"] == gt else "secondary"
+        if st.button(gt, key=f"btn_gt_{gt}", type=btn_type, use_container_width=True):
             st.session_state["selected_game_type"] = gt
             st.rerun()
 
@@ -528,11 +673,13 @@ pos_groups = ["All Skaters", "Forwards", "Defensemen", "Goaltenders"]
 pg_cols = st.sidebar.columns(2)
 for i, pg in enumerate(pos_groups):
     with pg_cols[i % 2]:
-        if st.button(pg, key=f"btn_pos_{pg}", type="primary" if st.session_state["selected_pos_group"] == pg else "secondary", use_container_width=True):
+        btn_type = "primary" if st.session_state["selected_pos_group"] == pg else "secondary"
+        if st.button(pg, key=f"btn_pos_{pg}", type=btn_type, use_container_width=True):
             st.session_state["selected_pos_group"] = pg
             st.rerun()
 
 position_filter = st.session_state["selected_pos_group"]
+
 BASE_URL = "https://api-web.nhle.com/v1"
 TEAM_TRICODE = "NSH"
 
@@ -585,7 +732,8 @@ def load_zone_faceoffs(season, game_type):
                                 "NZ_FO%": round(float(row.get("neutralZoneFaceoffPct")) * 100.0, 1) if row.get("neutralZoneFaceoffPct") is not None else None,
                                 "DZ_FO%": round(float(row.get("defensiveZoneFaceoffPct")) * 100.0, 1) if row.get("defensiveZoneFaceoffPct") is not None else None,
                             }
-                    if len(zone_dict) > 0: break
+                    if len(zone_dict) > 0:
+                        break
         except Exception:
             continue
     return zone_dict
@@ -594,7 +742,8 @@ def load_zone_faceoffs(season, game_type):
 def load_club_stats(season, game_type):
     url = f"{BASE_URL}/club-stats/{TEAM_TRICODE}/{season}/{game_type}"
     res = requests.get(url)
-    if res.status_code != 200: return pd.DataFrame(), pd.DataFrame()
+    if res.status_code != 200:
+        return pd.DataFrame(), pd.DataFrame()
     
     data = res.json()
     skaters = data.get("skaters", [])
@@ -628,7 +777,7 @@ def load_club_stats(season, game_type):
         nz_fo = z_stats.get("NZ_FO%")
         dz_fo = z_stats.get("DZ_FO%")
 
-        toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or 0
+        toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
         elif isinstance(toi_raw, str) and ":" in toi_raw:
@@ -712,9 +861,12 @@ def load_club_stats(season, game_type):
         wins = g.get("wins", 0)
         losses = g.get("losses", 0)
         
+        # Robust OTL mapping with difference fallback for archived seasons
         ot_losses = g.get("otLosses")
-        if ot_losses is None: ot_losses = g.get("ot")
-        if ot_losses is None: ot_losses = g.get("overtimeLosses", 0)
+        if ot_losses is None:
+            ot_losses = g.get("ot")
+        if ot_losses is None:
+            ot_losses = g.get("overtimeLosses", 0)
         if ot_losses == 0 and gp > (wins + losses):
             ot_losses = gp - (wins + losses)
 
