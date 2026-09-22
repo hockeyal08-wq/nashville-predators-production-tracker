@@ -4,7 +4,6 @@ import requests
 
 PREDS_LOGO_URL = "https://assets.nhle.com/logos/nhl/svg/NSH_light.svg"
 
-# Set layout wide and lock sidebar expanded by default
 st.set_page_config(
     page_title="Nashville Predators Hockey Operations Dashboard",
     layout="wide",
@@ -452,7 +451,7 @@ else:
 st.divider()
 
 # --- Tabbed Analytical Views with Professional Column Configurations ---
-st.subheader("Roster Performance & Advanced Indices")
+st.subheader("Skater Performance")
 
 if not df.empty:
     qualified_df = df[df["GP"] >= 5].reset_index(drop=True)
