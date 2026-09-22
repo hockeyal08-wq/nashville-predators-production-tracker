@@ -333,9 +333,7 @@ KNOWN_D_HANDEDNESS = {
 
 @st.cache_data(ttl=86400)
 def load_roster_handedness(season):
-    """Fetches shootsCatches (L/R) directly from the official team roster endpoint."""
     shoots_map = KNOWN_D_HANDEDNESS.copy()
-    
     for s_param in [season, "current"]:
         url = f"{BASE_URL}/roster/{TEAM_TRICODE}/{s_param}"
         try:
@@ -380,12 +378,12 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
-        # Raw percentage decimals
-        sh_pct = s.get("shootingPctg", 0.0)
-        sh_pct = float(sh_pct) if sh_pct is not None else 0.0
+        # Scale raw decimals up to whole percentages (e.g. 0.165 -> 16.5)
+        raw_sh = s.get("shootingPctg", 0.0)
+        sh_pct = round(float(raw_sh) * 100.0, 1) if raw_sh is not None else 0.0
 
-        fo_pct = s.get("faceoffWinningPctg", 0.0)
-        fo_pct = float(fo_pct) if fo_pct is not None else 0.0
+        raw_fo = s.get("faceoffWinningPctg", 0.0)
+        fo_pct = round(float(raw_fo) * 100.0, 1) if raw_fo is not None else 0.0
 
         # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
@@ -413,7 +411,6 @@ def load_club_skater_stats(season, game_type):
         raw_pos = s.get("positionCode", "N/A")
         shoots = shoots_map.get(player_id)
 
-        # Query player profile if defenseman handedness is still unknown
         if raw_pos == "D" and not shoots:
             try:
                 p_res = requests.get(f"{BASE_URL}/player/{player_id}/landing", timeout=2)
@@ -423,7 +420,6 @@ def load_club_skater_stats(season, game_type):
             except Exception:
                 pass
 
-        # Precise position assignment
         if raw_pos == "L":
             pos_code = "LW"
         elif raw_pos == "R":
@@ -514,7 +510,7 @@ else:
                     <div class="stat-pill">
                         <div class="stat-pill-label">Rate Scoring (P/60)</div>
                         <div class="stat-pill-val">{p['P/60']:.4f}</div>
-                        <div class="stat-pill-sub">{(p['SH%'] * 100):.2f}% Finishing</div>
+                        <div class="stat-pill-sub">{p['SH%']:.1f}% Finishing</div>
                     </div>
                     <div class="stat-pill">
                         <div class="stat-pill-label">Offensive Score</div>
@@ -593,8 +589,8 @@ if not df.empty:
         "+/-": st.column_config.NumberColumn("+/-", format="%+d"),
         "PIM": st.column_config.NumberColumn("PIM", format="%d"),
         "TOI/GP": st.column_config.NumberColumn("TOI/GP", format="%.2f m"),
-        "SH%": st.column_config.ProgressColumn("SH%", min_value=0.0, max_value=0.35, format="%.1f%%"),
-        "FO%": st.column_config.ProgressColumn("FO%", min_value=0.0, max_value=0.75, format="%.1f%%"),
+        "SH%": st.column_config.ProgressColumn("SH%", min_value=0.0, max_value=35.0, format="%.1f%%"),
+        "FO%": st.column_config.ProgressColumn("FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
         "P/60": st.column_config.ProgressColumn("P/60", min_value=0.0, max_value=float(df["P/60"].max() or 4.0), format="%.2f"),
         "Off_Score": st.column_config.ProgressColumn("Offensive Impact", min_value=0.0, max_value=float(df["Off_Score"].max() or 6.0), format="%.2f"),
         "Def_Score": st.column_config.ProgressColumn("Defensive Impact", min_value=float(df["Def_Score"].min() or -3.0), max_value=float(df["Def_Score"].max() or 5.0), format="%.2f"),
