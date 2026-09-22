@@ -362,7 +362,7 @@ with p_cols[2]:
 current_page = st.session_state["current_page"]
 
 # ==============================================================================
-# VERIFIED HEADSHOT OVERRIDES
+# VERIFIED HEADSHOT OVERRIDES (Roster Hub Only)
 # ==============================================================================
 VERIFIED_MANUAL_HEADSHOTS = {
     "Steven Stamkos": "https://assets.nhle.com/mugs/nhl/latest/8474564.png",
@@ -502,12 +502,11 @@ if current_page == "Trade Intelligence":
     st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
     st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses (NMC/NTC-free).")
 
-    # VETTED ACQUISITION TARGETS DATABASE WITH EXACT VERIFIED NHL IDs
+    # VETTED ACQUISITION TARGETS DATABASE (Using Team Logo SVG as Primary Asset)
     realistic_targets = [
         {
-            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8475848.png",
-            "Player": "Bryan Rust", 
             "Team_Logo": TEAM_LOGOS["PIT"],
+            "Player": "Bryan Rust", 
             "Team": "PIT", 
             "Pos": "RW",
             "Cap_Hit": 5.125, 
@@ -519,9 +518,8 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Two-time Stanley Cup champion actively made available as Pittsburgh cycles through a multi-year retool. World-class forechecking speed and high-compete board work that fits Andrew Brunette's system seamlessly."
         },
         {
-            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8476460.png",
-            "Player": "Rickard Rakell", 
             "Team_Logo": TEAM_LOGOS["PIT"],
+            "Player": "Rickard Rakell", 
             "Team": "PIT", 
             "Pos": "RW",
             "Cap_Hit": 5.00, 
@@ -533,9 +531,8 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Perennial trade-block fixture on a non-contending Penguins roster with full trade maneuverability. Generates rapid rush shots that take pressure off Steven Stamkos."
         },
         {
-            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8475794.png",
-            "Player": "Mikael Granlund", 
             "Team_Logo": TEAM_LOGOS["ANA"],
+            "Player": "Mikael Granlund", 
             "Team": "ANA", 
             "Pos": "C",
             "Cap_Hit": 7.00, 
@@ -547,9 +544,8 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Smart veteran distributor with extensive familiarity with Nashville hockey ops. High-end vision to quarterback secondary power-play units and stabilize middle-six minutes."
         },
         {
-            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8479379.png",
-            "Player": "Will Borgen", 
             "Team_Logo": TEAM_LOGOS["SEA"],
+            "Player": "Will Borgen", 
             "Team": "SEA", 
             "Pos": "RD",
             "Cap_Hit": 2.70, 
@@ -561,9 +557,8 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Under-the-radar right defenseman who suppresses neutral-zone rush entries at a top-tier rate. Highly cost-effective upgrade with complete roster flexibility."
         },
         {
-            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8478496.png",
-            "Player": "Noel Acciari", 
             "Team_Logo": TEAM_LOGOS["PHI"],
+            "Player": "Noel Acciari", 
             "Team": "PHI", 
             "Pos": "C",
             "Cap_Hit": 1.40, 
@@ -575,9 +570,8 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Fearless checking center who wins key defensive-zone draws, blocks point shots, and brings heavy physical identity to a bottom-six checking role."
         },
         {
-            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8476346.png",
-            "Player": "Joel Armia", 
             "Team_Logo": TEAM_LOGOS["MTL"],
+            "Player": "Joel Armia", 
             "Team": "MTL", 
             "Pos": "RW",
             "Cap_Hit": 3.40, 
@@ -624,13 +618,12 @@ if current_page == "Trade Intelligence":
 
     st.markdown("#### Real-Time Acquisition Target Registry (NMC-Free)")
     
-    # Render targets as an executive card grid with direct image rendering
+    # Render targets as an executive card grid featuring team logos
     for i, row in filtered_df.iterrows():
         with st.container(border=True):
             c1, c2, c3 = st.columns([1.2, 3.5, 5])
             with c1:
-                st.image(row["Photo"], width=80)
-                st.image(row["Team_Logo"], width=32)
+                st.image(row["Team_Logo"], width=90)
             with c2:
                 st.markdown(f"### **{row['Player']}** ({row['Pos']})")
                 st.caption(f"**Tier:** {row['Category']} | **Cap Hit:** ${row['Cap_Hit']:.3f}M")
