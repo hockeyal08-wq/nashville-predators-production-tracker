@@ -325,40 +325,8 @@ if current_page == "Line Combinations":
         "to freely execute weak-side pinches below the faceoff dots."
     )
 
-    # Dedicated direct photo URLs guaranteeing verified headshots across all 20 roster players
-    ROSTER_HEADSHOTS = {
-        # Forward Line 1
-        "Filip Forsberg": "https://assets.nhle.com/mugs/nhl/latest/8476887.png",
-        "Ryan O'Reilly": "https://assets.nhle.com/mugs/nhl/latest/8475158.png",
-        "Jonathan Marchessault": "https://assets.nhle.com/mugs/nhl/latest/8476539.png",
-        # Forward Line 2
-        "Steven Stamkos": "https://assets.nhle.com/mugs/nhl/latest/8474564.png",
-        "Mavrik Bourque": "https://assets.nhle.com/mugs/nhl/latest/8482142.png",
-        "Matthew Wood": "https://assets.nhle.com/mugs/nhl/latest/8484152.png",
-        # Forward Line 3
-        "Ross Colton": "https://assets.nhle.com/mugs/nhl/latest/8479525.png",
-        "Jack Drury": "https://assets.nhle.com/mugs/nhl/latest/8480835.png",
-        "Nils Höglander": "https://assets.nhle.com/mugs/nhl/latest/8481535.png",
-        # Forward Line 4
-        "Alexander Kerfoot": "https://assets.nhle.com/mugs/nhl/latest/8477021.png",
-        "Vitali Pinchuk": "https://assets.nhle.com/mugs/nhl/latest/8482670.png",
-        "Ozzy Wiesblatt": "https://assets.nhle.com/mugs/nhl/latest/8482103.png",
-        # Defense Pairing 1
-        "Nicolas Hague": "https://assets.nhle.com/mugs/nhl/latest/8480051.png",
-        "Roman Josi": "https://assets.nhle.com/mugs/nhl/latest/8474563.png",
-        # Defense Pairing 2
-        "Brady Skjei": "https://assets.nhle.com/mugs/nhl/latest/8476869.png",
-        "Nick Perbix": "https://assets.nhle.com/mugs/nhl/latest/8480249.png",
-        # Defense Pairing 3
-        "Adam Wilsby": "https://assets.nhle.com/mugs/nhl/latest/8482482.png",
-        "Ilya Lyubushkin": "https://assets.nhle.com/mugs/nhl/latest/8480950.png",
-        # Goaltending Tandem
-        "Juuse Saros": "https://assets.nhle.com/mugs/nhl/latest/8477424.png",
-        "Justus Annunen": "https://assets.nhle.com/mugs/nhl/latest/8481020.png",
-    }
-
-    def render_nhl_player(col, num, name, pos, role_tag):
-        img_url = ROSTER_HEADSHOTS.get(name, PREDS_LOGO_URL)
+    def render_nhl_player(col, num, name, pos, role_tag, player_id):
+        img_url = f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png"
         col.markdown(f"""
         <div class="nhl-player-card">
             <img class="nhl-mug" src="{img_url}" alt="{name}" onerror="this.onerror=null; this.src='{PREDS_LOGO_URL}';">
@@ -371,54 +339,54 @@ if current_page == "Line Combinations":
     # Forward Line 1
     st.markdown('<div class="line-header-banner">FORWARD LINE 1 | MATCHUP & HEAVY CYCLE</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 9, "Filip Forsberg", "LW", "Sniper / Cycle Touch")
-    render_nhl_player(c2, 90, "Ryan O'Reilly", "C", "200-Ft Anchor / Ozone Draws")
-    render_nhl_player(c3, 81, "Jonathan Marchessault", "RW", "Perimeter Release / Boards")
+    render_nhl_player(c1, 9, "Filip Forsberg", "LW", "Sniper / Cycle Touch", 8476887)
+    render_nhl_player(c2, 90, "Ryan O'Reilly", "C", "200-Ft Anchor / Ozone Draws", 8475158)
+    render_nhl_player(c3, 81, "Jonathan Marchessault", "RW", "Perimeter Release / Boards", 8476539)
 
     # Forward Line 2
     st.markdown('<div class="line-header-banner">FORWARD LINE 2 | RUSH STRIKE & HIGH-SLOT FINISHING</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer")
-    render_nhl_player(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor")
-    render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front")
+    render_nhl_player(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer", 8474564)
+    render_nhl_player(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor", 8482142)
+    render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484241)
 
     # Forward Line 3
     st.markdown('<div class="line-header-banner">FORWARD LINE 3 | RELENTLESS F1/F2 FORECHECK & TURNOVER CREATION</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 79, "Ross Colton", "LW", "Puck-Hound / Physical Pressure")
-    render_nhl_player(c2, 18, "Jack Drury", "C", "Neutral-Zone Transition Detail")
-    render_nhl_player(c3, 21, "Nils Höglander", "RW", "5v5 Motor / Cycle Finisher")
+    render_nhl_player(c1, 79, "Ross Colton", "LW", "Puck-Hound / Physical Pressure", 8479525)
+    render_nhl_player(c2, 18, "Jack Drury", "C", "Neutral-Zone Transition Detail", 8480835)
+    render_nhl_player(c3, 21, "Nils Höglander", "RW", "5v5 Motor / Cycle Finisher", 8481535)
 
     # Forward Line 4
     st.markdown('<div class="line-header-banner">FORWARD LINE 4 | TRANSITION PACE & DEFENSIVE IQ</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 14, "Alexander Kerfoot", "LW", "Two-Way Versatility")
-    render_nhl_player(c2, 51, "Vitali Pinchuk", "C", "6'3\" Transition Frame")
-    render_nhl_player(c3, 89, "Ozzy Wiesblatt", "RW", "North-South Energy / Agitator")
+    render_nhl_player(c1, 14, "Alexander Kerfoot", "LW", "Two-Way Versatility", 8477021)
+    render_nhl_player(c2, 51, "Vitali Pinchuk", "C", "6'3\" Transition Frame", 8486189)
+    render_nhl_player(c3, 89, "Ozzy Wiesblatt", "RW", "North-South Energy / Agitator", 8482103)
 
     # Defensive Pairing 1
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 1 | ELITE DUAL-THREAT TRANSITION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 41, "Nicolas Hague", "LD", "6'6\" Physical Anchor / Box-Outs")
-    render_nhl_player(d2, 58, "Roman Josi", "RD", "Weak-Side Activation / Rush Rover")
+    render_nhl_player(d1, 41, "Nicolas Hague", "LD", "6'6\" Physical Anchor / Box-Outs", 8480051)
+    render_nhl_player(d2, 58, "Roman Josi", "RD", "Weak-Side Activation / Rush Rover", 8474600)
 
     # Defensive Pairing 2
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 2 | TWO-WAY RUSH SUPPRESSION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 76, "Brady Skjei", "LD", "Exit Skating / Mobility")
-    render_nhl_player(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout")
+    render_nhl_player(d1, 76, "Brady Skjei", "LD", "Exit Skating / Mobility", 8476869)
+    render_nhl_player(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout", 8480249)
 
     # Defensive Pairing 3
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 3 | MOBILITY & CREASE PROTECTION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater")
-    render_nhl_player(d2, 46, "Ilya Lyubushkin", "RD", "Physical Net-Front Suppression")
+    render_nhl_player(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater", 8482482)
+    render_nhl_player(d2, 46, "Ilya Lyubushkin", "RD", "Physical Net-Front Suppression", 8480950)
 
     # Goaltending Crease
     st.markdown('<div class="line-header-banner">GOALTENDING TANDEM</div>', unsafe_allow_html=True)
     g1, g2 = st.columns(2)
-    render_nhl_player(g1, 74, "Juuse Saros", "G", "Starting Goaltender (Franchise Anchor)")
-    render_nhl_player(g2, 29, "Justus Annunen", "G", "Backup Goaltender (High-End Tandem)")
+    render_nhl_player(g1, 74, "Juuse Saros", "G", "Starting Goaltender (Franchise Anchor)", 8477424)
+    render_nhl_player(g2, 29, "Justus Annunen", "G", "Backup Goaltender (High-End Tandem)", 8481020)
 
     st.stop()
 
@@ -493,9 +461,22 @@ BASE_URL = "https://api-web.nhle.com/v1"
 TEAM_TRICODE = "NSH"
 
 KNOWN_D_HANDEDNESS = {
-    8474563: "L", 8475172: "R", 8475222: "L", 8476869: "L", 8478469: "L",
-    8479323: "R", 8479410: "R", 8476885: "R", 8482079: "L", 8481541: "R",
-    8483488: "L", 8484153: "R", 8480950: "R", 8480051: "L", 8480249: "R", 8482482: "L"
+    8474600: "L",  # Roman Josi
+    8475172: "R",  # Luke Schenn
+    8475222: "L",  # Ryan McDonagh
+    8476869: "L",  # Brady Skjei
+    8478469: "L",  # Jeremy Lauzon
+    8479323: "R",  # Dante Fabbro
+    8479410: "R",  # Alexandre Carrier
+    8476885: "R",  # Tyson Barrie
+    8482079: "L",  # Marc Del Gaizo
+    8481541: "R",  # Spencer Stastney
+    8483488: "L",  # Tanner Molendyk
+    8484153: "R",  # Andrew Gibson
+    8480950: "R",  # Ilya Lyubushkin
+    8480051: "L",  # Nicolas Hague
+    8480249: "R",  # Nick Perbix
+    8482482: "L",  # Adam Wilsby
 }
 
 @st.cache_data(ttl=86400)
@@ -519,6 +500,7 @@ def load_roster_handedness(season):
 
 @st.cache_data(ttl=1800)
 def load_zone_faceoffs(season, game_type):
+    """Fetches O-Zone, N-Zone, and D-Zone faceoff percentages using Nashville franchiseId (34) and teamId (18)."""
     zone_dict = {}
     urls = [
         f"https://api.nhle.com/stats/rest/en/skater/faceoffpercentages?isAggregate=false&isGame=false&limit=100&sort=%5B%7B%22property%22:%22totalFaceoffs%22,%22direction%22:%22DESC%22%7D%5D&cayenneExp=seasonId={season}%20and%20gameTypeId={game_type}%20and%20franchiseId=34",
@@ -534,12 +516,17 @@ def load_zone_faceoffs(season, game_type):
                         p_id = row.get("playerId")
                         tot_fo = row.get("totalFaceoffs", 0)
                         if tot_fo and tot_fo > 0:
+                            fo_win_pct = row.get("faceoffWinPct")
+                            oz_pct = row.get("offensiveZoneFaceoffPct")
+                            nz_pct = row.get("neutralZoneFaceoffPct")
+                            dz_pct = row.get("defensiveZoneFaceoffPct")
+
                             zone_dict[p_id] = {
                                 "Total_FO": int(tot_fo),
-                                "FO%": round(float(row.get("faceoffWinPct")) * 100.0, 1) if row.get("faceoffWinPct") is not None else None,
-                                "OZ_FO%": round(float(row.get("offensiveZoneFaceoffPct")) * 100.0, 1) if row.get("offensiveZoneFaceoffPct") is not None else None,
-                                "NZ_FO%": round(float(row.get("neutralZoneFaceoffPct")) * 100.0, 1) if row.get("neutralZoneFaceoffPct") is not None else None,
-                                "DZ_FO%": round(float(row.get("defensiveZoneFaceoffPct")) * 100.0, 1) if row.get("defensiveZoneFaceoffPct") is not None else None,
+                                "FO%": round(float(fo_win_pct) * 100.0, 1) if fo_win_pct is not None else None,
+                                "OZ_FO%": round(float(oz_pct) * 100.0, 1) if oz_pct is not None else None,
+                                "NZ_FO%": round(float(nz_pct) * 100.0, 1) if nz_pct is not None else None,
+                                "DZ_FO%": round(float(dz_pct) * 100.0, 1) if dz_pct is not None else None,
                             }
                     if len(zone_dict) > 0:
                         break
@@ -677,6 +664,7 @@ if not df.empty:
     elif position_filter == "Defensemen":
         df = df[df["Pos"].isin(["D", "LD", "RD"])].reset_index(drop=True)
 
+# Spotlight Header
 if df.empty:
     st.info(f"No {game_type_label.lower()} data recorded for {st.session_state['selected_season_label']}.")
 else:
@@ -737,6 +725,7 @@ else:
     """
     st.markdown(spotlight_html, unsafe_allow_html=True)
 
+    # Roster Selector Grid
     st.markdown("#### Roster Selection")
     num_cols = 6
     for i in range(0, len(df), num_cols):
@@ -756,6 +745,7 @@ else:
 
 st.divider()
 
+# Tabbed Analytical Views
 st.subheader("Skater Performance")
 
 if not df.empty:
@@ -810,21 +800,25 @@ if not df.empty:
     }
 
     if active_view == "Offensive Impact":
+        st.markdown("**Ranked by Offensive Impact:**")
         cols = ["Photo", "Skater", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]
         off_view = qualified_df[cols].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
         st.dataframe(off_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Defensive Impact":
+        st.markdown("**Ranked by Defensive Impact:**")
         cols = ["Photo", "Skater", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG"]
         def_view = qualified_df[cols].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
         st.dataframe(def_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Special Teams Performance":
+        st.markdown("**Ranked by Special Teams Impact:**")
         cols = ["Photo", "Skater", "Pos", "GP", "PP_Score", "PK_Score", "PPG", "SHG", "PIM", "TOI/GP"]
         st_view = qualified_df[cols].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
         st.dataframe(st_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Faceoff Breakdown":
+        st.markdown("**Zonal Faceoff Performance (Offensive, Neutral, & Defensive Zones):**")
         fo_skaters = qualified_df[qualified_df["Total_FO"] > 0].copy()
         if fo_skaters.empty:
             st.info("No faceoffs recorded for skaters in this selection.")
@@ -834,6 +828,7 @@ if not df.empty:
             st.dataframe(fo_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Complete Skater Statistics":
+        st.markdown("**Complete Skater Statistics:**")
         cols = [
             "Photo", "Skater", "Pos", "GP", "Off_Score", "Def_Score", "PP_Score", "PK_Score",
             "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "SOG", "SH%", "FO%", "PIM", 
@@ -843,6 +838,8 @@ if not df.empty:
         st.dataframe(comp_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Limited Sample (< 5 GP)":
+        st.markdown("**Limited Sample Size Skaters (< 5 Games Played):**")
+        st.caption("Rates and composite impact models are unweighted due to low minute exposure.")
         if limited_df.empty:
             st.info("No skaters currently have fewer than 5 games played for this selection.")
         else:
