@@ -335,7 +335,7 @@ if current_page == "Line Combinations":
     c1, c2, c3 = st.columns(3)
     render_nhl_player(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer", 8474564)
     render_nhl_player(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor", 8482142)
-    render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484152)
+    render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484241)
 
     # Forward Line 3
     st.markdown('<div class="line-header-banner">FORWARD LINE 3 | RELENTLESS F1/F2 FORECHECK & TURNOVER CREATION</div>', unsafe_allow_html=True)
