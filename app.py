@@ -13,19 +13,16 @@ st.set_page_config(
 # Deep franchise theme injection
 st.markdown(f"""
 <style>
-    /* Full Page Canvas, Main Body & App View Container */
     html, body, [data-testid="stAppViewContainer"], .stApp {{
         background-color: #041E42 !important;
         color: #F8FAFC !important;
         font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif !important;
     }}
     
-    /* Top Toolbar / Header */
     [data-testid="stHeader"] {{
         background-color: rgba(4, 30, 66, 0.95) !important;
     }}
 
-    /* Left Sidebar Theming */
     [data-testid="stSidebar"], [data-testid="stSidebarContent"] {{
         background-color: #03142D !important;
         border-right: 1.5px solid rgba(255, 184, 28, 0.3) !important;
@@ -34,19 +31,10 @@ st.markdown(f"""
         color: #F8FAFC !important;
     }}
 
-    /* Page Padding & Spacing */
     .block-container {{
         padding-top: 1.5rem !important;
         padding-bottom: 2rem !important;
         max-width: 95% !important;
-    }}
-
-    /* Sidebar Collapse Button Styling */
-    [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarCollapseButton"] button {{
-        opacity: 1 !important;
-        visibility: visible !important;
-        display: flex !important;
     }}
 
     [data-testid="stSidebarCollapseButton"] button {{
@@ -55,32 +43,8 @@ st.markdown(f"""
         border-radius: 8px !important;
         padding: 4px 8px !important;
         box-shadow: 0 0 10px rgba(255, 184, 28, 0.4) !important;
-        transition: all 0.2s ease-in-out !important;
     }}
 
-    [data-testid="stSidebarCollapseButton"] button:hover {{
-        background-color: #FFB81C !important;
-        box-shadow: 0 0 16px rgba(255, 184, 28, 0.7) !important;
-        transform: scale(1.05);
-    }}
-
-    [data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stSidebarCollapseButton"] svg * {{
-        opacity: 1 !important;
-        visibility: visible !important;
-        fill: #FFB81C !important;
-        stroke: #FFB81C !important;
-        color: #FFB81C !important;
-    }}
-
-    [data-testid="stSidebarCollapseButton"] button:hover svg,
-    [data-testid="stSidebarCollapseButton"] button:hover svg * {{
-        fill: #041E42 !important;
-        stroke: #041E42 !important;
-        color: #041E42 !important;
-    }}
-
-    /* Header Container */
     .header-container {{
         display: flex;
         align-items: center;
@@ -109,7 +73,6 @@ st.markdown(f"""
         letter-spacing: 0.3px;
     }}
 
-    /* Executive Spotlight Showcase Card */
     .spotlight-card {{
         background: linear-gradient(135deg, #092652 0%, #03142D 100%);
         border: 2px solid #FFB81C;
@@ -173,7 +136,6 @@ st.markdown(f"""
         font-weight: 600;
     }}
 
-    /* EA NHL Style Line Card */
     .nhl-player-card {{
         background: linear-gradient(180deg, #092652 0%, #03142D 100%);
         border: 1.5px solid rgba(255, 184, 28, 0.4);
@@ -190,8 +152,8 @@ st.markdown(f"""
         box-shadow: 0 6px 18px rgba(255, 184, 28, 0.35);
     }}
     .nhl-mug {{
-        width: 82px;
-        height: 82px;
+        width: 86px;
+        height: 86px;
         object-fit: cover;
         border-radius: 50%;
         border: 2px solid #FFB81C;
@@ -233,33 +195,23 @@ st.markdown(f"""
         border-radius: 4px;
     }}
 
-    /* Predators Gold Rounded Buttons */
     div[data-testid="stButton"] button[kind="secondary"] {{
         background-color: #061F47 !important;
         border: 2px solid #FFB81C !important;
         border-radius: 10px !important;
         color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
         font-weight: 700 !important;
         font-size: 0.95rem !important;
         padding: 8px 16px !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
-        transition: all 0.2s ease-in-out !important;
-    }}
-    div[data-testid="stButton"] button[kind="secondary"]:hover {{
-        background-color: rgba(255, 184, 28, 0.2) !important;
-        box-shadow: 0 0 12px rgba(255, 184, 28, 0.5) !important;
     }}
     div[data-testid="stButton"] button[kind="primary"] {{
         background-color: #FFB81C !important;
         border: 2px solid #FFB81C !important;
         border-radius: 10px !important;
         color: #041E42 !important;
-        -webkit-text-fill-color: #041E42 !important;
         font-weight: 800 !important;
         font-size: 0.95rem !important;
         padding: 8px 16px !important;
-        box-shadow: 0 4px 14px rgba(255, 184, 28, 0.45) !important;
     }}
 
     .filter-label {{
@@ -281,7 +233,6 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# Executive Header
 st.markdown(f"""
 <div class="header-container">
     <img src="{PREDS_LOGO_URL}" class="header-logo" alt="Nashville Predators">
@@ -313,6 +264,34 @@ with p_cols[1]:
 current_page = st.session_state["current_page"]
 
 # ==============================================================================
+# DYNAMIC HEADSHOT RESOLVER
+# ==============================================================================
+@st.cache_data(ttl=86400)
+def resolve_player_headshot(player_name, fallback_id=None):
+    """Dynamically resolves headshot URLs directly from the official NHL Player Landing API to prevent cross-player mismatch."""
+    try:
+        search_query = player_name.replace(" ", "%20")
+        url = f"https://search.d3.nhle.com/api/v1/search/player?culture=en-us&limit=3&q={search_query}"
+        res = requests.get(url, timeout=4)
+        if res.status_code == 200:
+            hits = res.json()
+            if hits:
+                p_id = hits[0].get("playerId")
+                if p_id:
+                    # Landing endpoint contains the exact official active headshot
+                    landing_res = requests.get(f"https://api-web.nhle.com/v1/player/{p_id}/landing", timeout=4)
+                    if landing_res.status_code == 200:
+                        headshot = landing_res.json().get("headshot")
+                        if headshot:
+                            return headshot
+                    return f"https://assets.nhle.com/mugs/nhl/latest/{p_id}.png"
+    except Exception:
+        pass
+    if fallback_id:
+        return f"https://assets.nhle.com/mugs/nhl/latest/{fallback_id}.png"
+    return PREDS_LOGO_URL
+
+# ==============================================================================
 # PAGE 1: 26/27 LINE COMBINATIONS (EA SPORTS NHL STYLE)
 # ==============================================================================
 if current_page == "Line Combinations":
@@ -325,53 +304,58 @@ if current_page == "Line Combinations":
         "to freely execute weak-side pinches below the faceoff dots."
     )
 
-    def render_nhl_player(col, num, name, pos, role_tag, player_id):
-        img_url = f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png"
+    def render_nhl_player(col, num, name, pos, role_tag, fallback_id):
+        headshot_url = resolve_player_headshot(name, fallback_id)
         col.markdown(f"""
         <div class="nhl-player-card">
-            <img class="nhl-mug" src="{img_url}" alt="{name}" onerror="this.onerror=null; this.src='{PREDS_LOGO_URL}';">
+            <img class="nhl-mug" src="{headshot_url}" alt="{name}" onerror="this.onerror=null; this.src='{PREDS_LOGO_URL}';">
             <div class="nhl-num-pos">#{num} • {pos}</div>
             <div class="nhl-name">{name}</div>
             <div class="nhl-tag">{role_tag}</div>
         </div>
         """, unsafe_allow_html=True)
 
-    # Forward Lines (LW - C - RW Pattern)
+    # Forward Line 1
     st.markdown('<div class="line-header-banner">FORWARD LINE 1 | MATCHUP & HEAVY CYCLE</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     render_nhl_player(c1, 9, "Filip Forsberg", "LW", "Sniper / Cycle Touch", 8476887)
     render_nhl_player(c2, 90, "Ryan O'Reilly", "C", "200-Ft Anchor / Ozone Draws", 8475158)
     render_nhl_player(c3, 81, "Jonathan Marchessault", "RW", "Perimeter Release / Boards", 8476539)
 
+    # Forward Line 2
     st.markdown('<div class="line-header-banner">FORWARD LINE 2 | RUSH STRIKE & HIGH-SLOT FINISHING</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     render_nhl_player(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer", 8474564)
     render_nhl_player(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor", 8482142)
     render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484241)
 
+    # Forward Line 3
     st.markdown('<div class="line-header-banner">FORWARD LINE 3 | RELENTLESS F1/F2 FORECHECK & TURNOVER CREATION</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     render_nhl_player(c1, 79, "Ross Colton", "LW", "Puck-Hound / Physical Pressure", 8479525)
     render_nhl_player(c2, 18, "Jack Drury", "C", "Neutral-Zone Transition Detail", 8480835)
-    render_nhl_player(c3, 21, "Nils Höglander", "RW", "5v5 Motor / Cycle Finisher", 8481535)
+    render_nhl_player(c3, 21, "Nils Hoglander", "RW", "5v5 Motor / Cycle Finisher", 8481535)
 
+    # Forward Line 4
     st.markdown('<div class="line-header-banner">FORWARD LINE 4 | TRANSITION PACE & DEFENSIVE IQ</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     render_nhl_player(c1, 14, "Alexander Kerfoot", "LW", "Two-Way Versatility", 8477021)
     render_nhl_player(c2, 51, "Vitali Pinchuk", "C", "6'3\" Transition Frame", 8486189)
     render_nhl_player(c3, 89, "Ozzy Wiesblatt", "RW", "North-South Energy / Agitator", 8482103)
 
-    # Defensive Pairings (LD - RD Pattern)
+    # Defensive Pairing 1
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 1 | ELITE DUAL-THREAT TRANSITION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
     render_nhl_player(d1, 41, "Nicolas Hague", "LD", "6'6\" Physical Anchor / Box-Outs", 8480051)
-    render_nhl_player(d2, 59, "Roman Josi", "RD", "Weak-Side Activation / Rush Rover", 8474563)
+    render_nhl_player(d2, 58, "Roman Josi", "RD", "Weak-Side Activation / Rush Rover", 8474563)
 
+    # Defensive Pairing 2
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 2 | TWO-WAY RUSH SUPPRESSION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
     render_nhl_player(d1, 76, "Brady Skjei", "LD", "Exit Skating / Mobility", 8476869)
     render_nhl_player(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout", 8480249)
 
+    # Defensive Pairing 3
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 3 | MOBILITY & CREASE PROTECTION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
     render_nhl_player(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater", 8482482)
@@ -391,8 +375,6 @@ if current_page == "Line Combinations":
 
 st.sidebar.markdown("### Filter Settings")
 
-# 1. Season Selection
-st.sidebar.markdown('<div class="filter-label">Season</div>', unsafe_allow_html=True)
 season_map = {
     "26/27": "20262027",
     "25/26": "20252026",
@@ -412,7 +394,6 @@ for i, label in enumerate(["26/27", "25/26", "24/25", "23/24"]):
 
 selected_season = season_map[st.session_state["selected_season_label"]]
 
-# 2. Game Type Selection
 st.sidebar.markdown('<div class="filter-label">Game Type</div>', unsafe_allow_html=True)
 if "selected_game_type" not in st.session_state:
     st.session_state["selected_game_type"] = "Regular Season"
@@ -428,7 +409,6 @@ for i, gt in enumerate(["Regular Season", "Playoffs"]):
 game_type_label = st.session_state["selected_game_type"]
 game_type_code = "2" if game_type_label == "Regular Season" else "3"
 
-# 3. Position Group Selection
 st.sidebar.markdown('<div class="filter-label">Position Group</div>', unsafe_allow_html=True)
 if "selected_pos_group" not in st.session_state:
     st.session_state["selected_pos_group"] = "All Skaters"
@@ -457,22 +437,9 @@ BASE_URL = "https://api-web.nhle.com/v1"
 TEAM_TRICODE = "NSH"
 
 KNOWN_D_HANDEDNESS = {
-    8474563: "L",  # Roman Josi
-    8475172: "R",  # Luke Schenn
-    8475222: "L",  # Ryan McDonagh
-    8476869: "L",  # Brady Skjei
-    8478469: "L",  # Jeremy Lauzon
-    8479323: "R",  # Dante Fabbro
-    8479410: "R",  # Alexandre Carrier
-    8476885: "R",  # Tyson Barrie
-    8482079: "L",  # Marc Del Gaizo
-    8481541: "R",  # Spencer Stastney
-    8483488: "L",  # Tanner Molendyk
-    8484153: "R",  # Andrew Gibson
-    8480950: "R",  # Ilya Lyubushkin
-    8480051: "L",  # Nicolas Hague
-    8480249: "R",  # Nick Perbix
-    8482482: "L",  # Adam Wilsby
+    8474563: "L", 8475172: "R", 8475222: "L", 8476869: "L", 8478469: "L",
+    8479323: "R", 8479410: "R", 8476885: "R", 8482079: "L", 8481541: "R",
+    8483488: "L", 8484153: "R", 8480950: "R", 8480051: "L", 8480249: "R", 8482482: "L"
 }
 
 @st.cache_data(ttl=86400)
@@ -496,7 +463,6 @@ def load_roster_handedness(season):
 
 @st.cache_data(ttl=1800)
 def load_zone_faceoffs(season, game_type):
-    """Fetches O-Zone, N-Zone, and D-Zone faceoff percentages using Nashville franchiseId (34) and teamId (18)."""
     zone_dict = {}
     urls = [
         f"https://api.nhle.com/stats/rest/en/skater/faceoffpercentages?isAggregate=false&isGame=false&limit=100&sort=%5B%7B%22property%22:%22totalFaceoffs%22,%22direction%22:%22DESC%22%7D%5D&cayenneExp=seasonId={season}%20and%20gameTypeId={game_type}%20and%20franchiseId=34",
@@ -512,17 +478,12 @@ def load_zone_faceoffs(season, game_type):
                         p_id = row.get("playerId")
                         tot_fo = row.get("totalFaceoffs", 0)
                         if tot_fo and tot_fo > 0:
-                            fo_win_pct = row.get("faceoffWinPct")
-                            oz_pct = row.get("offensiveZoneFaceoffPct")
-                            nz_pct = row.get("neutralZoneFaceoffPct")
-                            dz_pct = row.get("defensiveZoneFaceoffPct")
-
                             zone_dict[p_id] = {
                                 "Total_FO": int(tot_fo),
-                                "FO%": round(float(fo_win_pct) * 100.0, 1) if fo_win_pct is not None else None,
-                                "OZ_FO%": round(float(oz_pct) * 100.0, 1) if oz_pct is not None else None,
-                                "NZ_FO%": round(float(nz_pct) * 100.0, 1) if nz_pct is not None else None,
-                                "DZ_FO%": round(float(dz_pct) * 100.0, 1) if dz_pct is not None else None,
+                                "FO%": round(float(row.get("faceoffWinPct")) * 100.0, 1) if row.get("faceoffWinPct") is not None else None,
+                                "OZ_FO%": round(float(row.get("offensiveZoneFaceoffPct")) * 100.0, 1) if row.get("offensiveZoneFaceoffPct") is not None else None,
+                                "NZ_FO%": round(float(row.get("neutralZoneFaceoffPct")) * 100.0, 1) if row.get("neutralZoneFaceoffPct") is not None else None,
+                                "DZ_FO%": round(float(row.get("defensiveZoneFaceoffPct")) * 100.0, 1) if row.get("defensiveZoneFaceoffPct") is not None else None,
                             }
                     if len(zone_dict) > 0:
                         break
@@ -660,7 +621,6 @@ if not df.empty:
     elif position_filter == "Defensemen":
         df = df[df["Pos"].isin(["D", "LD", "RD"])].reset_index(drop=True)
 
-# Spotlight Header
 if df.empty:
     st.info(f"No {game_type_label.lower()} data recorded for {st.session_state['selected_season_label']}.")
 else:
@@ -721,7 +681,6 @@ else:
     """
     st.markdown(spotlight_html, unsafe_allow_html=True)
 
-    # Roster Selector Grid
     st.markdown("#### Roster Selection")
     num_cols = 6
     for i in range(0, len(df), num_cols):
@@ -741,7 +700,6 @@ else:
 
 st.divider()
 
-# Tabbed Analytical Views
 st.subheader("Skater Performance")
 
 if not df.empty:
@@ -796,25 +754,21 @@ if not df.empty:
     }
 
     if active_view == "Offensive Impact":
-        st.markdown("**Ranked by Offensive Impact:**")
         cols = ["Photo", "Skater", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]
         off_view = qualified_df[cols].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
         st.dataframe(off_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Defensive Impact":
-        st.markdown("**Ranked by Defensive Impact:**")
         cols = ["Photo", "Skater", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG"]
         def_view = qualified_df[cols].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
         st.dataframe(def_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Special Teams Performance":
-        st.markdown("**Ranked by Special Teams Impact:**")
         cols = ["Photo", "Skater", "Pos", "GP", "PP_Score", "PK_Score", "PPG", "SHG", "PIM", "TOI/GP"]
         st_view = qualified_df[cols].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
         st.dataframe(st_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Faceoff Breakdown":
-        st.markdown("**Zonal Faceoff Performance (Offensive, Neutral, & Defensive Zones):**")
         fo_skaters = qualified_df[qualified_df["Total_FO"] > 0].copy()
         if fo_skaters.empty:
             st.info("No faceoffs recorded for skaters in this selection.")
@@ -824,7 +778,6 @@ if not df.empty:
             st.dataframe(fo_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Complete Skater Statistics":
-        st.markdown("**Complete Skater Statistics:**")
         cols = [
             "Photo", "Skater", "Pos", "GP", "Off_Score", "Def_Score", "PP_Score", "PK_Score",
             "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "SOG", "SH%", "FO%", "PIM", 
@@ -834,8 +787,6 @@ if not df.empty:
         st.dataframe(comp_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Limited Sample (< 5 GP)":
-        st.markdown("**Limited Sample Size Skaters (< 5 Games Played):**")
-        st.caption("Rates and composite impact models are unweighted due to low minute exposure.")
         if limited_df.empty:
             st.info("No skaters currently have fewer than 5 games played for this selection.")
         else:
