@@ -41,6 +41,47 @@ st.markdown("""
         max-width: 95% !important;
     }
 
+    /* ============================================================ */
+    /* RESTORED: SIDEBAR COLLAPSE ARROW BOX (NAVY + GOLD)           */
+    /* ============================================================ */
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapseButton"] button {
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: flex !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"] button {
+        background-color: #061F47 !important;
+        border: 2px solid #FFB81C !important;
+        border-radius: 8px !important;
+        padding: 4px 8px !important;
+        box-shadow: 0 0 10px rgba(255, 184, 28, 0.4) !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"] button:hover {
+        background-color: #FFB81C !important;
+        box-shadow: 0 0 16px rgba(255, 184, 28, 0.7) !important;
+        transform: scale(1.05);
+    }
+
+    [data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="stSidebarCollapseButton"] svg * {
+        opacity: 1 !important;
+        visibility: visible !important;
+        fill: #FFB81C !important;
+        stroke: #FFB81C !important;
+        color: #FFB81C !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"] button:hover svg,
+    [data-testid="stSidebarCollapseButton"] button:hover svg * {
+        fill: #041E42 !important;
+        stroke: #041E42 !important;
+        color: #041E42 !important;
+    }
+
     /* Header Container */
     .header-container {
         display: flex;
@@ -300,14 +341,12 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
-        # Raw percentage decimals
         sh_pct = s.get("shootingPctg", 0.0)
         sh_pct = float(sh_pct) if sh_pct is not None else 0.0
 
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = float(fo_pct) if fo_pct is not None else 0.0
 
-        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
