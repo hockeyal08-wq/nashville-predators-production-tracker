@@ -354,16 +354,25 @@ def load_roster_handedness(season):
 def load_zone_faceoffs(season, game_type):
     """Fetches O-Zone, N-Zone, and D-Zone faceoff percentages directly from NHL REST reporting for all Nashville skaters."""
     zone_dict = {}
-    url = (
-        f"https://api.nhle.com/stats/rest/en/skater/faceoffpercentages"
-        f"?isAggregate=false&isGame=false&limit=100"
-        f"&sort=%5B%7B%22property%22:%22totalFaceoffs%22,%22direction%22:%22DESC%22%7D%5D"
-        f"&cayenneExp=seasonId={season}%20and%20gameTypeId={game_type}%20and%20teamTriCode=%27NSH%27"
-    )
-    try:
-        res = requests.get(url, timeout=6)
-        if res.status_code == 200:
-            data = res.json().get("data", [])
+    start = 0
+    page_size = 100
+
+    while True:
+        url = (
+            f"https://api.nhle.com/stats/rest/en/skater/faceoffpercentages"
+            f"?isAggregate=false&isGame=false&start={start}&limit={page_size}"
+            f"&sort=%5B%7B%22property%22:%22totalFaceoffs%22,%22direction%22:%22DESC%22%7D%5D"
+            f"&cayenneExp=seasonId={season}%20and%20gameTypeId={game_type}%20and%20teamTriCode=%27NSH%27"
+        )
+        try:
+            res = requests.get(url, timeout=6)
+            if res.status_code != 200:
+                break
+            payload = res.json()
+            data = payload.get("data", [])
+            if not data:
+                break
+
             for row in data:
                 p_id = row.get("playerId")
                 tot_fo = row.get("totalFaceoffs", 0)
@@ -380,8 +389,13 @@ def load_zone_faceoffs(season, game_type):
                         "NZ_FO%": round(float(nz_pct) * 100.0, 1) if nz_pct is not None else None,
                         "DZ_FO%": round(float(dz_pct) * 100.0, 1) if dz_pct is not None else None,
                     }
-    except Exception:
-        pass
+
+            if len(data) < page_size:
+                break
+            start += page_size
+        except Exception:
+            break
+
     return zone_dict
 
 @st.cache_data(ttl=900)
