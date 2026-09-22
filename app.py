@@ -140,15 +140,6 @@ st.markdown("""
         border-radius: 8px !important;
     }
 
-    /* Benchmark Caption Styling */
-    .benchmark-caption {
-        color: #FFB81C !important;
-        font-size: 0.95rem !important;
-        font-weight: 700 !important;
-        margin-bottom: 14px !important;
-        letter-spacing: 0.3px;
-    }
-
     h1, h2, h3, h4 {
         color: #FFFFFF !important;
     }
@@ -186,6 +177,14 @@ st.markdown("""
         overflow: hidden;
         border: 1px solid rgba(255, 184, 28, 0.3);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+    }
+
+    /* Sample size disclaimer pill */
+    .sample-disclaimer {
+        color: #FFB81C;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 12px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -252,14 +251,12 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
-        # Raw percentage decimals (0.0 to 1.0)
         sh_pct = s.get("shootingPctg", 0.0)
         sh_pct = float(sh_pct) if sh_pct is not None else 0.0
 
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = float(fo_pct) if fo_pct is not None else 0.0
 
-        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
@@ -406,6 +403,10 @@ st.divider()
 st.subheader("Roster Performance & Advanced Indices")
 
 if not df.empty:
+    # 5+ GP threshold partitioning
+    qualified_df = df[df["GP"] >= 5].reset_index(drop=True)
+    limited_df = df[df["GP"] < 5].reset_index(drop=True)
+
     if "active_tab_view" not in st.session_state:
         st.session_state["active_tab_view"] = "Offensive Impact"
 
@@ -413,10 +414,11 @@ if not df.empty:
         "Offensive Impact", 
         "Defensive Impact", 
         "Special Teams Performance", 
-        "Complete Skater Statistics"
+        "Complete Skater Statistics",
+        "Limited Sample (< 5 GP)"
     ]
 
-    nav_cols = st.columns(4)
+    nav_cols = st.columns(5)
     for idx, tab_name in enumerate(tabs):
         with nav_cols[idx]:
             btn_type = "primary" if st.session_state["active_tab_view"] == tab_name else "secondary"
@@ -426,7 +428,7 @@ if not df.empty:
 
     active_view = st.session_state["active_tab_view"]
 
-    # Shared Column Configurations for Executive Display
+    # Shared Column Configurations
     base_column_config = {
         "Photo": st.column_config.ImageColumn("", width="small"),
         "Skater": st.column_config.TextColumn("Player", width="medium"),
@@ -451,19 +453,19 @@ if not df.empty:
     if active_view == "Offensive Impact":
         st.markdown("**Ranked by Offensive Impact:**")
         cols = ["Photo", "Skater", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]
-        off_view = df[cols].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
+        off_view = qualified_df[cols].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
         st.dataframe(off_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Defensive Impact":
         st.markdown("**Ranked by Defensive Impact:**")
         cols = ["Photo", "Skater", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG", "FO%"]
-        def_view = df[cols].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
+        def_view = qualified_df[cols].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
         st.dataframe(def_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Special Teams Performance":
         st.markdown("**Ranked by Special Teams Impact:**")
         cols = ["Photo", "Skater", "Pos", "GP", "PP_Score", "PK_Score", "PPG", "SHG", "PIM", "TOI/GP"]
-        st_view = df[cols].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
+        st_view = qualified_df[cols].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
         st.dataframe(st_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Complete Skater Statistics":
@@ -473,5 +475,18 @@ if not df.empty:
             "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "SOG", "SH%", "PIM", 
             "PPG", "SHG", "GWG", "FO%"
         ]
-        comp_view = df[cols].sort_values(by="PTS", ascending=False).reset_index(drop=True)
+        comp_view = qualified_df[cols].sort_values(by="PTS", ascending=False).reset_index(drop=True)
         st.dataframe(comp_view, column_config=base_column_config, use_container_width=True, hide_index=True)
+
+    elif active_view == "Limited Sample (< 5 GP)":
+        st.markdown("**Limited Sample Size Skaters (< 5 Games Played):**")
+        st.caption("Rates and composite impact models are unweighted due to low minute exposure.")
+        if limited_df.empty:
+            st.info("No skaters currently have fewer than 5 games played for this selection.")
+        else:
+            cols = [
+                "Photo", "Skater", "Pos", "GP", "PTS", "G", "A", "+/-", 
+                "TOI/GP", "SOG", "SH%", "PIM", "P/60", "Off_Score", "Def_Score"
+            ]
+            lim_view = limited_df[cols].sort_values(by="GP", ascending=False).reset_index(drop=True)
+            st.dataframe(lim_view, column_config=base_column_config, use_container_width=True, hide_index=True)
