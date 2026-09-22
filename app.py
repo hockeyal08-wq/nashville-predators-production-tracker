@@ -41,9 +41,7 @@ st.markdown("""
         max-width: 95% !important;
     }
 
-    /* ============================================================ */
-    /* SIDEBAR COLLAPSE ARROW BOX (NAVY + GOLD)                     */
-    /* ============================================================ */
+    /* Sidebar Collapse Button Styling */
     [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarCollapseButton"] button {
         opacity: 1 !important;
@@ -315,6 +313,22 @@ position_filter = st.session_state["selected_pos_group"]
 BASE_URL = "https://api-web.nhle.com/v1"
 TEAM_TRICODE = "NSH"
 
+@st.cache_data(ttl=86400)
+def load_roster_handedness(season):
+    """Fetches shootsCatches (L/R) directly from the official team roster endpoint."""
+    url = f"{BASE_URL}/roster/{TEAM_TRICODE}/{season}"
+    res = requests.get(url)
+    shoots_map = {}
+    if res.status_code == 200:
+        data = res.json()
+        for group in ["defensemen", "forwards"]:
+            for player in data.get(group, []):
+                p_id = player.get("id")
+                shoots = player.get("shootsCatches")
+                if p_id and shoots:
+                    shoots_map[p_id] = shoots
+    return shoots_map
+
 @st.cache_data(ttl=900)
 def load_club_skater_stats(season, game_type):
     url = f"{BASE_URL}/club-stats/{TEAM_TRICODE}/{season}/{game_type}"
@@ -326,6 +340,8 @@ def load_club_skater_stats(season, game_type):
     skaters = data.get("skaters", [])
     if not skaters:
         return pd.DataFrame()
+
+    shoots_map = load_roster_handedness(season)
 
     rows = []
     for s in skaters:
@@ -341,14 +357,12 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
-        # Raw percentage decimals
         sh_pct = s.get("shootingPctg", 0.0)
         sh_pct = float(sh_pct) if sh_pct is not None else 0.0
 
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = float(fo_pct) if fo_pct is not None else 0.0
 
-        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
@@ -370,10 +384,11 @@ def load_club_skater_stats(season, game_type):
         pp_score = round(((pp_goals / gp) * 3.0) + (sog60 * 0.1), 4) if gp > 0 else 0.0
         pk_score = round((toi_gp_min * 0.05) + ((sh_goals / gp) * 4.0) - (pim60 * 0.1), 4) if gp > 0 else 0.0
 
+        player_id = s.get("playerId")
         raw_pos = s.get("positionCode", "N/A")
-        shoots = s.get("shootsCatches", "")
+        shoots = shoots_map.get(player_id, "")
 
-        # Granular positional mapping
+        # Accurate positional mapping (LW, RW, LD, RD, C)
         if raw_pos == "L":
             pos_code = "LW"
         elif raw_pos == "R":
@@ -383,7 +398,6 @@ def load_club_skater_stats(season, game_type):
         else:
             pos_code = raw_pos
 
-        player_id = s.get("playerId")
         first_name = s.get("firstName", {}).get("default", "")
         last_name = s.get("lastName", {}).get("default", "")
 
