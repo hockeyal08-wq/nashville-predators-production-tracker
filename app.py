@@ -13,16 +13,19 @@ st.set_page_config(
 # Deep franchise theme injection
 st.markdown(f"""
 <style>
+    /* Full Page Canvas, Main Body & App View Container */
     html, body, [data-testid="stAppViewContainer"], .stApp {{
         background-color: #041E42 !important;
         color: #F8FAFC !important;
         font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif !important;
     }}
     
+    /* Top Toolbar / Header */
     [data-testid="stHeader"] {{
         background-color: rgba(4, 30, 66, 0.95) !important;
     }}
 
+    /* Left Sidebar Theming */
     [data-testid="stSidebar"], [data-testid="stSidebarContent"] {{
         background-color: #03142D !important;
         border-right: 1.5px solid rgba(255, 184, 28, 0.3) !important;
@@ -31,10 +34,19 @@ st.markdown(f"""
         color: #F8FAFC !important;
     }}
 
+    /* Page Padding & Spacing */
     .block-container {{
         padding-top: 1.5rem !important;
         padding-bottom: 2rem !important;
         max-width: 95% !important;
+    }}
+
+    /* Sidebar Collapse Button Styling */
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapseButton"] button {{
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: flex !important;
     }}
 
     [data-testid="stSidebarCollapseButton"] button {{
@@ -43,8 +55,32 @@ st.markdown(f"""
         border-radius: 8px !important;
         padding: 4px 8px !important;
         box-shadow: 0 0 10px rgba(255, 184, 28, 0.4) !important;
+        transition: all 0.2s ease-in-out !important;
     }}
 
+    [data-testid="stSidebarCollapseButton"] button:hover {{
+        background-color: #FFB81C !important;
+        box-shadow: 0 0 16px rgba(255, 184, 28, 0.7) !important;
+        transform: scale(1.05);
+    }}
+
+    [data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="stSidebarCollapseButton"] svg * {{
+        opacity: 1 !important;
+        visibility: visible !important;
+        fill: #FFB81C !important;
+        stroke: #FFB81C !important;
+        color: #FFB81C !important;
+    }}
+
+    [data-testid="stSidebarCollapseButton"] button:hover svg,
+    [data-testid="stSidebarCollapseButton"] button:hover svg * {{
+        fill: #041E42 !important;
+        stroke: #041E42 !important;
+        color: #041E42 !important;
+    }}
+
+    /* Header Container */
     .header-container {{
         display: flex;
         align-items: center;
@@ -73,6 +109,7 @@ st.markdown(f"""
         letter-spacing: 0.3px;
     }}
 
+    /* Executive Spotlight Showcase Card */
     .spotlight-card {{
         background: linear-gradient(135deg, #092652 0%, #03142D 100%);
         border: 2px solid #FFB81C;
@@ -136,6 +173,7 @@ st.markdown(f"""
         font-weight: 600;
     }}
 
+    /* EA NHL Style Line Card */
     .nhl-player-card {{
         background: linear-gradient(180deg, #092652 0%, #03142D 100%);
         border: 1.5px solid rgba(255, 184, 28, 0.4);
@@ -195,23 +233,33 @@ st.markdown(f"""
         border-radius: 4px;
     }}
 
+    /* Predators Gold Rounded Buttons */
     div[data-testid="stButton"] button[kind="secondary"] {{
         background-color: #061F47 !important;
         border: 2px solid #FFB81C !important;
         border-radius: 10px !important;
         color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
         font-weight: 700 !important;
         font-size: 0.95rem !important;
         padding: 8px 16px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+        transition: all 0.2s ease-in-out !important;
+    }}
+    div[data-testid="stButton"] button[kind="secondary"]:hover {{
+        background-color: rgba(255, 184, 28, 0.2) !important;
+        box-shadow: 0 0 12px rgba(255, 184, 28, 0.5) !important;
     }}
     div[data-testid="stButton"] button[kind="primary"] {{
         background-color: #FFB81C !important;
         border: 2px solid #FFB81C !important;
         border-radius: 10px !important;
         color: #041E42 !important;
+        -webkit-text-fill-color: #041E42 !important;
         font-weight: 800 !important;
         font-size: 0.95rem !important;
         padding: 8px 16px !important;
+        box-shadow: 0 4px 14px rgba(255, 184, 28, 0.45) !important;
     }}
 
     .filter-label {{
@@ -233,6 +281,7 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
+# Executive Header
 st.markdown(f"""
 <div class="header-container">
     <img src="{PREDS_LOGO_URL}" class="header-logo" alt="Nashville Predators">
@@ -264,34 +313,6 @@ with p_cols[1]:
 current_page = st.session_state["current_page"]
 
 # ==============================================================================
-# DYNAMIC HEADSHOT RESOLVER
-# ==============================================================================
-@st.cache_data(ttl=86400)
-def resolve_player_headshot(player_name, fallback_id=None):
-    """Dynamically resolves headshot URLs directly from the official NHL Player Landing API to prevent cross-player mismatch."""
-    try:
-        search_query = player_name.replace(" ", "%20")
-        url = f"https://search.d3.nhle.com/api/v1/search/player?culture=en-us&limit=3&q={search_query}"
-        res = requests.get(url, timeout=4)
-        if res.status_code == 200:
-            hits = res.json()
-            if hits:
-                p_id = hits[0].get("playerId")
-                if p_id:
-                    # Landing endpoint contains the exact official active headshot
-                    landing_res = requests.get(f"https://api-web.nhle.com/v1/player/{p_id}/landing", timeout=4)
-                    if landing_res.status_code == 200:
-                        headshot = landing_res.json().get("headshot")
-                        if headshot:
-                            return headshot
-                    return f"https://assets.nhle.com/mugs/nhl/latest/{p_id}.png"
-    except Exception:
-        pass
-    if fallback_id:
-        return f"https://assets.nhle.com/mugs/nhl/latest/{fallback_id}.png"
-    return PREDS_LOGO_URL
-
-# ==============================================================================
 # PAGE 1: 26/27 LINE COMBINATIONS (EA SPORTS NHL STYLE)
 # ==============================================================================
 if current_page == "Line Combinations":
@@ -304,11 +325,43 @@ if current_page == "Line Combinations":
         "to freely execute weak-side pinches below the faceoff dots."
     )
 
-    def render_nhl_player(col, num, name, pos, role_tag, fallback_id):
-        headshot_url = resolve_player_headshot(name, fallback_id)
+    # Dedicated direct photo URLs guaranteeing verified headshots across all 20 roster players
+    ROSTER_HEADSHOTS = {
+        # Forward Line 1
+        "Filip Forsberg": "https://assets.nhle.com/mugs/nhl/latest/8476887.png",
+        "Ryan O'Reilly": "https://assets.nhle.com/mugs/nhl/latest/8475158.png",
+        "Jonathan Marchessault": "https://assets.nhle.com/mugs/nhl/latest/8476539.png",
+        # Forward Line 2
+        "Steven Stamkos": "https://assets.nhle.com/mugs/nhl/latest/8474564.png",
+        "Mavrik Bourque": "https://assets.nhle.com/mugs/nhl/latest/8482142.png",
+        "Matthew Wood": "https://assets.nhle.com/mugs/nhl/latest/8484152.png",
+        # Forward Line 3
+        "Ross Colton": "https://assets.nhle.com/mugs/nhl/latest/8479525.png",
+        "Jack Drury": "https://assets.nhle.com/mugs/nhl/latest/8480835.png",
+        "Nils Höglander": "https://assets.nhle.com/mugs/nhl/latest/8481535.png",
+        # Forward Line 4
+        "Alexander Kerfoot": "https://assets.nhle.com/mugs/nhl/latest/8477021.png",
+        "Vitali Pinchuk": "https://assets.nhle.com/mugs/nhl/latest/8482670.png",
+        "Ozzy Wiesblatt": "https://assets.nhle.com/mugs/nhl/latest/8482103.png",
+        # Defense Pairing 1
+        "Nicolas Hague": "https://assets.nhle.com/mugs/nhl/latest/8480051.png",
+        "Roman Josi": "https://assets.nhle.com/mugs/nhl/latest/8474563.png",
+        # Defense Pairing 2
+        "Brady Skjei": "https://assets.nhle.com/mugs/nhl/latest/8476869.png",
+        "Nick Perbix": "https://assets.nhle.com/mugs/nhl/latest/8480249.png",
+        # Defense Pairing 3
+        "Adam Wilsby": "https://assets.nhle.com/mugs/nhl/latest/8482482.png",
+        "Ilya Lyubushkin": "https://assets.nhle.com/mugs/nhl/latest/8480950.png",
+        # Goaltending Tandem
+        "Juuse Saros": "https://assets.nhle.com/mugs/nhl/latest/8477424.png",
+        "Justus Annunen": "https://assets.nhle.com/mugs/nhl/latest/8481020.png",
+    }
+
+    def render_nhl_player(col, num, name, pos, role_tag):
+        img_url = ROSTER_HEADSHOTS.get(name, PREDS_LOGO_URL)
         col.markdown(f"""
         <div class="nhl-player-card">
-            <img class="nhl-mug" src="{headshot_url}" alt="{name}" onerror="this.onerror=null; this.src='{PREDS_LOGO_URL}';">
+            <img class="nhl-mug" src="{img_url}" alt="{name}" onerror="this.onerror=null; this.src='{PREDS_LOGO_URL}';">
             <div class="nhl-num-pos">#{num} • {pos}</div>
             <div class="nhl-name">{name}</div>
             <div class="nhl-tag">{role_tag}</div>
@@ -318,54 +371,54 @@ if current_page == "Line Combinations":
     # Forward Line 1
     st.markdown('<div class="line-header-banner">FORWARD LINE 1 | MATCHUP & HEAVY CYCLE</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 9, "Filip Forsberg", "LW", "Sniper / Cycle Touch", 8476887)
-    render_nhl_player(c2, 90, "Ryan O'Reilly", "C", "200-Ft Anchor / Ozone Draws", 8475158)
-    render_nhl_player(c3, 81, "Jonathan Marchessault", "RW", "Perimeter Release / Boards", 8476539)
+    render_nhl_player(c1, 9, "Filip Forsberg", "LW", "Sniper / Cycle Touch")
+    render_nhl_player(c2, 90, "Ryan O'Reilly", "C", "200-Ft Anchor / Ozone Draws")
+    render_nhl_player(c3, 81, "Jonathan Marchessault", "RW", "Perimeter Release / Boards")
 
     # Forward Line 2
     st.markdown('<div class="line-header-banner">FORWARD LINE 2 | RUSH STRIKE & HIGH-SLOT FINISHING</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer", 8474564)
-    render_nhl_player(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor", 8482142)
-    render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484241)
+    render_nhl_player(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer")
+    render_nhl_player(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor")
+    render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front")
 
     # Forward Line 3
     st.markdown('<div class="line-header-banner">FORWARD LINE 3 | RELENTLESS F1/F2 FORECHECK & TURNOVER CREATION</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 79, "Ross Colton", "LW", "Puck-Hound / Physical Pressure", 8479525)
-    render_nhl_player(c2, 18, "Jack Drury", "C", "Neutral-Zone Transition Detail", 8480835)
-    render_nhl_player(c3, 21, "Nils Hoglander", "RW", "5v5 Motor / Cycle Finisher", 8481535)
+    render_nhl_player(c1, 79, "Ross Colton", "LW", "Puck-Hound / Physical Pressure")
+    render_nhl_player(c2, 18, "Jack Drury", "C", "Neutral-Zone Transition Detail")
+    render_nhl_player(c3, 21, "Nils Höglander", "RW", "5v5 Motor / Cycle Finisher")
 
     # Forward Line 4
     st.markdown('<div class="line-header-banner">FORWARD LINE 4 | TRANSITION PACE & DEFENSIVE IQ</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 14, "Alexander Kerfoot", "LW", "Two-Way Versatility", 8477021)
-    render_nhl_player(c2, 51, "Vitali Pinchuk", "C", "6'3\" Transition Frame", 8486189)
-    render_nhl_player(c3, 89, "Ozzy Wiesblatt", "RW", "North-South Energy / Agitator", 8482103)
+    render_nhl_player(c1, 14, "Alexander Kerfoot", "LW", "Two-Way Versatility")
+    render_nhl_player(c2, 51, "Vitali Pinchuk", "C", "6'3\" Transition Frame")
+    render_nhl_player(c3, 89, "Ozzy Wiesblatt", "RW", "North-South Energy / Agitator")
 
     # Defensive Pairing 1
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 1 | ELITE DUAL-THREAT TRANSITION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 41, "Nicolas Hague", "LD", "6'6\" Physical Anchor / Box-Outs", 8480051)
-    render_nhl_player(d2, 58, "Roman Josi", "RD", "Weak-Side Activation / Rush Rover", 8474563)
+    render_nhl_player(d1, 41, "Nicolas Hague", "LD", "6'6\" Physical Anchor / Box-Outs")
+    render_nhl_player(d2, 58, "Roman Josi", "RD", "Weak-Side Activation / Rush Rover")
 
     # Defensive Pairing 2
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 2 | TWO-WAY RUSH SUPPRESSION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 76, "Brady Skjei", "LD", "Exit Skating / Mobility", 8476869)
-    render_nhl_player(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout", 8480249)
+    render_nhl_player(d1, 76, "Brady Skjei", "LD", "Exit Skating / Mobility")
+    render_nhl_player(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout")
 
     # Defensive Pairing 3
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 3 | MOBILITY & CREASE PROTECTION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater", 8482482)
-    render_nhl_player(d2, 46, "Ilya Lyubushkin", "RD", "Physical Net-Front Suppression", 8480950)
+    render_nhl_player(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater")
+    render_nhl_player(d2, 46, "Ilya Lyubushkin", "RD", "Physical Net-Front Suppression")
 
-    # Goaltending Tandem
+    # Goaltending Crease
     st.markdown('<div class="line-header-banner">GOALTENDING TANDEM</div>', unsafe_allow_html=True)
     g1, g2 = st.columns(2)
-    render_nhl_player(g1, 74, "Juuse Saros", "G", "Starting Goaltender (Franchise Anchor)", 8477424)
-    render_nhl_player(g2, 29, "Justus Annunen", "G", "Backup Goaltender (High-End Tandem)", 8481020)
+    render_nhl_player(g1, 74, "Juuse Saros", "G", "Starting Goaltender (Franchise Anchor)")
+    render_nhl_player(g2, 29, "Justus Annunen", "G", "Backup Goaltender (High-End Tandem)")
 
     st.stop()
 
@@ -375,6 +428,7 @@ if current_page == "Line Combinations":
 
 st.sidebar.markdown("### Filter Settings")
 
+# 1. Season Selection
 season_map = {
     "26/27": "20262027",
     "25/26": "20252026",
@@ -394,6 +448,7 @@ for i, label in enumerate(["26/27", "25/26", "24/25", "23/24"]):
 
 selected_season = season_map[st.session_state["selected_season_label"]]
 
+# 2. Game Type Selection
 st.sidebar.markdown('<div class="filter-label">Game Type</div>', unsafe_allow_html=True)
 if "selected_game_type" not in st.session_state:
     st.session_state["selected_game_type"] = "Regular Season"
@@ -409,6 +464,7 @@ for i, gt in enumerate(["Regular Season", "Playoffs"]):
 game_type_label = st.session_state["selected_game_type"]
 game_type_code = "2" if game_type_label == "Regular Season" else "3"
 
+# 3. Position Group Selection
 st.sidebar.markdown('<div class="filter-label">Position Group</div>', unsafe_allow_html=True)
 if "selected_pos_group" not in st.session_state:
     st.session_state["selected_pos_group"] = "All Skaters"
