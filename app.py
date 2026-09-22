@@ -173,15 +173,64 @@ st.markdown("""
         font-weight: 600;
     }
 
-    /* Roster Grid Container Boxes */
-    [data-testid="stVerticalBlockBorderWrapper"] {
-        border-color: rgba(255, 184, 28, 0.3) !important;
-        background-color: #061A3B !important;
-        border-radius: 8px !important;
+    /* EA NHL Style Line Card */
+    .nhl-player-card {
+        background: linear-gradient(180deg, #092652 0%, #03142D 100%);
+        border: 1.5px solid rgba(255, 184, 28, 0.4);
+        border-radius: 10px;
+        padding: 12px 14px;
+        text-align: center;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+        transition: transform 0.2s ease, border-color 0.2s ease;
+        margin-bottom: 12px;
+    }
+    .nhl-player-card:hover {
+        transform: translateY(-2px);
+        border-color: #FFB81C;
+        box-shadow: 0 6px 18px rgba(255, 184, 28, 0.35);
+    }
+    .nhl-mug {
+        width: 82px;
+        height: 82px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #FFB81C;
+        margin: 0 auto 8px auto;
+        display: block;
+        background-color: #04142B;
+    }
+    .nhl-num-pos {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #FFB81C;
+        letter-spacing: 0.5px;
+    }
+    .nhl-name {
+        font-size: 1.02rem;
+        font-weight: 800;
+        color: #FFFFFF;
+        margin: 2px 0 4px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .nhl-tag {
+        font-size: 0.72rem;
+        color: #94A3B8;
+        font-weight: 600;
     }
 
-    h1, h2, h3, h4 {
-        color: #FFFFFF !important;
+    .line-header-banner {
+        background-color: #061F47;
+        border-left: 4px solid #FFB81C;
+        padding: 8px 14px;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #FFFFFF;
+        margin-top: 14px;
+        margin-bottom: 10px;
+        letter-spacing: 0.3px;
+        border-radius: 4px;
     }
 
     /* Predators Gold Rounded Buttons */
@@ -213,7 +262,6 @@ st.markdown("""
         box-shadow: 0 4px 14px rgba(255, 184, 28, 0.45) !important;
     }
 
-    /* Sidebar Label Styling */
     .filter-label {
         font-size: 0.92rem;
         font-weight: 700;
@@ -224,7 +272,6 @@ st.markdown("""
         letter-spacing: 0.5px;
     }
     
-    /* Sleek Dataframe Container Styling */
     [data-testid="stDataFrame"] {
         border-radius: 12px;
         overflow: hidden;
@@ -234,7 +281,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Executive Header with Official Franchise Vector Logo
+# Executive Header
 st.markdown(f"""
 <div class="header-container">
     <img src="{PREDS_LOGO_URL}" class="header-logo" alt="Nashville Predators">
@@ -244,6 +291,103 @@ st.markdown(f"""
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+# --- Top Navigation in Sidebar ---
+st.sidebar.markdown("### Navigation Mode")
+if "current_page" not in st.session_state:
+    st.session_state["current_page"] = "Skater Analytics"
+
+p_cols = st.sidebar.columns(2)
+with p_cols[0]:
+    btn_p1 = "primary" if st.session_state["current_page"] == "Skater Analytics" else "secondary"
+    if st.button("Skater Hub", key="btn_nav_skaters", type=btn_p1, use_container_width=True):
+        st.session_state["current_page"] = "Skater Analytics"
+        st.rerun()
+
+with p_cols[1]:
+    btn_p2 = "primary" if st.session_state["current_page"] == "Line Combinations" else "secondary"
+    if st.button("26/27 Lines", key="btn_nav_lines", type=btn_p2, use_container_width=True):
+        st.session_state["current_page"] = "Line Combinations"
+        st.rerun()
+
+current_page = st.session_state["current_page"]
+
+# ==============================================================================
+# PAGE 1: 26/27 LINE COMBINATIONS (EA SPORTS NHL STYLE)
+# ==============================================================================
+if current_page == "Line Combinations":
+    st.subheader("26/27 Projected Line Combinations")
+    st.caption("Tactical Alignment: Andrew Brunette 1-2-2 High-Pace Forecheck & Weak-Side D-Activation")
+
+    st.info(
+        "**System Alignment Overview:** The 26/27 lineup significantly improves neutral-zone rush speed and forecheck pressure "
+        "with additions like Mavrik Bourque, Nils Höglander, and Ross Colton[cite: 3]. Nicolas Hague on D1 gives Roman Josi an anchor "
+        "to freely execute weak-side pinches below the faceoff dots[cite: 3]."
+    )
+
+    def render_nhl_player(col, num, name, pos, role_tag, player_id):
+        img_url = f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png"
+        col.markdown(f"""
+        <div class="nhl-player-card">
+            <img class="nhl-mug" src="{img_url}" alt="{name}" onerror="this.src='https://assets.nhle.com/mugs/nhl/default-skater.png';">
+            <div class="nhl-num-pos">#{num} • {pos}</div>
+            <div class="nhl-name">{name}</div>
+            <div class="nhl-tag">{role_tag}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Forward Lines
+    st.markdown('<div class="line-header-banner">FORWARD LINE 1 | MATCHUP & HEAVY CYCLE</div>', unsafe_allow_html=True)
+    c1, c2, c3 = st.columns(3)
+    render_nhl_player(c1, 9, "Filip Forsberg", "LW", "Sniper / Cycle Touch", 8476887) #[cite: 3]
+    render_nhl_player(c2, 90, "Ryan O'Reilly", "C", "200-Ft Anchor / Ozone Draws", 8475158) #[cite: 3]
+    render_nhl_player(c3, 81, "Jonathan Marchessault", "RW", "Perimeter Release / Boards", 8476539) #[cite: 3]
+
+    st.markdown('<div class="line-header-banner">FORWARD LINE 2 | RUSH STRIKE & HIGH-SLOT FINISHING</div>', unsafe_allow_html=True)
+    c1, c2, c3 = st.columns(3)
+    render_nhl_player(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer", 8474564) #[cite: 3]
+    render_nhl_player(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor", 8482142) #[cite: 3]
+    render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484241) #[cite: 3]
+
+    st.markdown('<div class="line-header-banner">FORWARD LINE 3 | RELENTLESS F1/F2 FORECHECK & TURNOVER CREATION</div>', unsafe_allow_html=True)
+    c1, c2, c3 = st.columns(3)
+    render_nhl_player(c1, 79, "Ross Colton", "LW", "Puck-Hound / Physical Pressure", 8479525) #[cite: 3]
+    render_nhl_player(c2, 18, "Jack Drury", "C", "Neutral-Zone Transition Detail", 8480835) #[cite: 3]
+    render_nhl_player(c3, 21, "Nils Höglander", "RW", "5v5 Motor / Cycle Finisher", 8481535) #[cite: 3]
+
+    st.markdown('<div class="line-header-banner">FORWARD LINE 4 | TRANSITION PACE & DEFENSIVE IQ</div>', unsafe_allow_html=True)
+    c1, c2, c3 = st.columns(3)
+    render_nhl_player(c1, 14, "Alexander Kerfoot", "LW", "Two-Way Versatility", 8477021) #[cite: 3]
+    render_nhl_player(c2, 51, "Vitali Pinchuk", "C", "6'3\" Transition Frame", 8486189) #[cite: 3]
+    render_nhl_player(c3, 89, "Ozzy Wiesblatt", "RW", "North-South Energy / Agitator", 8482103) #[cite: 3]
+
+    # Defense Pairings
+    st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 1 | ELITE DUAL-THREAT TRANSITION</div>', unsafe_allow_html=True)
+    d1, d2 = st.columns(2)
+    render_nhl_player(d1, 41, "Nicolas Hague", "LD", "6'6\" Physical Anchor / Box-Outs", 8480838) #[cite: 3]
+    render_nhl_player(d2, 59, "Roman Josi", "RD", "Weak-Side Activation / Rush Rover", 8474563) #[cite: 3]
+
+    st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 2 | TWO-WAY RUSH SUPPRESSION</div>', unsafe_allow_html=True)
+    d1, d2 = st.columns(2)
+    render_nhl_player(d1, 76, "Brady Skjei", "LD", "Exit Skating / Mobility", 8477932) #[cite: 3]
+    render_nhl_player(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout", 8480249) #[cite: 3]
+
+    st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 3 | MOBILITY & CREASE PROTECTION</div>', unsafe_allow_html=True)
+    d1, d2 = st.columns(2)
+    render_nhl_player(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater", 8482482) #[cite: 3]
+    render_nhl_player(d2, 46, "Ilya Lyubushkin", "RD", "Physical Net-Front Suppression", 8477447) #[cite: 3]
+
+    # Goaltending Crease
+    st.markdown('<div class="line-header-banner">GOALTENDING TANDEM</div>', unsafe_allow_html=True)
+    g1, g2 = st.columns(2)
+    render_nhl_player(g1, 74, "Juuse Saros", "G", "Starting Goaltender (Franchise Anchor)", 8477424) #[cite: 3]
+    render_nhl_player(g2, 29, "Justus Annunen", "G", "Backup Goaltender (High-End Tandem)", 8481020) #[cite: 3]
+
+    st.stop()
+
+# ==============================================================================
+# PAGE 2: SKATER ANALYTICS & PERFORMANCE HUB
+# ==============================================================================
 
 # --- Sidebar Controls ---
 st.sidebar.markdown("### Filter Settings")
@@ -329,6 +473,8 @@ KNOWN_D_HANDEDNESS = {
     8484153: "R",  # Andrew Gibson
     8477447: "R",  # Ilya Lyubushkin
     8480838: "L",  # Nicolas Hague
+    8480249: "R",  # Nick Perbix
+    8482482: "L",  # Adam Wilsby
 }
 
 @st.cache_data(ttl=86400)
@@ -422,7 +568,6 @@ def load_club_skater_stats(season, game_type):
         raw_sh = s.get("shootingPctg") or s.get("shootingPct") or 0.0
         sh_pct = round(float(raw_sh) * 100.0, 1) if raw_sh is not None else 0.0
 
-        # Extract zone-specific faceoff metrics
         z_stats = zone_map.get(player_id, {})
         tot_fo = z_stats.get("Total_FO", 0)
         fo_pct = z_stats.get("FO%")
@@ -430,7 +575,6 @@ def load_club_skater_stats(season, game_type):
         nz_fo = z_stats.get("NZ_FO%")
         dz_fo = z_stats.get("DZ_FO%")
 
-        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
@@ -521,7 +665,7 @@ if not df.empty:
     elif position_filter == "Defensemen":
         df = df[df["Pos"].isin(["D", "LD", "RD"])].reset_index(drop=True)
 
-# --- Spotlight Header ---
+# Spotlight Header
 if df.empty:
     st.info(f"No {game_type_label.lower()} data recorded for {st.session_state['selected_season_label']}.")
 else:
@@ -582,7 +726,7 @@ else:
     """
     st.markdown(spotlight_html, unsafe_allow_html=True)
 
-    # --- Interactive Roster Selector Grid ---
+    # Roster Selector Grid
     st.markdown("#### Roster Selection")
     num_cols = 6
     for i in range(0, len(df), num_cols):
@@ -602,7 +746,7 @@ else:
 
 st.divider()
 
-# --- Tabbed Analytical Views with Professional Column Configurations ---
+# --- Tabbed Analytical Views ---
 st.subheader("Skater Performance")
 
 if not df.empty:
@@ -617,12 +761,11 @@ if not df.empty:
         "Defensive Impact", 
         "Special Teams Performance",
         "Faceoff Breakdown",
-        "Line Combinations",
         "Complete Skater Statistics",
         "Limited Sample (< 5 GP)"
     ]
 
-    nav_cols = st.columns(7)
+    nav_cols = st.columns(6)
     for idx, tab_name in enumerate(tabs):
         with nav_cols[idx]:
             btn_type = "primary" if st.session_state["active_tab_view"] == tab_name else "secondary"
@@ -684,54 +827,6 @@ if not df.empty:
             cols = ["Photo", "Skater", "Pos", "GP", "Total_FO", "FO%", "OZ_FO%", "NZ_FO%", "DZ_FO%"]
             fo_view = fo_skaters[cols].sort_values(by="Total_FO", ascending=False).reset_index(drop=True)
             st.dataframe(fo_view, column_config=base_column_config, use_container_width=True, hide_index=True)
-
-    elif active_view == "Line Combinations":
-        st.markdown("### 26/27 Projected Lineup & Deployment Analysis")
-        st.caption("Tactical Blueprint: Andrew Brunette High-Pace 1-2-2 Forecheck & Weak-Side D-Activation")
-        
-        st.info(
-            "**System Alignment Overview:** The 26/27 lineup significantly improves neutral-zone rush speed and forecheck pressure "
-            "with additions like Mavrik Bourque, Nils Höglander, and Ross Colton[cite: 3]. Nicolas Hague on D1 gives Roman Josi an anchor "
-            "to freely execute weak-side pinches below the faceoff dots[cite: 3]."
-        )
-        
-        col_fwds, col_def = st.columns(2)
-        
-        with col_fwds:
-            st.markdown("#### Forward Combinations")
-            st.markdown("""
-            * **Line 1**: **Filip Forsberg (9)** – **Ryan O'Reilly (90)** – **Jonathan Marchessault (81)**[cite: 3]
-              * *Role*: Primary Matchup, Heavy Cycle & Top Ozone Draws
-              * *Scheme Fit*: **High** | Elite low-cycle touch and board retrieval
-            * **Line 2**: **Steven Stamkos (91)** – **Mavrik Bourque (22)** – **Matthew Wood (71)**[cite: 3]
-              * *Role*: Rush Strike Unit & High-Slot Finishing
-              * *Scheme Fit*: **Very High** | Bourque's pace and distribution complement Stamkos' release
-            * **Line 3**: **Ross Colton (79)** – **Jack Drury (18)** – **Nils Höglander (21)**[cite: 3]
-              * *Role*: Relentless F1/F2 Forecheck & Transition Disruption
-              * *Scheme Fit*: **Elite** | High-motor puck pressure aligned with Brunette's 1-2-2 model
-            * **Line 4**: **Alexander Kerfoot (14)** – **Vitali Pinchuk (51)** – **Ozzy Wiesblatt (89)**[cite: 3]
-              * *Role*: Pace Depth, Transitional Speed & Defensive IQ
-              * *Scheme Fit*: **High** | Size and transition speed (Pinchuk) paired with Kerfoot's two-way awareness
-            """)
-            
-        with col_def:
-            st.markdown("#### Defensive Pairings & Goaltending")
-            st.markdown("""
-            * **Pair 1**: **Nicolas Hague (41)** – **Roman Josi (59)**[cite: 3]
-              * *Scheme Fit*: **Elite** | Hague's 6'6" frame and box-out presence give Josi full freedom to activate below the dots[cite: 3]
-            * **Pair 2**: **Brady Skjei (76)** – **Nick Perbix (48)**[cite: 3]
-              * *Scheme Fit*: **High** | Mobile two-way unit specializing in clean zone exits[cite: 3]
-            * **Pair 3**: **Adam Wilsby (83)** – **Ilya Lyubushkin (46)**[cite: 3]
-              * *Scheme Fit*: **Balanced** | Wilsby's mobility paired with Lyubushkin's crease-clearing physical edge[cite: 3]
-            * **Starter**: **Juuse Saros (74)**[cite: 3]
-            * **Backup**: **Justus Annunen (29)**[cite: 3]
-            """)
-            
-            st.markdown("#### Tactical Notes")
-            st.markdown("""
-            * **Weak-Side Pinches**: Having Hague and Perbix on the right side provides defensive coverage for Josi and Skjei[cite: 3].
-            * **Transition Pace**: Bourque, Höglander, and Colton provide north-south speed through the neutral zone[cite: 3].
-            """)
 
     elif active_view == "Complete Skater Statistics":
         st.markdown("**Complete Skater Statistics:**")
