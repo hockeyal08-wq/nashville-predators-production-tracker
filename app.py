@@ -348,7 +348,7 @@ if current_page == "Line Combinations":
     c1, c2, c3 = st.columns(3)
     render_nhl_player(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer", 8474564)
     render_nhl_player(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor", 8482142)
-    render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484241)
+    render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484152)
 
     # Forward Line 3
     st.markdown('<div class="line-header-banner">FORWARD LINE 3 | RELENTLESS F1/F2 FORECHECK & TURNOVER CREATION</div>', unsafe_allow_html=True)
@@ -800,25 +800,21 @@ if not df.empty:
     }
 
     if active_view == "Offensive Impact":
-        st.markdown("**Ranked by Offensive Impact:**")
         cols = ["Photo", "Skater", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]
         off_view = qualified_df[cols].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
         st.dataframe(off_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Defensive Impact":
-        st.markdown("**Ranked by Defensive Impact:**")
         cols = ["Photo", "Skater", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG"]
         def_view = qualified_df[cols].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
         st.dataframe(def_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Special Teams Performance":
-        st.markdown("**Ranked by Special Teams Impact:**")
         cols = ["Photo", "Skater", "Pos", "GP", "PP_Score", "PK_Score", "PPG", "SHG", "PIM", "TOI/GP"]
         st_view = qualified_df[cols].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
         st.dataframe(st_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Faceoff Breakdown":
-        st.markdown("**Zonal Faceoff Performance (Offensive, Neutral, & Defensive Zones):**")
         fo_skaters = qualified_df[qualified_df["Total_FO"] > 0].copy()
         if fo_skaters.empty:
             st.info("No faceoffs recorded for skaters in this selection.")
@@ -828,7 +824,6 @@ if not df.empty:
             st.dataframe(fo_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Complete Skater Statistics":
-        st.markdown("**Complete Skater Statistics:**")
         cols = [
             "Photo", "Skater", "Pos", "GP", "Off_Score", "Def_Score", "PP_Score", "PK_Score",
             "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "SOG", "SH%", "FO%", "PIM", 
@@ -838,8 +833,6 @@ if not df.empty:
         st.dataframe(comp_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
     elif active_view == "Limited Sample (< 5 GP)":
-        st.markdown("**Limited Sample Size Skaters (< 5 Games Played):**")
-        st.caption("Rates and composite impact models are unweighted due to low minute exposure.")
         if limited_df.empty:
             st.info("No skaters currently have fewer than 5 games played for this selection.")
         else:
