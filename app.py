@@ -293,7 +293,6 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
-        # Raw percentage decimals
         sh_pct = s.get("shootingPctg", 0.0)
         sh_pct = float(sh_pct) if sh_pct is not None else 0.0
 
@@ -447,7 +446,6 @@ st.divider()
 st.subheader("Roster Performance & Advanced Indices")
 
 if not df.empty:
-    # 5+ GP threshold partitioning
     qualified_df = df[df["GP"] >= 5].reset_index(drop=True)
     limited_df = df[df["GP"] < 5].reset_index(drop=True)
 
@@ -472,7 +470,6 @@ if not df.empty:
 
     active_view = st.session_state["active_tab_view"]
 
-    # Shared Column Configurations
     base_column_config = {
         "Photo": st.column_config.ImageColumn("", width="small"),
         "Skater": st.column_config.TextColumn("Player", width="medium"),
@@ -534,4 +531,3 @@ if not df.empty:
             ]
             lim_view = limited_df[cols].sort_values(by="GP", ascending=False).reset_index(drop=True)
             st.dataframe(lim_view, column_config=base_column_config, use_container_width=True, hide_index=True)
-Steps to Apply:
