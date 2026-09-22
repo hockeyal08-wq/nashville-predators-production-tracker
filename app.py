@@ -352,49 +352,40 @@ def load_roster_handedness(season):
 
 @st.cache_data(ttl=1800)
 def load_zone_faceoffs(season, game_type):
-    """Fetches O-Zone, N-Zone, and D-Zone faceoff percentages directly from NHL REST reporting for all Nashville skaters."""
+    """Fetches O-Zone, N-Zone, and D-Zone faceoff percentages using Nashville franchiseId (34) and teamId (18)."""
     zone_dict = {}
-    start = 0
-    page_size = 100
-
-    while True:
-        url = (
-            f"https://api.nhle.com/stats/rest/en/skater/faceoffpercentages"
-            f"?isAggregate=false&isGame=false&start={start}&limit={page_size}"
-            f"&sort=%5B%7B%22property%22:%22totalFaceoffs%22,%22direction%22:%22DESC%22%7D%5D"
-            f"&cayenneExp=seasonId={season}%20and%20gameTypeId={game_type}%20and%20teamTriCode=%27NSH%27"
-        )
+    
+    urls = [
+        f"https://api.nhle.com/stats/rest/en/skater/faceoffpercentages?isAggregate=false&isGame=false&limit=100&sort=%5B%7B%22property%22:%22totalFaceoffs%22,%22direction%22:%22DESC%22%7D%5D&cayenneExp=seasonId={season}%20and%20gameTypeId={game_type}%20and%20franchiseId=34",
+        f"https://api.nhle.com/stats/rest/en/skater/faceoffpercentages?isAggregate=false&isGame=false&limit=100&sort=%5B%7B%22property%22:%22totalFaceoffs%22,%22direction%22:%22DESC%22%7D%5D&cayenneExp=seasonId={season}%20and%20gameTypeId={game_type}%20and%20teamId=18",
+    ]
+    
+    for url in urls:
         try:
-            res = requests.get(url, timeout=6)
-            if res.status_code != 200:
-                break
-            payload = res.json()
-            data = payload.get("data", [])
-            if not data:
-                break
+            res = requests.get(url, timeout=5)
+            if res.status_code == 200:
+                data = res.json().get("data", [])
+                if data:
+                    for row in data:
+                        p_id = row.get("playerId")
+                        tot_fo = row.get("totalFaceoffs", 0)
+                        if tot_fo and tot_fo > 0:
+                            fo_win_pct = row.get("faceoffWinPct")
+                            oz_pct = row.get("offensiveZoneFaceoffPct")
+                            nz_pct = row.get("neutralZoneFaceoffPct")
+                            dz_pct = row.get("defensiveZoneFaceoffPct")
 
-            for row in data:
-                p_id = row.get("playerId")
-                tot_fo = row.get("totalFaceoffs", 0)
-                if tot_fo and tot_fo > 0:
-                    fo_win_pct = row.get("faceoffWinPct")
-                    oz_pct = row.get("offensiveZoneFaceoffPct")
-                    nz_pct = row.get("neutralZoneFaceoffPct")
-                    dz_pct = row.get("defensiveZoneFaceoffPct")
-
-                    zone_dict[p_id] = {
-                        "Total_FO": int(tot_fo),
-                        "FO%": round(float(fo_win_pct) * 100.0, 1) if fo_win_pct is not None else None,
-                        "OZ_FO%": round(float(oz_pct) * 100.0, 1) if oz_pct is not None else None,
-                        "NZ_FO%": round(float(nz_pct) * 100.0, 1) if nz_pct is not None else None,
-                        "DZ_FO%": round(float(dz_pct) * 100.0, 1) if dz_pct is not None else None,
-                    }
-
-            if len(data) < page_size:
-                break
-            start += page_size
+                            zone_dict[p_id] = {
+                                "Total_FO": int(tot_fo),
+                                "FO%": round(float(fo_win_pct) * 100.0, 1) if fo_win_pct is not None else None,
+                                "OZ_FO%": round(float(oz_pct) * 100.0, 1) if oz_pct is not None else None,
+                                "NZ_FO%": round(float(nz_pct) * 100.0, 1) if nz_pct is not None else None,
+                                "DZ_FO%": round(float(dz_pct) * 100.0, 1) if dz_pct is not None else None,
+                            }
+                    if len(zone_dict) > 0:
+                        break
         except Exception:
-            break
+            continue
 
     return zone_dict
 
