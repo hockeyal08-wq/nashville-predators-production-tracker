@@ -375,6 +375,23 @@ VERIFIED_MANUAL_HEADSHOTS = {
 def resolve_player_headshot(player_name, fallback_id=None):
     if player_name in VERIFIED_MANUAL_HEADSHOTS:
         return VERIFIED_MANUAL_HEADSHOTS[player_name]
+    try:
+        search_query = player_name.replace(" ", "%20")
+        url = f"https://search.d3.nhle.com/api/v1/search/player?culture=en-us&limit=3&q={search_query}"
+        res = requests.get(url, timeout=4)
+        if res.status_code == 200:
+            hits = res.json()
+            if hits:
+                p_id = hits[0].get("playerId")
+                if p_id:
+                    landing_res = requests.get(f"https://api-web.nhle.com/v1/player/{p_id}/landing", timeout=4)
+                    if landing_res.status_code == 200:
+                        headshot = landing_res.json().get("headshot")
+                        if headshot:
+                            return headshot
+                    return f"https://assets.nhle.com/mugs/nhl/latest/{p_id}.png"
+    except Exception:
+        pass
     if fallback_id:
         return f"https://assets.nhle.com/mugs/nhl/latest/{fallback_id}.png"
     return PREDS_LOGO_URL
@@ -644,7 +661,7 @@ season_map = {
     "23/24": "20232024"
 }
 if "selected_season_label" not in st.session_state:
-    st.session_state["selected_season_label"] = "25/26"
+    st.session_state["selected_season_label"] = "26/27"
 
 s_cols = st.sidebar.columns(2)
 for i, label in enumerate(["26/27", "25/26", "24/25", "23/24"]):
@@ -874,11 +891,11 @@ def load_club_stats(season, game_type):
         sv = g.get("saves", 0)
         
         raw_svp = g.get("savePctg") or g.get("savePct") or 0.0
-        if raw_svp == 0.0 and sa > 0:
-            raw_svp = sv / sa
         svp = round(float(raw_svp) * 100.0, 2) if raw_svp <= 1.0 else round(float(raw_svp), 2)
 
-        gaa = round(float(g.get("goalsAgainstAverage") or 0.0), 2)
+        raw_gaa = g.get("goalsAgainstAverage") or 0.0
+        gaa = round(float(raw_gaa), 2)
+        
         so = g.get("shutouts", 0)
 
         first_name = g.get("firstName", {}).get("default", "")
@@ -968,9 +985,9 @@ else:
                             <div class="stat-pill-sub">{p['GS']} Starts</div>
                         </div>
                         <div class="stat-pill">
-                            <div class="stat-pill-label">Overtime Losses</div>
-                            <div class="stat-pill-val">{p['OTL']} OTL</div>
-                            <div class="stat-pill-sub">OT Point Gainers</div>
+                            <div class="stat-pill-label">Shots Faced</div>
+                            <div class="stat-pill-val">{p['SA']} SA</div>
+                            <div class="stat-pill-sub">Crease Workload</div>
                         </div>
                     </div>
                 </div>
@@ -1044,7 +1061,7 @@ else:
                         st.image(skater["Photo"], use_container_width=True)
                         st.caption(f"**{skater['Skater']}** | {skater['Pos']}")
                         if position_filter == "Goaltenders":
-                            st.caption(f"{skater['W']}-{skater['L']}-{skater['OTL']} | {skater['SV%']:.2f}%")
+                            st.caption(f"{skater['W']} W | {skater['SV%']:.2f}% SV%")
                         else:
                             st.caption(f"{skater['PTS']} PTS ({skater['GP']} GP)")
                         if st.button("Select", key=f"btn_{skater['PlayerId']}", use_container_width=True):
