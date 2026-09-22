@@ -9,27 +9,32 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom executive styling: Navy/Gold palette, subtle borders, clean typography
+# --- Executive Nashville Predators Branding Palette ---
+# Primary: #FFB81C (Preds Gold), Secondary: #041E42 (Preds Navy), Slate Dark: #0B192C, Soft Grey: #E2E8F0
 st.markdown(f"""
 <style>
+    /* Global Background & Contrast Defaults */
     .reportview-container .main .block-container {{
-        padding-top: 2rem;
+        padding-top: 1.5rem;
+        max-width: 95%;
     }}
+    
+    /* Header Section */
     .header-container {{
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: 22px;
         margin-bottom: 24px;
-        border-bottom: 2px solid rgba(255, 184, 28, 0.3);
-        padding-bottom: 16px;
+        border-bottom: 1.5px solid rgba(255, 184, 28, 0.4);
+        padding-bottom: 18px;
     }}
     .header-logo {{
-        width: 80px;
+        width: 85px;
         height: auto;
         object-fit: contain;
     }}
     .header-title-box h1 {{
-        font-size: 2rem;
+        font-size: 2.1rem;
         font-weight: 800;
         letter-spacing: -0.5px;
         margin: 0;
@@ -38,20 +43,22 @@ st.markdown(f"""
     .header-subtitle {{
         font-size: 0.95rem;
         color: #94A3B8;
-        margin-top: 4px;
+        margin-top: 5px;
         font-weight: 500;
     }}
+
+    /* Refined Spotlight Executive Card */
     .spotlight-card {{
-        background: linear-gradient(135deg, rgba(4, 30, 66, 0.92) 0%, rgba(10, 22, 40, 0.95) 100%);
-        border: 1px solid rgba(255, 184, 28, 0.45);
+        background: linear-gradient(135deg, #041E42 0%, #08162B 100%);
+        border: 1px solid rgba(255, 184, 28, 0.55);
         border-radius: 12px;
-        padding: 24px 28px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        padding: 24px 30px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
         margin-bottom: 28px;
-        color: white;
+        color: #FFFFFF;
     }}
     .spotlight-title {{
-        font-size: 2rem;
+        font-size: 2.1rem;
         font-weight: 700;
         margin: 0;
         color: #FFB81C;
@@ -59,28 +66,29 @@ st.markdown(f"""
     }}
     .badge {{
         display: inline-block;
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.06);
         border: 1px solid rgba(255, 184, 28, 0.35);
         border-radius: 4px;
-        padding: 4px 8px;
-        font-size: 0.8rem;
+        padding: 4px 9px;
+        font-size: 0.78rem;
         font-weight: 600;
         margin-right: 6px;
-        margin-top: 6px;
+        margin-top: 8px;
         margin-bottom: 14px;
+        color: #E2E8F0;
         letter-spacing: 0.5px;
     }}
     .stat-pill-container {{
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
-        margin-top: 10px;
+        gap: 14px;
+        margin-top: 12px;
     }}
     .stat-pill {{
-        background: rgba(4, 30, 66, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(11, 25, 44, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 8px;
-        padding: 10px 14px;
+        padding: 12px 16px;
         text-align: left;
     }}
     .stat-pill-label {{
@@ -88,19 +96,30 @@ st.markdown(f"""
         text-transform: uppercase;
         color: #94A3B8;
         font-weight: 600;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.6px;
     }}
     .stat-pill-val {{
-        font-size: 1.3rem;
+        font-size: 1.35rem;
         font-weight: 700;
         color: #FFFFFF;
-        margin-top: 2px;
+        margin-top: 3px;
     }}
     .stat-pill-sub {{
         font-size: 0.75rem;
         color: #FFB81C;
-        margin-top: 2px;
+        margin-top: 3px;
+        font-weight: 500;
     }}
+    
+    /* Interactive Select Button Tweaks */
+    div[data-testid="stButton"] button {
+        border-color: rgba(255, 184, 28, 0.4) !important;
+        font-weight: 600 !important;
+    }
+    div[data-testid="stButton"] button:hover {
+        border-color: #FFB81C !important;
+        color: #FFB81C !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -233,8 +252,9 @@ def load_club_skater_stats(season, game_type):
         df = df[df["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
     return df
 
-# --- Outlier Styling (Min 5 GP filter) ---
+# --- Subtle Institutional Outlier Styling (Min 5 GP filter) ---
 def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0.15):
+    """Subdued corporate tones: Slate Emerald for top 15%, Muted Crimson for bottom 15%."""
     styler_df = pd.DataFrame('', index=data_df.index, columns=data_df.columns)
     eligible_mask = data_df["GP"] >= min_gp
     eligible_df = data_df[eligible_mask]
@@ -257,9 +277,9 @@ def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0
             if pd.isna(val):
                 continue
             if val >= high_thresh:
-                styler_df.loc[idx, col] = 'background-color: rgba(34, 197, 94, 0.35); font-weight: bold;'
+                styler_df.loc[idx, col] = 'background-color: rgba(30, 81, 40, 0.45); color: #E8F5E9; font-weight: 600;'
             elif val <= low_thresh:
-                styler_df.loc[idx, col] = 'background-color: rgba(239, 68, 68, 0.35); font-weight: bold;'
+                styler_df.loc[idx, col] = 'background-color: rgba(120, 20, 20, 0.40); color: #FFEBEE; font-weight: 600;'
                 
     return styler_df
 
@@ -284,9 +304,9 @@ else:
     # Executive Spotlight Showcase
     spotlight_html = f"""
     <div class="spotlight-card">
-        <div style="display: flex; gap: 24px; align-items: center; flex-wrap: wrap;">
+        <div style="display: flex; gap: 28px; align-items: center; flex-wrap: wrap;">
             <div style="flex-shrink: 0; text-align: center;">
-                <img src="{p['Headshot']}" style="width: 140px; height: 140px; object-fit: cover; border-radius: 50%; border: 2px solid #FFB81C; box-shadow: 0 4px 16px rgba(0,0,0,0.6);">
+                <img src="{p['Headshot']}" style="width: 145px; height: 145px; object-fit: cover; border-radius: 50%; border: 2px solid #FFB81C; box-shadow: 0 6px 18px rgba(0,0,0,0.65);">
             </div>
             <div style="flex-grow: 1; min-width: 280px;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -299,7 +319,7 @@ else:
                             <span class="badge">SOG: {p['SOG']}</span>
                         </div>
                     </div>
-                    <img src="{PREDS_LOGO_URL}" style="width: 50px; opacity: 0.85;" alt="Predators">
+                    <img src="{PREDS_LOGO_URL}" style="width: 55px; opacity: 0.9;" alt="Predators">
                 </div>
                 <div class="stat-pill-container">
                     <div class="stat-pill">
@@ -351,7 +371,7 @@ st.divider()
 
 # --- Tabbed Analytical Views with 4-Decimal Precision ---
 st.subheader("Roster Performance & Advanced Indices")
-st.caption("Green: Top 15% tier | Red: Bottom 15% tier (Minimum 5 GP required to qualify)")
+st.caption("Benchmark Tiers: Muted Emerald = Top 15% percentile | Subdued Crimson = Bottom 15% percentile (Minimum 5 GP required)")
 
 format_4dec = {
     "Off_Score": "{:.4f}",
