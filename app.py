@@ -1,26 +1,4 @@
-import os
-from pathlib import Path
-
-# --- 1. Programmatically write Streamlit Theme Engine config ---
-config_dir = Path(".streamlit")
-config_file = config_dir / "config.toml"
-theme_config = """[theme]
-primaryColor = "#FFB81C"
-backgroundColor = "#041E42"
-secondaryBackgroundColor = "#03142D"
-textColor = "#FFFFFF"
-font = "sans serif"
-"""
-
-try:
-    config_dir.mkdir(exist_ok=True)
-    if not config_file.exists() or config_file.read_text() != theme_config:
-        config_file.write_text(theme_config)
-except Exception:
-    pass
-
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import requests
 
@@ -31,57 +9,63 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- 2. Real-Time DOM JS Observer: Force Closed Arrow (>>) and Open Arrow (<<) to Gold ---
-components.html("""
+# Direct browser root piercing via raw script tag in markdown
+st.markdown("""
 <script>
-    function forceGoldArrows() {
-        const doc = window.parent.document;
-        
-        // Select all potential header & sidebar chevron containers
-        const buttonContainers = doc.querySelectorAll(
-            '[data-testid="stSidebarCollapseButton"], [data-testid="collapsedControl"], [data-testid="stSidebarCollapsedControl"], [data-testid="stHeader"] button'
-        );
-        
-        buttonContainers.forEach(container => {
-            const svg = container.querySelector('svg');
-            if (svg) {
-                // Style button container
-                const btn = container.tagName === 'BUTTON' ? container : container.querySelector('button');
-                if (btn) {
-                    btn.style.setProperty('background-color', '#061F47', 'important');
-                    btn.style.setProperty('border', '2px solid #FFB81C', 'important');
-                    btn.style.setProperty('border-radius', '8px', 'important');
-                    btn.style.setProperty('box-shadow', '0 0 10px rgba(255, 184, 28, 0.45)', 'important');
-                    btn.style.setProperty('opacity', '1', 'important');
-                    btn.style.setProperty('visibility', 'visible', 'important');
-                }
-
-                // Force SVG and all inner lines/paths to Predators Gold
-                svg.style.setProperty('fill', '#FFB81C', 'important');
-                svg.style.setProperty('stroke', '#FFB81C', 'important');
-                svg.style.setProperty('color', '#FFB81C', 'important');
-                svg.style.setProperty('opacity', '1', 'important');
-                svg.style.setProperty('filter', 'drop-shadow(0 0 3px #FFB81C)', 'important');
-                
-                svg.querySelectorAll('*').forEach(child => {
-                    child.style.setProperty('fill', '#FFB81C', 'important');
-                    child.style.setProperty('stroke', '#FFB81C', 'important');
-                    child.style.setProperty('color', '#FFB81C', 'important');
-                    child.style.setProperty('opacity', '1', 'important');
-                });
+(function() {
+    const parentDoc = window.parent.document;
+    let styleTag = parentDoc.getElementById("preds-arrow-style");
+    if (!styleTag) {
+        styleTag = parentDoc.createElement("style");
+        styleTag.id = "preds-arrow-style";
+        styleTag.innerHTML = `
+            /* Closed sidebar trigger button (>>) */
+            [data-testid="collapsedControl"],
+            [data-testid="stSidebarCollapsedControl"],
+            header [data-testid="collapsedControl"] {
+                display: flex !important;
+                opacity: 1 !important;
+                visibility: visible !important;
             }
-        });
+            [data-testid="collapsedControl"] button,
+            [data-testid="stSidebarCollapsedControl"] button,
+            header [data-testid="collapsedControl"] button {
+                background-color: #061F47 !important;
+                border: 2px solid #FFB81C !important;
+                border-radius: 8px !important;
+                box-shadow: 0 0 12px rgba(255, 184, 28, 0.45) !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                padding: 4px 8px !important;
+            }
+            /* The double chevron SVG path itself */
+            [data-testid="collapsedControl"] svg,
+            [data-testid="stSidebarCollapsedControl"] svg,
+            header [data-testid="collapsedControl"] svg,
+            [data-testid="stSidebarCollapseButton"] svg {
+                fill: #FFB81C !important;
+                stroke: #FFB81C !important;
+                color: #FFB81C !important;
+                filter: drop-shadow(0 0 4px rgba(255, 184, 28, 0.8)) !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+            [data-testid="collapsedControl"] svg *,
+            [data-testid="stSidebarCollapsedControl"] svg *,
+            header [data-testid="collapsedControl"] svg *,
+            [data-testid="stSidebarCollapseButton"] svg * {
+                fill: #FFB81C !important;
+                stroke: #FFB81C !important;
+                color: #FFB81C !important;
+            }
+        `;
+        parentDoc.head.appendChild(styleTag);
     }
-
-    forceGoldArrows();
-    const observer = new MutationObserver(() => {
-        forceGoldArrows();
-    });
-    observer.observe(window.parent.document.body, { childList: true, subtree: true });
+})();
 </script>
-""", height=0, width=0)
+""", unsafe_allow_html=True)
 
-# --- 3. Deep Franchise CSS Styling ---
+# Deep franchise theme injection
 st.markdown("""
 <style>
     /* Full Page Canvas, Main Body & App View Container */
@@ -112,11 +96,7 @@ st.markdown("""
         max-width: 95% !important;
     }
 
-    /* ============================================================ */
-    /* FORCE COLLAPSED (>>) & EXPANDED (<<) ARROWS TO PREDATORS GOLD*/
-    /* ============================================================ */
-    
-    /* Permanent Visibility & Button Tile */
+    /* Target any remaining instance of the sidebar arrow */
     [data-testid="collapsedControl"],
     [data-testid="stSidebarCollapsedControl"],
     [data-testid="stSidebarCollapseButton"] {
@@ -133,12 +113,8 @@ st.markdown("""
         border-radius: 8px !important;
         padding: 4px 8px !important;
         box-shadow: 0 0 10px rgba(255, 184, 28, 0.4) !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        transition: all 0.2s ease-in-out !important;
     }
 
-    /* Target SVG Chevrons directly via Color & Matrix Filter */
     [data-testid="collapsedControl"] svg,
     [data-testid="stSidebarCollapsedControl"] svg,
     [data-testid="stSidebarCollapseButton"] svg {
@@ -148,15 +124,6 @@ st.markdown("""
         opacity: 1 !important;
         visibility: visible !important;
         filter: invert(75%) sepia(85%) saturate(1400%) hue-rotate(350deg) brightness(103%) contrast(105%) !important;
-    }
-
-    [data-testid="collapsedControl"] svg *,
-    [data-testid="stSidebarCollapsedControl"] svg *,
-    [data-testid="stSidebarCollapseButton"] svg * {
-        fill: #FFB81C !important;
-        stroke: #FFB81C !important;
-        color: #FFB81C !important;
-        opacity: 1 !important;
     }
 
     /* Header Container */
@@ -418,14 +385,12 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
-        # Raw percentage decimals
         sh_pct = s.get("shootingPctg", 0.0)
         sh_pct = float(sh_pct) if sh_pct is not None else 0.0
 
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = float(fo_pct) if fo_pct is not None else 0.0
 
-        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
