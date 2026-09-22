@@ -482,7 +482,7 @@ if current_page == "Line Combinations":
     render_nhl_player_cap(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout", 8480249, "$2.82M", "UFA '27")
 
     # Defensive Pairing 3
-    st.markdown('<div class="line-header-banner"><span>DEFENSIVE PAIRING 3 | MOBILITY & CREASE PROTECTION</span><span class="line-cap-total">Line Cap: $4.55M</span></div>', unsafe_allow_html=True)
+    st.markdown('<div class="line-header-banner"><span>DEFENSIVE PAIRING 3 | MOBILITY & CREASE PROTECTION</span><span class="line-cap-total">Pair Cap: $4.55M</span></div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
     render_nhl_player_cap(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater", 8482482, "$1.30M", "RFA '28")
     render_nhl_player_cap(d2, 46, "Ilya Lyubushkin", "RD", "Physical Net-Front Suppression", 8480950, "$3.25M", "UFA '27")
@@ -514,7 +514,7 @@ if current_page == "Trade Intelligence":
             "Category": "Top-Six Forward", 
             "Deadline_Posture": "🟢 Top BUY Target",
             "Brunette_Fit": 95, 
-            "P_60": 2.84,
+            "P_GP": 0.82,
             "SOG_60": 9.42,
             "Chem_Fit": "Line 2 RW alongside Stamkos & Bourque | High F1 Forecheck Motor"
         },
@@ -528,7 +528,7 @@ if current_page == "Trade Intelligence":
             "Category": "Top-Six Forward", 
             "Deadline_Posture": "🟢 BUY Target",
             "Brunette_Fit": 92, 
-            "P_60": 2.51,
+            "P_GP": 0.74,
             "SOG_60": 10.15,
             "Chem_Fit": "PP2 Unit Quarterback / High-Volume High-Slot Release"
         },
@@ -542,7 +542,7 @@ if current_page == "Trade Intelligence":
             "Category": "Top-Six Forward", 
             "Deadline_Posture": "🔵 Secondary Scorer",
             "Brunette_Fit": 93, 
-            "P_60": 2.76,
+            "P_GP": 0.85,
             "SOG_60": 6.80,
             "Chem_Fit": "Middle-Six Playmaker / Zone-Entry Transition Anchor"
         },
@@ -556,7 +556,7 @@ if current_page == "Trade Intelligence":
             "Category": "Top-4 Defensive Upgrade", 
             "Deadline_Posture": "🟡 Value BUY",
             "Brunette_Fit": 91, 
-            "P_60": 0.85,
+            "P_GP": 0.24,
             "SOG_60": 3.20,
             "Chem_Fit": "Pairing 3 RD with Wilsby / Heavy Physical Shot Suppression"
         },
@@ -570,7 +570,7 @@ if current_page == "Trade Intelligence":
             "Category": "Bottom-Six / PK Depth", 
             "Deadline_Posture": "🟡 Depth Grinder",
             "Brunette_Fit": 94, 
-            "P_60": 1.20,
+            "P_GP": 0.35,
             "SOG_60": 5.40,
             "Chem_Fit": "Line 4 Center / PK1 Shield / Defensive Zone Faceoff Specialist"
         },
@@ -584,7 +584,7 @@ if current_page == "Trade Intelligence":
             "Category": "Bottom-Six / PK Depth", 
             "Deadline_Posture": "🔵 PK Specialist BUY",
             "Brunette_Fit": 89, 
-            "P_60": 1.45,
+            "P_GP": 0.42,
             "SOG_60": 6.10,
             "Chem_Fit": "Line 3/4 Board Battle Protector / Short-Handed Threat"
         }
@@ -624,7 +624,7 @@ if current_page == "Trade Intelligence":
 
     st.markdown("#### Real-Time Acquisition Target Registry (NMC-Free)")
     
-    # Render targets as an executive card grid featuring team logos, stats, and chem fits
+    # Render targets as an executive card grid featuring team logos, P/GP stats, and chem fits
     for i, row in filtered_df.iterrows():
         with st.container(border=True):
             c1, c2, c3 = st.columns([1.2, 3.5, 5])
@@ -636,7 +636,7 @@ if current_page == "Trade Intelligence":
                 st.markdown(f"**Action:** {row['Deadline_Posture']}")
                 st.markdown(f"**Scheme Fit:** {row['Brunette_Fit']}/100")
             with c3:
-                st.markdown(f"**Analytics Profile:** `{row['P_60']} P/60` | `{row['SOG_60']} SOG/60`")
+                st.markdown(f"**Analytics Profile:** `{row['P_GP']} P/GP` | `{row['SOG_60']} SOG/60`")
                 st.info(f"**Line Chemistry Fit:** {row['Chem_Fit']}")
 
     st.stop()
@@ -817,12 +817,12 @@ def load_club_skater_stats(season, game_type):
 
         total_toi_min = toi_gp_min * gp
 
-        p60 = round((pts / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
+        pgp = round((pts / gp), 4) if gp > 0 else 0.0
         sog60 = round((shots / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
         pm60 = round((plus_minus / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
         pim60 = round((pim / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
 
-        off_score = round(p60 + (sog60 * 0.25) + ((pp_goals / gp) * 1.5), 4) if gp > 0 else 0.0
+        off_score = round(pgp * 10 + (sog60 * 0.25) + ((pp_goals / gp) * 1.5), 4) if gp > 0 else 0.0
         def_score = round((pm60 * 1.5) + (toi_gp_min * 0.1) + ((sh_goals / gp) * 2.0) - (pim60 * 0.2), 4) if gp > 0 else 0.0
         pp_score = round(((pp_goals / gp) * 3.0) + (sog60 * 0.1), 4) if gp > 0 else 0.0
         pk_score = round((toi_gp_min * 0.05) + ((sh_goals / gp) * 4.0) - (pim60 * 0.1), 4) if gp > 0 else 0.0
@@ -873,7 +873,7 @@ def load_club_skater_stats(season, game_type):
             "NZ_FO%": nz_fo,
             "DZ_FO%": dz_fo,
             "TOI/GP": round(toi_gp_min, 2),
-            "P/60": p60,
+            "P/GP": pgp,
             "SOG/60": sog60,
             "+/- /60": pm60,
             "Off_Score": off_score,
@@ -936,8 +936,8 @@ else:
                         <div class="stat-pill-sub">{p['G']}G, {p['A']}A</div>
                     </div>
                     <div class="stat-pill">
-                        <div class="stat-pill-label">Rate Scoring (P/60)</div>
-                        <div class="stat-pill-val">{p['P/60']:.4f}</div>
+                        <div class="stat-pill-label">Scoring Rate (P/GP)</div>
+                        <div class="stat-pill-val">{p['P/GP']:.2f}</div>
                         <div class="stat-pill-sub">{fo_stat_line}</div>
                     </div>
                     <div class="stat-pill">
@@ -1024,7 +1024,7 @@ if not df.empty:
         "OZ_FO%": st.column_config.ProgressColumn("OZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
         "NZ_FO%": st.column_config.ProgressColumn("NZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
         "DZ_FO%": st.column_config.ProgressColumn("DZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
-        "P/60": st.column_config.ProgressColumn("P/60", min_value=0.0, max_value=float(df["P/60"].max() or 4.0), format="%.2f"),
+        "P/GP": st.column_config.ProgressColumn("P/GP", min_value=0.0, max_value=float(df["P/GP"].max() or 2.0), format="%.2f"),
         "Off_Score": st.column_config.ProgressColumn("Offensive Impact", min_value=0.0, max_value=float(df["Off_Score"].max() or 6.0), format="%.2f"),
         "Def_Score": st.column_config.ProgressColumn("Defensive Impact", min_value=float(df["Def_Score"].min() or -3.0), max_value=float(df["Def_Score"].max() or 5.0), format="%.2f"),
         "PP_Score": st.column_config.ProgressColumn("PP Impact", min_value=0.0, max_value=float(df["PP_Score"].max() or 5.0), format="%.2f"),
@@ -1032,7 +1032,7 @@ if not df.empty:
     }
 
     if active_view == "Offensive Impact":
-        cols = ["Photo", "Skater", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]
+        cols = ["Photo", "Skater", "Pos", "GP", "Off_Score", "P/GP", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]
         off_view = qualified_df[cols].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
         st.dataframe(off_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
@@ -1058,7 +1058,7 @@ if not df.empty:
     elif active_view == "Complete Skater Statistics":
         cols = [
             "Photo", "Skater", "Pos", "GP", "Off_Score", "Def_Score", "PP_Score", "PK_Score",
-            "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "SOG", "SH%", "FO%", "PIM", 
+            "PTS", "G", "A", "+/-", "P/GP", "TOI/GP", "SOG", "SH%", "FO%", "PIM", 
             "PPG", "SHG", "GWG"
         ]
         comp_view = qualified_df[cols].sort_values(by="PTS", ascending=False).reset_index(drop=True)
@@ -1070,7 +1070,7 @@ if not df.empty:
         else:
             cols = [
                 "Photo", "Skater", "Pos", "GP", "PTS", "G", "A", "+/-", 
-                "TOI/GP", "SOG", "SH%", "PIM", "P/60", "Off_Score", "Def_Score"
+                "TOI/GP", "SOG", "SH%", "PIM", "P/GP", "Off_Score", "Def_Score"
             ]
             lim_view = limited_df[cols].sort_values(by="GP", ascending=False).reset_index(drop=True)
             st.dataframe(lim_view, column_config=base_column_config, use_container_width=True, hide_index=True)
