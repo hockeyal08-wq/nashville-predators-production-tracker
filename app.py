@@ -41,44 +41,61 @@ st.markdown("""
     }
 
     /* ============================================================ */
-    /* SELECTBOX & WIDGET THEME: MATCHING GOLD ROUNDED RECTANGLES   */
+    /* SIDEBAR SELECTBOX: PREDATORS NAVY & GOLD ROUNDED RECTANGLE   */
     /* ============================================================ */
     
-    /* Selectbox Input Box Container */
-    div[data-baseweb="select"] > div {
+    /* Input Container Box (Forces background away from white) */
+    [data-testid="stSidebar"] div[data-baseweb="select"] > div,
+    [data-testid="stSidebar"] div[data-baseweb="select"] > div > div {
         background-color: #061F47 !important;
         border: 2px solid #FFB81C !important;
         border-radius: 10px !important;
         color: #FFFFFF !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
     }
     
-    /* Selectbox Selected Text & Inner Elements */
-    div[data-baseweb="select"] * {
+    /* Force pure white high-contrast text inside the select input */
+    [data-testid="stSidebar"] div[data-baseweb="select"] span,
+    [data-testid="stSidebar"] div[data-baseweb="select"] p,
+    [data-testid="stSidebar"] div[data-baseweb="select"] div {
         color: #FFFFFF !important;
         -webkit-text-fill-color: #FFFFFF !important;
         font-weight: 700 !important;
         font-size: 0.95rem !important;
+        opacity: 1.0 !important;
     }
-    
-    /* Dropdown Arrow Icon */
-    div[data-baseweb="select"] svg {
+
+    /* Dropdown Chevron Arrow Icon */
+    [data-testid="stSidebar"] div[data-baseweb="select"] svg {
         fill: #FFB81C !important;
     }
-    
+
     /* Dropdown Options Popup Menu */
-    div[data-baseweb="popover"] ul,
-    div[data-baseweb="menu"] {
+    div[data-baseweb="popover"],
+    div[data-baseweb="popover"] > div,
+    div[data-baseweb="menu"],
+    ul[role="listbox"] {
         background-color: #061F47 !important;
-        border: 1.5px solid #FFB81C !important;
+        border: 2px solid #FFB81C !important;
         border-radius: 8px !important;
     }
-    div[data-baseweb="menu"] li {
+    ul[role="listbox"] li {
         color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
         font-weight: 600 !important;
+        background-color: transparent !important;
     }
-    div[data-baseweb="menu"] li:hover {
+    ul[role="listbox"] li:hover,
+    ul[role="listbox"] li[aria-selected="true"] {
         background-color: #FFB81C !important;
         color: #041E42 !important;
+        -webkit-text-fill-color: #041E42 !important;
+    }
+
+    /* Radio button active dot color: Predators Gold */
+    [data-testid="stSidebar"] div[data-testid="stRadio"] div[role="radiogroup"] > label input:checked + div {
+        background-color: #FFB81C !important;
+        border-color: #FFB81C !important;
     }
 
     /* Header Container */
