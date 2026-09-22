@@ -9,7 +9,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Deep franchise theme injection restoring standard st.tabs with yellow rounded borders
+# Deep franchise theme injection
 st.markdown("""
 <style>
     /* Full Page Canvas, Main Body & App View Container */
@@ -38,66 +38,6 @@ st.markdown("""
         padding-top: 1.5rem !important;
         padding-bottom: 2rem !important;
         max-width: 95% !important;
-    }
-
-    /* ============================================================ */
-    /* PREDATORS YELLOW ROUNDED RECTANGLE TABS                      */
-    /* ============================================================ */
-    
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 12px !important;
-        background-color: transparent !important;
-        border-bottom: none !important;
-        padding-bottom: 6px !important;
-    }
-
-    /* Standard Tabs: Visible Gold Rounded Border Frame */
-    .stTabs [data-baseweb="tab"] {
-        border: 2px solid #FFB81C !important;
-        border-radius: 10px !important;
-        background: rgba(4, 30, 66, 0.9) !important;
-        padding: 8px 20px !important;
-        margin-right: 0px !important;
-        transition: all 0.2s ease-in-out !important;
-    }
-
-    /* Text inside standard tabs */
-    .stTabs [data-baseweb="tab"] p,
-    .stTabs [data-baseweb="tab"] span,
-    .stTabs [data-baseweb="tab"] div,
-    .stTabs [data-baseweb="tab"] {
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-        font-weight: 700 !important;
-        font-size: 1rem !important;
-        opacity: 1 !important;
-    }
-
-    /* Hover effect */
-    .stTabs [data-baseweb="tab"]:hover {
-        background: rgba(255, 184, 28, 0.2) !important;
-        box-shadow: 0 0 10px rgba(255, 184, 28, 0.4) !important;
-    }
-
-    /* ACTIVE TAB: Solid Gold fill with dark navy text */
-    .stTabs [data-baseweb="tab"][aria-selected="true"] {
-        background: #FFB81C !important;
-        border: 2px solid #FFB81C !important;
-        box-shadow: 0 4px 14px rgba(255, 184, 28, 0.35) !important;
-    }
-    .stTabs [data-baseweb="tab"][aria-selected="true"] p,
-    .stTabs [data-baseweb="tab"][aria-selected="true"] span,
-    .stTabs [data-baseweb="tab"][aria-selected="true"] div {
-        color: #041E42 !important;
-        -webkit-text-fill-color: #041E42 !important;
-        font-weight: 800 !important;
-    }
-
-    /* Eliminate default tab underline and border rail */
-    .stTabs [data-baseweb="tab-highlight"],
-    .stTabs div[data-baseweb="tab-highlight"],
-    .stTabs [data-baseweb="tab-border"] {
-        display: none !important;
     }
 
     /* Header Container */
@@ -200,19 +140,6 @@ st.markdown("""
         border-radius: 8px !important;
     }
 
-    /* Interactive Buttons */
-    div[data-testid="stButton"] button {
-        background-color: transparent !important;
-        border: 1.5px solid #FFB81C !important;
-        color: #FFB81C !important;
-        font-weight: 700 !important;
-        transition: all 0.2s ease-in-out;
-    }
-    div[data-testid="stButton"] button:hover {
-        background-color: #FFB81C !important;
-        color: #041E42 !important;
-    }
-
     /* Benchmark Caption Styling */
     .benchmark-caption {
         color: #FFB81C !important;
@@ -224,6 +151,39 @@ st.markdown("""
 
     h1, h2, h3, h4 {
         color: #FFFFFF !important;
+    }
+
+    /* ============================================================ */
+    /* CUSTOM NAVIGATION BUTTON BAR (GUARANTEED VISIBILITY)         */
+    /* ============================================================ */
+    
+    /* Default / Unselected Buttons: Bright Yellow Rounded Border + Pure White Text */
+    div[data-testid="stButton"] button[kind="secondary"] {
+        background-color: #061F47 !important;
+        border: 2px solid #FFB81C !important;
+        border-radius: 10px !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        padding: 8px 16px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+    div[data-testid="stButton"] button[kind="secondary"]:hover {
+        background-color: rgba(255, 184, 28, 0.2) !important;
+        box-shadow: 0 0 12px rgba(255, 184, 28, 0.5) !important;
+    }
+
+    /* Active / Selected Button: Solid Predators Gold Fill + Dark Navy Text */
+    div[data-testid="stButton"] button[kind="primary"] {
+        background-color: #FFB81C !important;
+        border: 2px solid #FFB81C !important;
+        border-radius: 10px !important;
+        color: #041E42 !important;
+        font-weight: 800 !important;
+        font-size: 0.95rem !important;
+        padding: 8px 16px !important;
+        box-shadow: 0 4px 14px rgba(255, 184, 28, 0.45) !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -489,14 +449,29 @@ format_4dec = {
 }
 
 if not df.empty:
-    tab1, tab2, tab3, tab4 = st.tabs([
+    # State tracking for view selection
+    if "active_tab_view" not in st.session_state:
+        st.session_state["active_tab_view"] = "Offensive Impact"
+
+    tabs = [
         "Offensive Impact", 
         "Defensive Impact", 
         "Special Teams Performance", 
         "Complete Skater Statistics"
-    ])
+    ]
 
-    with tab1:
+    # Explicit 4-column button bar that Streamlit's CSS engine cannot override
+    nav_cols = st.columns(4)
+    for idx, tab_name in enumerate(tabs):
+        with nav_cols[idx]:
+            btn_type = "primary" if st.session_state["active_tab_view"] == tab_name else "secondary"
+            if st.button(tab_name, key=f"nav_btn_{idx}", type=btn_type, use_container_width=True):
+                st.session_state["active_tab_view"] = tab_name
+                st.rerun()
+
+    active_view = st.session_state["active_tab_view"]
+
+    if active_view == "Offensive Impact":
         st.markdown("**Ranked by Offensive Score (`Off_Score`):**")
         off_df = df[["Name", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
         styled_off = (
@@ -506,7 +481,7 @@ if not df.empty:
         )
         st.dataframe(styled_off, use_container_width=True, hide_index=True)
 
-    with tab2:
+    elif active_view == "Defensive Impact":
         st.markdown("**Ranked by Defensive Score (`Def_Score`):**")
         def_df = df[["Name", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG", "FO%"]].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
         styled_def = (
@@ -516,7 +491,7 @@ if not df.empty:
         )
         st.dataframe(styled_def, use_container_width=True, hide_index=True)
 
-    with tab3:
+    elif active_view == "Special Teams Performance":
         st.markdown("**Ranked by Special Teams Impact (`PP_Score` & `PK_Score`):**")
         st_df = df[["Name", "Pos", "GP", "PP_Score", "PK_Score", "PPG", "SHG", "PIM", "TOI/GP"]].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
         styled_st = (
@@ -526,7 +501,7 @@ if not df.empty:
         )
         st.dataframe(styled_st, use_container_width=True, hide_index=True)
 
-    with tab4:
+    elif active_view == "Complete Skater Statistics":
         comp_df = df[[
             "Name", "Pos", "GP", "Off_Score", "Def_Score", "PP_Score", "PK_Score",
             "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "SOG", "SH%", "PIM", 
