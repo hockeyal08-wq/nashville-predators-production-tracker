@@ -617,11 +617,12 @@ if not df.empty:
         "Defensive Impact", 
         "Special Teams Performance",
         "Faceoff Breakdown",
+        "Line Combinations",
         "Complete Skater Statistics",
         "Limited Sample (< 5 GP)"
     ]
 
-    nav_cols = st.columns(6)
+    nav_cols = st.columns(7)
     for idx, tab_name in enumerate(tabs):
         with nav_cols[idx]:
             btn_type = "primary" if st.session_state["active_tab_view"] == tab_name else "secondary"
@@ -683,6 +684,54 @@ if not df.empty:
             cols = ["Photo", "Skater", "Pos", "GP", "Total_FO", "FO%", "OZ_FO%", "NZ_FO%", "DZ_FO%"]
             fo_view = fo_skaters[cols].sort_values(by="Total_FO", ascending=False).reset_index(drop=True)
             st.dataframe(fo_view, column_config=base_column_config, use_container_width=True, hide_index=True)
+
+    elif active_view == "Line Combinations":
+        st.markdown("### 26/27 Projected Lineup & Deployment Analysis")
+        st.caption("Tactical Blueprint: Andrew Brunette High-Pace 1-2-2 Forecheck & Weak-Side D-Activation")
+        
+        st.info(
+            "**System Alignment Overview:** The 26/27 lineup significantly improves neutral-zone rush speed and forecheck pressure "
+            "with additions like Mavrik Bourque, Nils Höglander, and Ross Colton[cite: 3]. Nicolas Hague on D1 gives Roman Josi an anchor "
+            "to freely execute weak-side pinches below the faceoff dots[cite: 3]."
+        )
+        
+        col_fwds, col_def = st.columns(2)
+        
+        with col_fwds:
+            st.markdown("#### Forward Combinations")
+            st.markdown("""
+            * **Line 1**: **Filip Forsberg (9)** – **Ryan O'Reilly (90)** – **Jonathan Marchessault (81)**[cite: 3]
+              * *Role*: Primary Matchup, Heavy Cycle & Top Ozone Draws
+              * *Scheme Fit*: **High** | Elite low-cycle touch and board retrieval
+            * **Line 2**: **Steven Stamkos (91)** – **Mavrik Bourque (22)** – **Matthew Wood (71)**[cite: 3]
+              * *Role*: Rush Strike Unit & High-Slot Finishing
+              * *Scheme Fit*: **Very High** | Bourque's pace and distribution complement Stamkos' release
+            * **Line 3**: **Ross Colton (79)** – **Jack Drury (18)** – **Nils Höglander (21)**[cite: 3]
+              * *Role*: Relentless F1/F2 Forecheck & Transition Disruption
+              * *Scheme Fit*: **Elite** | High-motor puck pressure aligned with Brunette's 1-2-2 model
+            * **Line 4**: **Alexander Kerfoot (14)** – **Vitali Pinchuk (51)** – **Ozzy Wiesblatt (89)**[cite: 3]
+              * *Role*: Pace Depth, Transitional Speed & Defensive IQ
+              * *Scheme Fit*: **High** | Size and transition speed (Pinchuk) paired with Kerfoot's two-way awareness
+            """)
+            
+        with col_def:
+            st.markdown("#### Defensive Pairings & Goaltending")
+            st.markdown("""
+            * **Pair 1**: **Nicolas Hague (41)** – **Roman Josi (59)**[cite: 3]
+              * *Scheme Fit*: **Elite** | Hague's 6'6" frame and box-out presence give Josi full freedom to activate below the dots[cite: 3]
+            * **Pair 2**: **Brady Skjei (76)** – **Nick Perbix (48)**[cite: 3]
+              * *Scheme Fit*: **High** | Mobile two-way unit specializing in clean zone exits[cite: 3]
+            * **Pair 3**: **Adam Wilsby (83)** – **Ilya Lyubushkin (46)**[cite: 3]
+              * *Scheme Fit*: **Balanced** | Wilsby's mobility paired with Lyubushkin's crease-clearing physical edge[cite: 3]
+            * **Starter**: **Juuse Saros (74)**[cite: 3]
+            * **Backup**: **Justus Annunen (29)**[cite: 3]
+            """)
+            
+            st.markdown("#### Tactical Notes")
+            st.markdown("""
+            * **Weak-Side Pinches**: Having Hague and Perbix on the right side provides defensive coverage for Josi and Skjei[cite: 3].
+            * **Transition Pace**: Bourque, Höglander, and Colton provide north-south speed through the neutral zone[cite: 3].
+            """)
 
     elif active_view == "Complete Skater Statistics":
         st.markdown("**Complete Skater Statistics:**")
