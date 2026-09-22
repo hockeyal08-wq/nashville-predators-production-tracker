@@ -37,12 +37,51 @@ st.markdown(f"""
         max-width: 95% !important;
     }}
 
-    [data-testid="stSidebarCollapseButton"] button {{
+    /* Force Sidebar Collapse Button Permanently Visible in Both Open and Collapsed States */
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapseButton"] button,
+    [data-testid="collapsedControl"],
+    [data-testid="collapsedControl"] button {{
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: flex !important;
+    }}
+
+    [data-testid="stSidebarCollapseButton"] button,
+    [data-testid="collapsedControl"] button {{
         background-color: #061F47 !important;
         border: 2px solid #FFB81C !important;
         border-radius: 8px !important;
         padding: 4px 8px !important;
         box-shadow: 0 0 10px rgba(255, 184, 28, 0.4) !important;
+        transition: all 0.2s ease-in-out !important;
+    }}
+
+    [data-testid="stSidebarCollapseButton"] button:hover,
+    [data-testid="collapsedControl"] button:hover {{
+        background-color: #FFB81C !important;
+        box-shadow: 0 0 16px rgba(255, 184, 28, 0.7) !important;
+        transform: scale(1.05);
+    }}
+
+    [data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="stSidebarCollapseButton"] svg *,
+    [data-testid="collapsedControl"] svg,
+    [data-testid="collapsedControl"] svg * {{
+        opacity: 1 !important;
+        visibility: visible !important;
+        fill: #FFB81C !important;
+        stroke: #FFB81C !important;
+        color: #FFB81C !important;
+    }}
+
+    [data-testid="stSidebarCollapseButton"] button:hover svg,
+    [data-testid="stSidebarCollapseButton"] button:hover svg *,
+    [data-testid="collapsedControl"] button:hover svg,
+    [data-testid="collapsedControl"] button:hover svg * {{
+        fill: #041E42 !important;
+        stroke: #041E42 !important;
+        color: #041E42 !important;
     }}
 
     .header-container {{
