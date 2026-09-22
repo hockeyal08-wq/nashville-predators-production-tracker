@@ -470,7 +470,7 @@ if not df.empty:
     active_view = st.session_state["active_tab_view"]
 
     if active_view == "Offensive Impact":
-        st.markdown("**Ranked by Offensive Score:**")
+        st.markdown("**Ranked by Offensive Impact:**")
         off_df = df[["Name", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
         styled_off = (
             off_df.style
@@ -480,7 +480,7 @@ if not df.empty:
         st.dataframe(styled_off, use_container_width=True, hide_index=True)
 
     elif active_view == "Defensive Impact":
-        st.markdown("**Ranked by Defensive Score:**")
+        st.markdown("**Ranked by Defensive Impact:**")
         def_df = df[["Name", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG", "FO%"]].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
         styled_def = (
             def_df.style
