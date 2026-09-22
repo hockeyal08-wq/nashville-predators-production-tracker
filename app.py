@@ -513,6 +513,7 @@ if current_page == "Trade Intelligence":
             "Status": "Signed thru '28 (Trade Block)",
             "Category": "Top-Six Forward", 
             "Deadline_Posture": "🟢 Top BUY Target",
+            "Role_Success": "Top-Six Winger | Core Playoff Scoring Catalyst & Forecheck Engine",
             "Brunette_Fit": 95, 
             "P_GP": 0.82,
             "SOG_GP": 3.10,
@@ -527,6 +528,7 @@ if current_page == "Trade Intelligence":
             "Status": "Pending UFA '28 (No NMC)",
             "Category": "Top-Six Forward", 
             "Deadline_Posture": "🟢 BUY Target",
+            "Role_Success": "Top-Six Winger | Secondary Scoring Push & PP2 Quarterback",
             "Brunette_Fit": 92, 
             "P_GP": 0.74,
             "SOG_GP": 3.35,
@@ -541,6 +543,7 @@ if current_page == "Trade Intelligence":
             "Status": "Signed thru '28",
             "Category": "Top-Six Forward", 
             "Deadline_Posture": "🔵 Secondary Scorer",
+            "Role_Success": "Middle-Six Playmaker | Transition Stabilizer & Play Driver",
             "Brunette_Fit": 93, 
             "P_GP": 0.85,
             "SOG_GP": 2.40,
@@ -555,6 +558,7 @@ if current_page == "Trade Intelligence":
             "Status": "Pending UFA '27 (No NMC)",
             "Category": "Top-4 Defensive Upgrade", 
             "Deadline_Posture": "🟡 Value BUY",
+            "Role_Success": "Shutdown Defenseman | Pair 3 Anchor & Rush Suppression Specialist",
             "Brunette_Fit": 91, 
             "P_GP": 0.24,
             "SOG_GP": 1.15,
@@ -569,6 +573,7 @@ if current_page == "Trade Intelligence":
             "Status": "Signed thru '28",
             "Category": "Bottom-Six / PK Depth", 
             "Deadline_Posture": "🟡 Depth Grinder",
+            "Role_Success": "Checking Forward | PK1 Anchor & Defensive Zone Draw Specialist",
             "Brunette_Fit": 94, 
             "P_GP": 0.35,
             "SOG_GP": 1.75,
@@ -583,6 +588,7 @@ if current_page == "Trade Intelligence":
             "Status": "Expiring Contract (No NMC)",
             "Category": "Bottom-Six / PK Depth", 
             "Deadline_Posture": "🔵 PK Specialist BUY",
+            "Role_Success": "Penalty Killer / Forechecker | Board Battle Protector & Late-Lead Guard",
             "Brunette_Fit": 89, 
             "P_GP": 0.42,
             "SOG_GP": 2.05,
@@ -633,7 +639,7 @@ if current_page == "Trade Intelligence":
             with c2:
                 st.markdown(f"### **{row['Player']}** ({row['Pos']})")
                 st.caption(f"**Tier:** {row['Category']} | **Cap Hit:** ${row['Cap_Hit']:.3f}M")
-                st.markdown(f"**Role:** {row['Deadline_Posture']}")
+                st.markdown(f"**Role & Postseason Success:** {row['Role_Success']}")
                 st.markdown(f"**Scheme Fit:** {row['Brunette_Fit']}/100")
             with c3:
                 st.markdown(f"**Analytics Profile:** `{row['P_GP']} P/GP` | `{row['SOG_GP']} SOG/GP`")
