@@ -422,6 +422,7 @@ if current_page == "Line Combinations":
 
 st.sidebar.markdown("### Filter Settings")
 
+# 1. Season Selection
 season_map = {
     "26/27": "20262027",
     "25/26": "20252026",
@@ -441,6 +442,7 @@ for i, label in enumerate(["26/27", "25/26", "24/25", "23/24"]):
 
 selected_season = season_map[st.session_state["selected_season_label"]]
 
+# 2. Game Type Selection
 st.sidebar.markdown('<div class="filter-label">Game Type</div>', unsafe_allow_html=True)
 if "selected_game_type" not in st.session_state:
     st.session_state["selected_game_type"] = "Regular Season"
@@ -456,6 +458,7 @@ for i, gt in enumerate(["Regular Season", "Playoffs"]):
 game_type_label = st.session_state["selected_game_type"]
 game_type_code = "2" if game_type_label == "Regular Season" else "3"
 
+# 3. Position Group Selection
 st.sidebar.markdown('<div class="filter-label">Position Group</div>', unsafe_allow_html=True)
 if "selected_pos_group" not in st.session_state:
     st.session_state["selected_pos_group"] = "All Skaters"
@@ -678,7 +681,7 @@ else:
     fo_stat_line = (
         f"OZ: {p['OZ_FO%']:.1f}% | DZ: {p['DZ_FO%']:.1f}%" 
         if pd.notna(p['OZ_FO%']) and pd.notna(p['DZ_FO%']) 
-        else f"{p['SH%']:.1f}% Finishing"
+        else f"{p['SH%']:.1f}% Shooting Pctg"
     )
 
     spotlight_html = f"""
