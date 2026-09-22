@@ -637,13 +637,13 @@ if current_page == "Trade Intelligence":
 
     st.markdown("#### Real-Time Acquisition Target Registry (NMC-Free)")
     
-    # Render targets as an executive card grid
+    # Render targets as an executive card grid with direct image rendering
     for i, row in filtered_df.iterrows():
         with st.container(border=True):
             c1, c2, c3 = st.columns([1.2, 3.5, 5])
             with c1:
-                st.image(row["Photo"], width=85)
-                st.image(row["Team_Logo"], width=35)
+                st.image(row["Photo"], width=80)
+                st.image(row["Team_Logo"], width=32)
             with c2:
                 st.markdown(f"### **{row['Player']}** ({row['Pos']})")
                 st.caption(f"**Tier:** {row['Category']} | **Cap Hit:** ${row['Cap_Hit']:.3f}M")
