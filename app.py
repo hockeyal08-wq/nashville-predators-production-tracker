@@ -9,7 +9,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- Preds Executive Theming ---
+# --- Complete Preds Navy & Gold Theme Injection ---
 st.markdown("""
 <style>
     /* Full Page Canvas, Main Body & App View Container */
@@ -40,21 +40,35 @@ st.markdown("""
         max-width: 95% !important;
     }
 
-    /* --- PREDATORS GOLD TABS --- */
-    button[data-baseweb="tab"] {
-        color: #E2E8F0 !important;
+    /* --- PREDATORS YELLOW/GOLD TABS OVERRIDE --- */
+    /* Target the base tab button */
+    .stTabs [data-baseweb="tab"] {
+        color: #CBD5E1 !important;
         font-weight: 700 !important;
         font-size: 1.05rem !important;
         padding: 10px 18px !important;
     }
-    button[data-baseweb="tab"]:hover {
+    .stTabs [data-baseweb="tab"]:hover {
         color: #FFB81C !important;
     }
-    button[data-baseweb="tab"][aria-selected="true"] {
+    
+    /* Active / Selected Tab Text & All Children */
+    .stTabs [data-baseweb="tab"][aria-selected="true"],
+    .stTabs [data-baseweb="tab"][aria-selected="true"] p,
+    .stTabs [data-baseweb="tab"][aria-selected="true"] span,
+    .stTabs [data-baseweb="tab"][aria-selected="true"] div {
         color: #FFB81C !important;
-        border-bottom: 3px solid #FFB81C !important;
+        font-weight: 800 !important;
     }
-    div[data-baseweb="tab-border"] {
+    
+    /* Active Underline Highlight Bar */
+    .stTabs [data-baseweb="tab-highlight"] {
+        background-color: #FFB81C !important;
+        height: 3px !important;
+    }
+    
+    /* Bottom Divider Rail */
+    .stTabs [data-baseweb="tab-border"] {
         background-color: rgba(255, 184, 28, 0.25) !important;
     }
 
@@ -174,7 +188,7 @@ st.markdown("""
     /* Benchmark Caption Styling */
     .benchmark-caption {
         color: #FFB81C !important;
-        font-size: 0.92rem !important;
+        font-size: 0.95rem !important;
         font-weight: 600 !important;
         margin-bottom: 14px !important;
     }
@@ -310,7 +324,7 @@ def load_club_skater_stats(season, game_type):
         df = df[df["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
     return df
 
-# --- Soft Green (Top 15%) & Soft Red (Bottom 15%) Table Outlier Styling ---
+# --- Soft Green (Top 15%) & Soft Red (Bottom 15%) Table Highlights ---
 def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0.15):
     """Clean data presentation: Soft green for top 15%, soft red for bottom 15%."""
     styler_df = pd.DataFrame('', index=data_df.index, columns=data_df.columns)
