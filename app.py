@@ -245,7 +245,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Sidebar Controls (Interactive Gold & Navy Buttons) ---
+# --- Sidebar Controls ---
 st.sidebar.markdown("### Filter Settings")
 
 # 1. Season Selection
@@ -350,6 +350,39 @@ def load_roster_handedness(season):
             pass
     return shoots_map
 
+@st.cache_data(ttl=1800)
+def load_zone_faceoffs(season, game_type):
+    """Fetches O-Zone, N-Zone, and D-Zone faceoff percentages directly from NHL REST reporting."""
+    zone_dict = {}
+    url = (
+        f"https://api.nhle.com/stats/rest/en/skater/faceoffpercentages"
+        f"?isAggregate=false&isGame=false&sort=%5B%7B%22property%22:%22totalFaceoffs%22,%22direction%22:%22DESC%22%7D%5D"
+        f"&cayenneExp=seasonId={season}%20and%20gameTypeId={game_type}"
+    )
+    try:
+        res = requests.get(url, timeout=6)
+        if res.status_code == 200:
+            data = res.json().get("data", [])
+            for row in data:
+                p_id = row.get("playerId")
+                tot_fo = row.get("totalFaceoffs", 0)
+                if tot_fo and tot_fo > 0:
+                    fo_win_pct = row.get("faceoffWinPct")
+                    oz_pct = row.get("offensiveZoneFaceoffPct")
+                    nz_pct = row.get("neutralZoneFaceoffPct")
+                    dz_pct = row.get("defensiveZoneFaceoffPct")
+
+                    zone_dict[p_id] = {
+                        "Total_FO": int(tot_fo),
+                        "FO%": round(float(fo_win_pct) * 100.0, 1) if fo_win_pct is not None else None,
+                        "OZ_FO%": round(float(oz_pct) * 100.0, 1) if oz_pct is not None else None,
+                        "NZ_FO%": round(float(nz_pct) * 100.0, 1) if nz_pct is not None else None,
+                        "DZ_FO%": round(float(dz_pct) * 100.0, 1) if dz_pct is not None else None,
+                    }
+    except Exception:
+        pass
+    return zone_dict
+
 @st.cache_data(ttl=900)
 def load_club_skater_stats(season, game_type):
     url = f"{BASE_URL}/club-stats/{TEAM_TRICODE}/{season}/{game_type}"
@@ -363,9 +396,11 @@ def load_club_skater_stats(season, game_type):
         return pd.DataFrame()
 
     shoots_map = load_roster_handedness(season)
+    zone_map = load_zone_faceoffs(season, game_type)
 
     rows = []
     for s in skaters:
+        player_id = s.get("playerId")
         gp = s.get("gamesPlayed", 0)
         pts = s.get("points", 0)
         goals = s.get("goals", 0)
@@ -378,27 +413,16 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
-        # Scale raw decimals up to whole percentages (e.g. 0.165 -> 16.5)
         raw_sh = s.get("shootingPctg") or s.get("shootingPct") or 0.0
         sh_pct = round(float(raw_sh) * 100.0, 1) if raw_sh is not None else 0.0
 
-        # Look up faceoff percentage across all API schema variations
-        raw_fo = (
-            s.get("faceoffWinPct") 
-            if s.get("faceoffWinPct") is not None 
-            else s.get("faceoffWinningPctg") 
-            if s.get("faceoffWinningPctg") is not None 
-            else s.get("faceoffPct") 
-            if s.get("faceoffPct") is not None 
-            else s.get("faceoffPercentage")
-        )
-        
-        if raw_fo is not None:
-            raw_fo_float = float(raw_fo)
-            # If the API already passed a whole number (e.g. 52.3) vs a decimal (0.523)
-            fo_pct = round(raw_fo_float * 100.0, 1) if raw_fo_float <= 1.0 else round(raw_fo_float, 1)
-        else:
-            fo_pct = 0.0
+        # Extract zone-specific faceoff metrics
+        z_stats = zone_map.get(player_id, {})
+        tot_fo = z_stats.get("Total_FO", 0)
+        fo_pct = z_stats.get("FO%")
+        oz_fo = z_stats.get("OZ_FO%")
+        nz_fo = z_stats.get("NZ_FO%")
+        dz_fo = z_stats.get("DZ_FO%")
 
         # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
@@ -422,7 +446,6 @@ def load_club_skater_stats(season, game_type):
         pp_score = round(((pp_goals / gp) * 3.0) + (sog60 * 0.1), 4) if gp > 0 else 0.0
         pk_score = round((toi_gp_min * 0.05) + ((sh_goals / gp) * 4.0) - (pim60 * 0.1), 4) if gp > 0 else 0.0
 
-        player_id = s.get("playerId")
         raw_pos = s.get("positionCode", "N/A")
         shoots = shoots_map.get(player_id)
 
@@ -463,7 +486,11 @@ def load_club_skater_stats(season, game_type):
             "PPG": int(pp_goals),
             "SHG": int(sh_goals),
             "GWG": int(gw_goals),
+            "Total_FO": int(tot_fo),
             "FO%": fo_pct,
+            "OZ_FO%": oz_fo,
+            "NZ_FO%": nz_fo,
+            "DZ_FO%": dz_fo,
             "TOI/GP": round(toi_gp_min, 2),
             "P/60": p60,
             "SOG/60": sog60,
@@ -496,6 +523,11 @@ else:
         st.session_state["selected_player_id"] = int(df.iloc[0]["PlayerId"])
 
     p = df[df["PlayerId"] == st.session_state["selected_player_id"]].iloc[0]
+    fo_stat_line = (
+        f"OZ: {p['OZ_FO%']:.1f}% | DZ: {p['DZ_FO%']:.1f}%" 
+        if pd.notna(p['OZ_FO%']) and pd.notna(p['DZ_FO%']) 
+        else f"{p['SH%']:.1f}% Finishing"
+    )
 
     spotlight_html = f"""
     <div class="spotlight-card">
@@ -525,7 +557,7 @@ else:
                     <div class="stat-pill">
                         <div class="stat-pill-label">Rate Scoring (P/60)</div>
                         <div class="stat-pill-val">{p['P/60']:.4f}</div>
-                        <div class="stat-pill-sub">{p['SH%']:.1f}% Finishing</div>
+                        <div class="stat-pill-sub">{fo_stat_line}</div>
                     </div>
                     <div class="stat-pill">
                         <div class="stat-pill-label">Offensive Score</div>
@@ -577,12 +609,13 @@ if not df.empty:
     tabs = [
         "Offensive Impact", 
         "Defensive Impact", 
-        "Special Teams Performance", 
+        "Special Teams Performance",
+        "Faceoff Breakdown",
         "Complete Skater Statistics",
         "Limited Sample (< 5 GP)"
     ]
 
-    nav_cols = st.columns(5)
+    nav_cols = st.columns(6)
     for idx, tab_name in enumerate(tabs):
         with nav_cols[idx]:
             btn_type = "primary" if st.session_state["active_tab_view"] == tab_name else "secondary"
@@ -605,7 +638,11 @@ if not df.empty:
         "PIM": st.column_config.NumberColumn("PIM", format="%d"),
         "TOI/GP": st.column_config.NumberColumn("TOI/GP", format="%.2f m"),
         "SH%": st.column_config.ProgressColumn("SH%", min_value=0.0, max_value=35.0, format="%.1f%%"),
-        "FO%": st.column_config.ProgressColumn("FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
+        "Total_FO": st.column_config.NumberColumn("Total Draws", format="%d"),
+        "FO%": st.column_config.ProgressColumn("Overall FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
+        "OZ_FO%": st.column_config.ProgressColumn("OZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
+        "NZ_FO%": st.column_config.ProgressColumn("NZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
+        "DZ_FO%": st.column_config.ProgressColumn("DZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
         "P/60": st.column_config.ProgressColumn("P/60", min_value=0.0, max_value=float(df["P/60"].max() or 4.0), format="%.2f"),
         "Off_Score": st.column_config.ProgressColumn("Offensive Impact", min_value=0.0, max_value=float(df["Off_Score"].max() or 6.0), format="%.2f"),
         "Def_Score": st.column_config.ProgressColumn("Defensive Impact", min_value=float(df["Def_Score"].min() or -3.0), max_value=float(df["Def_Score"].max() or 5.0), format="%.2f"),
@@ -621,7 +658,7 @@ if not df.empty:
 
     elif active_view == "Defensive Impact":
         st.markdown("**Ranked by Defensive Impact:**")
-        cols = ["Photo", "Skater", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG", "FO%"]
+        cols = ["Photo", "Skater", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG"]
         def_view = qualified_df[cols].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
         st.dataframe(def_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
@@ -631,12 +668,22 @@ if not df.empty:
         st_view = qualified_df[cols].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
         st.dataframe(st_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
+    elif active_view == "Faceoff Breakdown":
+        st.markdown("**Zonal Faceoff Performance (Offensive, Neutral, & Defensive Zones):**")
+        fo_skaters = qualified_df[qualified_df["Total_FO"] > 0].copy()
+        if fo_skaters.empty:
+            st.info("No faceoffs recorded for skaters in this selection.")
+        else:
+            cols = ["Photo", "Skater", "Pos", "GP", "Total_FO", "FO%", "OZ_FO%", "NZ_FO%", "DZ_FO%"]
+            fo_view = fo_skaters[cols].sort_values(by="Total_FO", ascending=False).reset_index(drop=True)
+            st.dataframe(fo_view, column_config=base_column_config, use_container_width=True, hide_index=True)
+
     elif active_view == "Complete Skater Statistics":
         st.markdown("**Complete Skater Statistics:**")
         cols = [
             "Photo", "Skater", "Pos", "GP", "Off_Score", "Def_Score", "PP_Score", "PK_Score",
-            "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "SOG", "SH%", "PIM", 
-            "PPG", "SHG", "GWG", "FO%"
+            "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "SOG", "SH%", "FO%", "PIM", 
+            "PPG", "SHG", "GWG"
         ]
         comp_view = qualified_df[cols].sort_values(by="PTS", ascending=False).reset_index(drop=True)
         st.dataframe(comp_view, column_config=base_column_config, use_container_width=True, hide_index=True)
