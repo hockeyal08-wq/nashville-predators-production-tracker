@@ -369,13 +369,19 @@ with p_cols[2]:
 current_page = st.session_state["current_page"]
 
 # ==============================================================================
-# VERIFIED HEADSHOT OVERRIDES (Guaranteed exact IDs for your preds roster)
+# VERIFIED HEADSHOT OVERRIDES (Guaranteed exact IDs for Roster & Targets)
 # ==============================================================================
 VERIFIED_MANUAL_HEADSHOTS = {
     "Steven Stamkos": "https://assets.nhle.com/mugs/nhl/latest/8474564.png",
     "Jonathan Marchessault": "https://assets.nhle.com/mugs/nhl/latest/8476539.png",
     "Roman Josi": "https://assets.nhle.com/mugs/nhl/latest/8474600.png",
-    "Matthew Wood": "https://assets.nhle.com/mugs/nhl/latest/8484241.png"
+    "Matthew Wood": "https://assets.nhle.com/mugs/nhl/latest/8484241.png",
+    "Bryan Rust": "https://assets.nhle.com/mugs/nhl/latest/8475848.png",
+    "Rickard Rakell": "https://assets.nhle.com/mugs/nhl/latest/8476460.png",
+    "Mikael Granlund": "https://assets.nhle.com/mugs/nhl/latest/8475794.png",
+    "Will Borgen": "https://assets.nhle.com/mugs/nhl/latest/8479379.png",
+    "Noel Acciari": "https://assets.nhle.com/mugs/nhl/latest/8478496.png",
+    "Joel Armia": "https://assets.nhle.com/mugs/nhl/latest/8476346.png"
 }
 
 @st.cache_data(ttl=86400)
@@ -509,11 +515,11 @@ if current_page == "Trade Intelligence":
     st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
     st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses (NMC/NTC-free).")
 
-    # VETTED ACQUISITION TARGETS DATABASE WITH MANUAL ICONS AND ACCURATE CDN URLs
+    # VETTED ACQUISITION TARGETS DATABASE WITH MANUAL ICONS & VERIFIED HEADSHOTS
     realistic_targets = [
         # --- TOP-SIX FORWARDS ---
         {
-            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8475848.png",
+            "Photo": resolve_player_headshot("Bryan Rust"),
             "Player": "Bryan Rust", 
             "Team_Logo": TEAM_LOGOS["PIT"],
             "Team": "PIT", 
@@ -527,7 +533,7 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Two-time Stanley Cup champion actively made available as Pittsburgh cycles through a multi-year retool. World-class forechecking speed and high-compete board work that fits Andrew Brunette's system seamlessly."
         },
         {
-            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8476460.png",
+            "Photo": resolve_player_headshot("Rickard Rakell"),
             "Player": "Rickard Rakell", 
             "Team_Logo": TEAM_LOGOS["PIT"],
             "Team": "PIT", 
@@ -541,7 +547,7 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Perennial trade-block fixture on a non-contending Penguins roster with full trade maneuverability. Generates rapid rush shots that take pressure off Steven Stamkos."
         },
         {
-            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8475794.png",
+            "Photo": resolve_player_headshot("Mikael Granlund"),
             "Player": "Mikael Granlund", 
             "Team_Logo": TEAM_LOGOS["ANA"],
             "Team": "ANA", 
@@ -557,7 +563,7 @@ if current_page == "Trade Intelligence":
 
         # --- TOP-4 DEFENSIVE UPGRADES ---
         {
-            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8479379.png",
+            "Photo": resolve_player_headshot("Will Borgen"),
             "Player": "Will Borgen", 
             "Team_Logo": TEAM_LOGOS["SEA"],
             "Team": "SEA", 
@@ -573,7 +579,7 @@ if current_page == "Trade Intelligence":
 
         # --- BOTTOM-SIX & PK DEPTH ---
         {
-            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8478496.png",
+            "Photo": resolve_player_headshot("Noel Acciari"),
             "Player": "Noel Acciari", 
             "Team_Logo": TEAM_LOGOS["PHI"],
             "Team": "PHI", 
@@ -587,7 +593,7 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Fearless checking center who wins key defensive-zone draws, blocks point shots, and brings heavy physical identity to a bottom-six checking role."
         },
         {
-            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8476346.png",
+            "Photo": resolve_player_headshot("Joel Armia"),
             "Player": "Joel Armia", 
             "Team_Logo": TEAM_LOGOS["MTL"],
             "Team": "MTL", 
