@@ -31,54 +31,51 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- 2. Real-Time DOM JS Observer: Keep Chevron Permanently Visible & Gold ---
+# --- 2. Real-Time DOM JS Observer: Force Closed Arrow (>>) and Open Arrow (<<) to Gold ---
 components.html("""
 <script>
-    function forcePermanentChevron() {
+    function forceGoldArrows() {
         const doc = window.parent.document;
-        const selectors = [
-            '[data-testid="stSidebarCollapseButton"]',
-            '[data-testid="collapsedControl"]',
-            '[data-testid="stSidebarCollapsedControl"]'
-        ];
         
-        selectors.forEach(sel => {
-            const containers = doc.querySelectorAll(sel);
-            containers.forEach(el => {
-                // Remove Streamlit's auto-hide fade rule
-                el.style.setProperty('opacity', '1', 'important');
-                el.style.setProperty('visibility', 'visible', 'important');
-                el.style.setProperty('display', 'flex', 'important');
+        // Select all potential header & sidebar chevron containers
+        const buttonContainers = doc.querySelectorAll(
+            '[data-testid="stSidebarCollapseButton"], [data-testid="collapsedControl"], [data-testid="stSidebarCollapsedControl"], [data-testid="stHeader"] button'
+        );
+        
+        buttonContainers.forEach(container => {
+            const svg = container.querySelector('svg');
+            if (svg) {
+                // Style button container
+                const btn = container.tagName === 'BUTTON' ? container : container.querySelector('button');
+                if (btn) {
+                    btn.style.setProperty('background-color', '#061F47', 'important');
+                    btn.style.setProperty('border', '2px solid #FFB81C', 'important');
+                    btn.style.setProperty('border-radius', '8px', 'important');
+                    btn.style.setProperty('box-shadow', '0 0 10px rgba(255, 184, 28, 0.45)', 'important');
+                    btn.style.setProperty('opacity', '1', 'important');
+                    btn.style.setProperty('visibility', 'visible', 'important');
+                }
 
-                const btn = el.querySelector('button') || el;
-                btn.style.setProperty('opacity', '1', 'important');
-                btn.style.setProperty('visibility', 'visible', 'important');
-                btn.style.setProperty('background-color', '#061F47', 'important');
-                btn.style.setProperty('border', '2px solid #FFB81C', 'important');
-                btn.style.setProperty('border-radius', '8px', 'important');
-                btn.style.setProperty('box-shadow', '0 0 10px rgba(255, 184, 28, 0.4)', 'important');
+                // Force SVG and all inner lines/paths to Predators Gold
+                svg.style.setProperty('fill', '#FFB81C', 'important');
+                svg.style.setProperty('stroke', '#FFB81C', 'important');
+                svg.style.setProperty('color', '#FFB81C', 'important');
+                svg.style.setProperty('opacity', '1', 'important');
+                svg.style.setProperty('filter', 'drop-shadow(0 0 3px #FFB81C)', 'important');
                 
-                const svgs = el.querySelectorAll('svg');
-                svgs.forEach(svg => {
-                    svg.style.setProperty('opacity', '1', 'important');
-                    svg.style.setProperty('visibility', 'visible', 'important');
-                    svg.style.setProperty('fill', '#FFB81C', 'important');
-                    svg.style.setProperty('stroke', '#FFB81C', 'important');
-                    svg.style.setProperty('color', '#FFB81C', 'important');
-                    
-                    svg.querySelectorAll('*').forEach(child => {
-                        child.style.setProperty('fill', '#FFB81C', 'important');
-                        child.style.setProperty('stroke', '#FFB81C', 'important');
-                        child.style.setProperty('opacity', '1', 'important');
-                    });
+                svg.querySelectorAll('*').forEach(child => {
+                    child.style.setProperty('fill', '#FFB81C', 'important');
+                    child.style.setProperty('stroke', '#FFB81C', 'important');
+                    child.style.setProperty('color', '#FFB81C', 'important');
+                    child.style.setProperty('opacity', '1', 'important');
                 });
-            });
+            }
         });
     }
 
-    forcePermanentChevron();
+    forceGoldArrows();
     const observer = new MutationObserver(() => {
-        forcePermanentChevron();
+        forceGoldArrows();
     });
     observer.observe(window.parent.document.body, { childList: true, subtree: true });
 </script>
@@ -116,65 +113,50 @@ st.markdown("""
     }
 
     /* ============================================================ */
-    /* FORCE PERMANENT VISIBILITY & SPORTY GOLD ARROW               */
+    /* FORCE COLLAPSED (>>) & EXPANDED (<<) ARROWS TO PREDATORS GOLD*/
     /* ============================================================ */
     
-    /* Disarm Streamlit hover-only auto-hide */
-    [data-testid="stSidebarCollapseButton"],
+    /* Permanent Visibility & Button Tile */
     [data-testid="collapsedControl"],
     [data-testid="stSidebarCollapsedControl"],
-    [data-testid="stSidebarCollapseButton"] button,
-    [data-testid="collapsedControl"] button,
-    [data-testid="stSidebarCollapsedControl"] button {
+    [data-testid="stSidebarCollapseButton"] {
         opacity: 1 !important;
         visibility: visible !important;
         display: flex !important;
     }
 
-    /* Sporty Navy & Gold Button Box */
-    [data-testid="stSidebarCollapseButton"] button,
     [data-testid="collapsedControl"] button,
-    [data-testid="stSidebarCollapsedControl"] button {
+    [data-testid="stSidebarCollapsedControl"] button,
+    [data-testid="stSidebarCollapseButton"] button {
         background-color: #061F47 !important;
         border: 2px solid #FFB81C !important;
         border-radius: 8px !important;
         padding: 4px 8px !important;
         box-shadow: 0 0 10px rgba(255, 184, 28, 0.4) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
         transition: all 0.2s ease-in-out !important;
     }
 
-    /* Hover State */
-    [data-testid="stSidebarCollapseButton"] button:hover,
-    [data-testid="collapsedControl"] button:hover,
-    [data-testid="stSidebarCollapsedControl"] button:hover {
-        background-color: #FFB81C !important;
-        box-shadow: 0 0 16px rgba(255, 184, 28, 0.7) !important;
-        transform: scale(1.06);
-    }
-
-    /* Ensure arrow SVG is fully opaque & colored gold */
-    [data-testid="stSidebarCollapseButton"] svg,
+    /* Target SVG Chevrons directly via Color & Matrix Filter */
     [data-testid="collapsedControl"] svg,
     [data-testid="stSidebarCollapsedControl"] svg,
-    [data-testid="stSidebarCollapseButton"] svg *,
-    [data-testid="collapsedControl"] svg *,
-    [data-testid="stSidebarCollapsedControl"] svg * {
-        opacity: 1 !important;
-        visibility: visible !important;
+    [data-testid="stSidebarCollapseButton"] svg {
         fill: #FFB81C !important;
         stroke: #FFB81C !important;
         color: #FFB81C !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        filter: invert(75%) sepia(85%) saturate(1400%) hue-rotate(350deg) brightness(103%) contrast(105%) !important;
     }
 
-    [data-testid="stSidebarCollapseButton"] button:hover svg,
-    [data-testid="collapsedControl"] button:hover svg,
-    [data-testid="stSidebarCollapsedControl"] button:hover svg,
-    [data-testid="stSidebarCollapseButton"] button:hover svg *,
-    [data-testid="collapsedControl"] button:hover svg *,
-    [data-testid="stSidebarCollapsedControl"] button:hover svg * {
-        fill: #041E42 !important;
-        stroke: #041E42 !important;
-        color: #041E42 !important;
+    [data-testid="collapsedControl"] svg *,
+    [data-testid="stSidebarCollapsedControl"] svg *,
+    [data-testid="stSidebarCollapseButton"] svg * {
+        fill: #FFB81C !important;
+        stroke: #FFB81C !important;
+        color: #FFB81C !important;
+        opacity: 1 !important;
     }
 
     /* Header Container */
