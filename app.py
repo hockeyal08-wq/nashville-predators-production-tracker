@@ -41,56 +41,35 @@ st.markdown("""
     }
 
     /* ============================================================ */
-    /* SPORTY GOLD CHEVRON OVERRIDES (ALL STREAMLIT VERSIONS)       */
+    /* FORCE SIDEBAR ARROWS TO PREDATORS GOLD VIA GRAPHICS FILTER   */
     /* ============================================================ */
     
-    /* Target every container that wraps the collapse/expand trigger */
-    [data-testid="stSidebarCollapsedControl"],
-    [data-testid="collapsedControl"],
-    [data-testid="stSidebarCollapseButton"] {
-        color: #FFB81C !important;
-    }
-
-    /* Target the button itself */
+    /* Target the button container for both open and closed states */
     [data-testid="stSidebarCollapsedControl"] button,
     [data-testid="collapsedControl"] button,
     [data-testid="stSidebarCollapseButton"] button {
         background-color: #061F47 !important;
         border: 2px solid #FFB81C !important;
-        border-radius: 8px !important;
-        box-shadow: 0 0 10px rgba(255, 184, 28, 0.3) !important;
-        transition: all 0.2s ease-in-out !important;
+        border-radius: 10px !important;
+        box-shadow: 0 0 12px rgba(255, 184, 28, 0.35) !important;
+        padding: 4px 8px !important;
     }
 
-    [data-testid="stSidebarCollapsedControl"] button:hover,
-    [data-testid="collapsedControl"] button:hover,
-    [data-testid="stSidebarCollapseButton"] button:hover {
-        background-color: #FFB81C !important;
-        box-shadow: 0 0 16px rgba(255, 184, 28, 0.6) !important;
-    }
-
-    /* Target SVG and all child paths inside the buttons */
+    /* Target the SVG arrows directly:
+       Convert grey -> Pure Predators Gold (#FFB81C) using graphics matrix */
     [data-testid="stSidebarCollapsedControl"] svg,
     [data-testid="collapsedControl"] svg,
-    [data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stSidebarCollapsedControl"] svg *,
-    [data-testid="collapsedControl"] svg *,
-    [data-testid="stSidebarCollapseButton"] svg * {
-        fill: #FFB81C !important;
-        stroke: #FFB81C !important;
-        color: #FFB81C !important;
+    [data-testid="stSidebarCollapseButton"] svg {
+        filter: invert(75%) sepia(85%) saturate(1400%) hue-rotate(350deg) brightness(103%) contrast(105%) !important;
+        opacity: 1 !important;
+        transform: scale(1.15) !important;
+        transition: transform 0.2s ease-in-out !important;
     }
 
-    /* Hover invert: gold background, navy icon */
     [data-testid="stSidebarCollapsedControl"] button:hover svg,
     [data-testid="collapsedControl"] button:hover svg,
-    [data-testid="stSidebarCollapseButton"] button:hover svg,
-    [data-testid="stSidebarCollapsedControl"] button:hover svg *,
-    [data-testid="collapsedControl"] button:hover svg *,
-    [data-testid="stSidebarCollapseButton"] button:hover svg * {
-        fill: #041E42 !important;
-        stroke: #041E42 !important;
-        color: #041E42 !important;
+    [data-testid="stSidebarCollapseButton"] button:hover svg {
+        transform: scale(1.3) !important;
     }
 
     /* Header Container */
@@ -352,12 +331,14 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
+        # Raw percentage decimals
         sh_pct = s.get("shootingPctg", 0.0)
         sh_pct = float(sh_pct) if sh_pct is not None else 0.0
 
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = float(fo_pct) if fo_pct is not None else 0.0
 
+        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
