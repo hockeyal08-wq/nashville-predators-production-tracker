@@ -154,7 +154,7 @@ st.markdown("""
     }
 
     /* ============================================================ */
-    /* CUSTOM NAVIGATION BUTTON BAR (GUARANTEED VISIBILITY)         */
+    /* CUSTOM NAVIGATION BUTTON BAR                                 */
     /* ============================================================ */
     
     /* Default / Unselected Buttons: Bright Yellow Rounded Border + Pure White Text */
@@ -449,7 +449,6 @@ format_4dec = {
 }
 
 if not df.empty:
-    # State tracking for view selection
     if "active_tab_view" not in st.session_state:
         st.session_state["active_tab_view"] = "Offensive Impact"
 
@@ -460,7 +459,6 @@ if not df.empty:
         "Complete Skater Statistics"
     ]
 
-    # Explicit 4-column button bar that Streamlit's CSS engine cannot override
     nav_cols = st.columns(4)
     for idx, tab_name in enumerate(tabs):
         with nav_cols[idx]:
@@ -472,7 +470,7 @@ if not df.empty:
     active_view = st.session_state["active_tab_view"]
 
     if active_view == "Offensive Impact":
-        st.markdown("**Ranked by Offensive Score (`Off_Score`):**")
+        st.markdown("**Ranked by Offensive Score:**")
         off_df = df[["Name", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
         styled_off = (
             off_df.style
@@ -482,7 +480,7 @@ if not df.empty:
         st.dataframe(styled_off, use_container_width=True, hide_index=True)
 
     elif active_view == "Defensive Impact":
-        st.markdown("**Ranked by Defensive Score (`Def_Score`):**")
+        st.markdown("**Ranked by Defensive Score:**")
         def_df = df[["Name", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG", "FO%"]].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
         styled_def = (
             def_df.style
@@ -492,7 +490,7 @@ if not df.empty:
         st.dataframe(styled_def, use_container_width=True, hide_index=True)
 
     elif active_view == "Special Teams Performance":
-        st.markdown("**Ranked by Special Teams Impact (`PP_Score` & `PK_Score`):**")
+        st.markdown("**Ranked by Special Teams Impact:**")
         st_df = df[["Name", "Pos", "GP", "PP_Score", "PK_Score", "PPG", "SHG", "PIM", "TOI/GP"]].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
         styled_st = (
             st_df.style
