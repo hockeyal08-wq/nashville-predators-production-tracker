@@ -9,7 +9,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- Complete Preds Navy & Gold Theme Injection ---
+# Deep franchise theme injection with nuclear !important overrides for Streamlit tabs
 st.markdown("""
 <style>
     /* Full Page Canvas, Main Body & App View Container */
@@ -40,34 +40,45 @@ st.markdown("""
         max-width: 95% !important;
     }
 
-    /* --- PREDATORS YELLOW/GOLD TABS OVERRIDE --- */
-    /* Target the base tab button */
+    /* ============================================================ */
+    /* FORCE TABS TO PREDATORS GOLD / YELLOW                        */
+    /* ============================================================ */
+    
+    /* Inactive Tab Text */
+    .stTabs [data-baseweb="tab"] p,
+    .stTabs [data-baseweb="tab"] span,
     .stTabs [data-baseweb="tab"] {
-        color: #CBD5E1 !important;
+        color: #94A3B8 !important;
         font-weight: 700 !important;
         font-size: 1.05rem !important;
-        padding: 10px 18px !important;
     }
+    
+    /* Inactive Tab Hover */
+    .stTabs [data-baseweb="tab"]:hover p,
+    .stTabs [data-baseweb="tab"]:hover span,
     .stTabs [data-baseweb="tab"]:hover {
         color: #FFB81C !important;
     }
-    
-    /* Active / Selected Tab Text & All Children */
-    .stTabs [data-baseweb="tab"][aria-selected="true"],
-    .stTabs [data-baseweb="tab"][aria-selected="true"] p,
-    .stTabs [data-baseweb="tab"][aria-selected="true"] span,
-    .stTabs [data-baseweb="tab"][aria-selected="true"] div {
+
+    /* ACTIVE TAB: Forces "Offensive Impact", etc. to Yellow */
+    .stTabs [aria-selected="true"],
+    .stTabs [aria-selected="true"] p,
+    .stTabs [aria-selected="true"] span,
+    .stTabs [aria-selected="true"] div,
+    .stTabs button[aria-selected="true"] * {
         color: #FFB81C !important;
         font-weight: 800 !important;
+        -webkit-text-fill-color: #FFB81C !important;
     }
-    
-    /* Active Underline Highlight Bar */
-    .stTabs [data-baseweb="tab-highlight"] {
+
+    /* ACTIVE TAB UNDERLINE BAR: Forces red line to Yellow */
+    .stTabs [data-baseweb="tab-highlight"],
+    .stTabs div[data-baseweb="tab-highlight"] {
         background-color: #FFB81C !important;
         height: 3px !important;
     }
-    
-    /* Bottom Divider Rail */
+
+    /* Tab Rail Divider */
     .stTabs [data-baseweb="tab-border"] {
         background-color: rgba(255, 184, 28, 0.25) !important;
     }
@@ -189,8 +200,9 @@ st.markdown("""
     .benchmark-caption {
         color: #FFB81C !important;
         font-size: 0.95rem !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
         margin-bottom: 14px !important;
+        letter-spacing: 0.3px;
     }
 
     h1, h2, h3, h4 {
@@ -324,7 +336,7 @@ def load_club_skater_stats(season, game_type):
         df = df[df["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
     return df
 
-# --- Soft Green (Top 15%) & Soft Red (Bottom 15%) Table Highlights ---
+# --- Soft Green (Top 15%) & Soft Red (Bottom 15%) Table Outliers ---
 def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0.15):
     """Clean data presentation: Soft green for top 15%, soft red for bottom 15%."""
     styler_df = pd.DataFrame('', index=data_df.index, columns=data_df.columns)
@@ -349,9 +361,11 @@ def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0
             if pd.isna(val):
                 continue
             if val >= high_thresh:
-                styler_df.loc[idx, col] = 'background-color: rgba(34, 197, 94, 0.35); font-weight: bold;'
+                # Soft green background with bold dark text
+                styler_df.loc[idx, col] = 'background-color: rgba(34, 197, 94, 0.35); color: #041E42; font-weight: bold;'
             elif val <= low_thresh:
-                styler_df.loc[idx, col] = 'background-color: rgba(239, 68, 68, 0.35); font-weight: bold;'
+                # Soft red background with bold white text
+                styler_df.loc[idx, col] = 'background-color: rgba(239, 68, 68, 0.40); color: #FFFFFF; font-weight: bold;'
                 
     return styler_df
 
