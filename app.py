@@ -41,27 +41,55 @@ st.markdown("""
     }
 
     /* ============================================================ */
-    /* SIDEBAR TOGGLE & EXPAND CHEVRON ARROWS (PREDATORS GOLD)      */
+    /* SPORTY GOLD CHEVRON BADGE FOR SIDEBAR TOGGLE                 */
     /* ============================================================ */
     
-    /* Target collapsed sidebar expand arrow (>>) */
-    [data-testid="collapsedControl"] svg,
-    [data-testid="collapsedControl"] svg path,
-    [data-testid="collapsedControl"] button svg,
-    [data-testid="collapsedControl"] button svg path {
+    /* Collapsed Control Toggle (When sidebar is hidden) */
+    [data-testid="collapsedControl"] {
+        top: 18px !important;
+        left: 18px !important;
+    }
+    [data-testid="collapsedControl"] button {
+        background-color: #061F47 !important;
+        border: 1.5px solid #FFB81C !important;
+        border-radius: 8px !important;
+        padding: 4px 8px !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6), 0 0 10px rgba(255, 184, 28, 0.25) !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    [data-testid="collapsedControl"] button:hover {
+        background-color: #FFB81C !important;
+        box-shadow: 0 0 16px rgba(255, 184, 28, 0.6) !important;
+        transform: scale(1.08);
+    }
+    [data-testid="collapsedControl"] svg {
         fill: #FFB81C !important;
         stroke: #FFB81C !important;
-        color: #FFB81C !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+    [data-testid="collapsedControl"] button:hover svg {
+        fill: #041E42 !important;
+        stroke: #041E42 !important;
     }
 
-    /* Target open sidebar collapse arrow (<<) */
-    [data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stSidebarCollapseButton"] svg path,
-    [data-testid="stSidebarCollapseButton"] button svg,
-    [data-testid="stSidebarCollapseButton"] button svg path {
+    /* Expanded Sidebar Collapse Arrow (<<) */
+    [data-testid="stSidebarCollapseButton"] button {
+        background-color: #061F47 !important;
+        border: 1.5px solid #FFB81C !important;
+        border-radius: 8px !important;
+        transition: all 0.25s ease-in-out !important;
+    }
+    [data-testid="stSidebarCollapseButton"] button:hover {
+        background-color: #FFB81C !important;
+        box-shadow: 0 0 12px rgba(255, 184, 28, 0.5) !important;
+    }
+    [data-testid="stSidebarCollapseButton"] svg {
         fill: #FFB81C !important;
         stroke: #FFB81C !important;
-        color: #FFB81C !important;
+    }
+    [data-testid="stSidebarCollapseButton"] button:hover svg {
+        fill: #041E42 !important;
+        stroke: #041E42 !important;
     }
 
     /* Header Container */
@@ -168,11 +196,7 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* ============================================================ */
-    /* PREDATORS GOLD ROUNDED BUTTONS (ACTIVE & INACTIVE)           */
-    /* ============================================================ */
-    
-    /* Inactive Buttons: Navy background + 2px Gold border + White Text */
+    /* Predators Gold Rounded Buttons */
     div[data-testid="stButton"] button[kind="secondary"] {
         background-color: #061F47 !important;
         border: 2px solid #FFB81C !important;
@@ -189,8 +213,6 @@ st.markdown("""
         background-color: rgba(255, 184, 28, 0.2) !important;
         box-shadow: 0 0 12px rgba(255, 184, 28, 0.5) !important;
     }
-
-    /* Active Buttons: Solid Predators Gold fill + Dark Navy Text */
     div[data-testid="stButton"] button[kind="primary"] {
         background-color: #FFB81C !important;
         border: 2px solid #FFB81C !important;
@@ -568,4 +590,3 @@ if not df.empty:
             ]
             lim_view = limited_df[cols].sort_values(by="GP", ascending=False).reset_index(drop=True)
             st.dataframe(lim_view, column_config=base_column_config, use_container_width=True, hide_index=True)
-Steps:
