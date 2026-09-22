@@ -1087,3 +1087,171 @@ if not df.empty:
             ]
             lim_view = limited_df[cols].sort_values(by="GP", ascending=False).reset_index(drop=True)
             st.dataframe(lim_view, column_config=base_column_config, use_container_width=True, hide_index=True)
+# ==============================================================================
+# GOALTENDER ANALYTICS MODULE (APPEND-READY)
+# ==============================================================================
+
+@st.cache_data(ttl=900)
+def load_club_goalie_stats(season, game_type):
+    url = f"{BASE_URL}/club-stats/{TEAM_TRICODE}/{season}/{game_type}"
+    res = requests.get(url)
+    if res.status_code != 200:
+        return pd.DataFrame()
+    
+    data = res.json()
+    goalies = data.get("goalies", [])
+    if not goalies:
+        return pd.DataFrame()
+
+    goalie_rows = []
+    for g in goalies:
+        player_id = g.get("playerId")
+        gp = g.get("gamesPlayed", 0)
+        gs = g.get("gamesStarted", 0)
+        wins = g.get("wins", 0)
+        losses = g.get("losses", 0)
+        
+        # Robust OTL mapping with difference fallback for archived seasons
+        ot_losses = g.get("otLosses")
+        if ot_losses is None:
+            ot_losses = g.get("ot")
+        if ot_losses is None:
+            ot_losses = g.get("overtimeLosses", 0)
+        if ot_losses == 0 and gp > (wins + losses):
+            ot_losses = gp - (wins + losses)
+
+        sa = g.get("shotsAgainst", 0)
+        ga = g.get("goalsAgainst", 0)
+        sv = g.get("saves", 0)
+        
+        raw_svp = g.get("savePctg") or g.get("savePct") or 0.0
+        if raw_svp == 0.0 and sa > 0:
+            raw_svp = sv / sa
+        svp = round(float(raw_svp) * 100.0, 2) if raw_svp <= 1.0 else round(float(raw_svp), 2)
+
+        gaa = round(float(g.get("goalsAgainstAverage") or 0.0), 2)
+        so = g.get("shutouts", 0)
+
+        first_name = g.get("firstName", {}).get("default", "")
+        last_name = g.get("lastName", {}).get("default", "")
+
+        goalie_rows.append({
+            "PlayerId": player_id,
+            "Photo": g.get("headshot", f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png"),
+            "Skater": f"{first_name} {last_name}",
+            "Pos": "G",
+            "GP": int(gp),
+            "GS": int(gs),
+            "W": int(wins),
+            "L": int(losses),
+            "OTL": int(ot_losses),
+            "SA": int(sa),
+            "GA": int(ga),
+            "SV": int(sv),
+            "SV%": svp,
+            "GAA": gaa,
+            "SO": int(so)
+        })
+
+    gdf = pd.DataFrame(goalie_rows)
+    if not gdf.empty:
+        gdf = gdf.sort_values(by="GP", ascending=False).reset_index(drop=True)
+    return gdf
+
+# If you want to include Goaltenders in your position filter toggle:
+# 1. Add "Goaltenders" to your position filter buttons in the sidebar.
+# 2. Drop the block below into your main display logic when position_filter == "Goaltenders":
+
+if position_filter == "Goaltenders":
+    goalie_df = load_club_goalie_stats(selected_season, game_type_code)
+    
+    if goalie_df.empty:
+        st.info(f"No goaltender data recorded for {st.session_state['selected_season_label']}.")
+    else:
+        if "selected_player_id" not in st.session_state or st.session_state["selected_player_id"] not in goalie_df["PlayerId"].values:
+            st.session_state["selected_player_id"] = int(goalie_df.iloc[0]["PlayerId"])
+
+        p = goalie_df[goalie_df["PlayerId"] == st.session_state["selected_player_id"]].iloc[0]
+        
+        spotlight_html = f"""
+        <div class="spotlight-card">
+            <div style="display: flex; gap: 28px; align-items: center; flex-wrap: wrap;">
+                <div style="flex-shrink: 0; text-align: center;">
+                    <img src="{p['Photo']}" onerror="this.onerror=null; this.src='{PREDS_LOGO_URL}';" style="width: 145px; height: 145px; object-fit: cover; border-radius: 50%; border: 2px solid #FFB81C; box-shadow: 0 6px 18px rgba(0,0,0,0.65);">
+                </div>
+                <div style="flex-grow: 1; min-width: 280px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h2 class="spotlight-title">{p['Skater']}</h2>
+                            <div>
+                                <span class="badge">POS: G</span>
+                                <span class="badge">GP: {p['GP']}</span>
+                                <span class="badge">RECORD: {p['W']}-{p['L']}-{p['OTL']}</span>
+                            </div>
+                        </div>
+                        <img src="{PREDS_LOGO_URL}" style="width: 60px; opacity: 0.9;" alt="Predators">
+                    </div>
+                    <div class="stat-pill-container">
+                        <div class="stat-pill">
+                            <div class="stat-pill-label">Save Percentage</div>
+                            <div class="stat-pill-val">{p['SV%']:.2f}%</div>
+                            <div class="stat-pill-sub">{p['SV']} Saves</div>
+                        </div>
+                        <div class="stat-pill">
+                            <div class="stat-pill-label">Goals Against Avg</div>
+                            <div class="stat-pill-val">{p['GAA']:.2f}</div>
+                            <div class="stat-pill-sub">{p['GA']} Goals Allowed</div>
+                        </div>
+                        <div class="stat-pill">
+                            <div class="stat-pill-label">Shutouts</div>
+                            <div class="stat-pill-val">{p['SO']} SO</div>
+                            <div class="stat-pill-sub">{p['GS']} Starts</div>
+                        </div>
+                        <div class="stat-pill">
+                            <div class="stat-pill-label">Overtime Losses</div>
+                            <div class="stat-pill-val">{p['OTL']} OTL</div>
+                            <div class="stat-pill-sub">OT Point Gainers</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """
+        st.markdown(spotlight_html, unsafe_allow_html=True)
+
+        st.markdown("#### Goaltender Selection")
+        num_cols = 6
+        for i in range(0, len(goalie_df), num_cols):
+            cols = st.columns(num_cols)
+            for j, col in enumerate(cols):
+                idx = i + j
+                if idx < len(goalie_df):
+                    g_skater = goalie_df.iloc[idx]
+                    with col:
+                        with st.container(border=True):
+                            st.image(g_skater["Photo"], use_container_width=True)
+                            st.caption(f"**{g_skater['Skater']}** | G")
+                            st.caption(f"{g_skater['W']}-{g_skater['L']}-{g_skater['OTL']} | {g_skater['SV%']:.2f}%")
+                            if st.button("Select", key=f"btn_g_{g_skater['PlayerId']}", use_container_width=True):
+                                st.session_state["selected_player_id"] = int(g_skater["PlayerId"])
+                                st.rerun()
+
+        st.divider()
+        st.subheader("Goaltender Statistics Hub")
+        cols = ["Photo", "Skater", "GP", "GS", "W", "L", "OTL", "SA", "GA", "SV", "SV%", "GAA", "SO"]
+        goalie_column_config = {
+            "Photo": st.column_config.ImageColumn("", width="small"),
+            "Skater": st.column_config.TextColumn("Goaltender", width="medium"),
+            "GP": st.column_config.NumberColumn("GP", format="%d"),
+            "GS": st.column_config.NumberColumn("GS", format="%d"),
+            "W": st.column_config.NumberColumn("W", format="%d"),
+            "L": st.column_config.NumberColumn("L", format="%d"),
+            "OTL": st.column_config.NumberColumn("OTL", format="%d"),
+            "SA": st.column_config.NumberColumn("SA", format="%d"),
+            "GA": st.column_config.NumberColumn("GA", format="%d"),
+            "SV": st.column_config.NumberColumn("SV", format="%d"),
+            "SV%": st.column_config.ProgressColumn("SV%", min_value=85.0, max_value=95.0, format="%.2f%%"),
+            "GAA": st.column_config.NumberColumn("GAA", format="%.2f"),
+            "SO": st.column_config.NumberColumn("SO", format="%d"),
+        }
+        st.dataframe(goalie_df[cols], column_config=goalie_column_config, use_container_width=True, hide_index=True)
