@@ -369,7 +369,7 @@ with p_cols[2]:
 current_page = st.session_state["current_page"]
 
 # ==============================================================================
-# VERIFIED HEADSHOT OVERRIDES
+# VERIFIED HEADSHOT OVERRIDES (Guaranteed accurate NHL CDN Mug URLs)
 # ==============================================================================
 VERIFIED_MANUAL_HEADSHOTS = {
     "Steven Stamkos": "https://assets.nhle.com/mugs/nhl/latest/8474564.png",
@@ -388,23 +388,6 @@ VERIFIED_MANUAL_HEADSHOTS = {
 def resolve_player_headshot(player_name, fallback_id=None):
     if player_name in VERIFIED_MANUAL_HEADSHOTS:
         return VERIFIED_MANUAL_HEADSHOTS[player_name]
-    try:
-        search_query = player_name.replace(" ", "%20")
-        url = f"https://search.d3.nhle.com/api/v1/search/player?culture=en-us&limit=3&q={search_query}"
-        res = requests.get(url, timeout=4)
-        if res.status_code == 200:
-            hits = res.json()
-            if hits:
-                p_id = hits[0].get("playerId")
-                if p_id:
-                    landing_res = requests.get(f"https://api-web.nhle.com/v1/player/{p_id}/landing", timeout=4)
-                    if landing_res.status_code == 200:
-                        headshot = landing_res.json().get("headshot")
-                        if headshot:
-                            return headshot
-                    return f"https://assets.nhle.com/mugs/nhl/latest/{p_id}.png"
-    except Exception:
-        pass
     if fallback_id:
         return f"https://assets.nhle.com/mugs/nhl/latest/{fallback_id}.png"
     return PREDS_LOGO_URL
@@ -515,13 +498,13 @@ if current_page == "Trade Intelligence":
     st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
     st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses (NMC/NTC-free).")
 
-    # VETTED ACQUISITION TARGETS DATABASE WITH PLAYER HEADSHOTS, TEAM LOGOS, AND POSITIONS
+    # VETTED ACQUISITION TARGETS DATABASE WITH DIRECT VERIFIED HEADSHOTS
     realistic_targets = [
         # --- TOP-SIX FORWARDS ---
         {
             "Photo": resolve_player_headshot("Bryan Rust"),
             "Player": "Bryan Rust", 
-            "Team_Logo": TEAM_LOGOS["PIT"],
+            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/PIT_light.svg",
             "Team": "PIT", 
             "Pos": "RW",
             "Cap_Hit": 5.125, 
@@ -535,7 +518,7 @@ if current_page == "Trade Intelligence":
         {
             "Photo": resolve_player_headshot("Rickard Rakell"),
             "Player": "Rickard Rakell", 
-            "Team_Logo": TEAM_LOGOS["PIT"],
+            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/PIT_light.svg",
             "Team": "PIT", 
             "Pos": "RW",
             "Cap_Hit": 5.00, 
@@ -549,7 +532,7 @@ if current_page == "Trade Intelligence":
         {
             "Photo": resolve_player_headshot("Mikael Granlund"),
             "Player": "Mikael Granlund", 
-            "Team_Logo": TEAM_LOGOS["ANA"],
+            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/ANA_light.svg",
             "Team": "ANA", 
             "Pos": "C",
             "Cap_Hit": 7.00, 
@@ -565,7 +548,7 @@ if current_page == "Trade Intelligence":
         {
             "Photo": resolve_player_headshot("Will Borgen"),
             "Player": "Will Borgen", 
-            "Team_Logo": TEAM_LOGOS["SEA"],
+            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/SEA_light.svg",
             "Team": "SEA", 
             "Pos": "RD",
             "Cap_Hit": 2.70, 
@@ -581,7 +564,7 @@ if current_page == "Trade Intelligence":
         {
             "Photo": resolve_player_headshot("Noel Acciari"),
             "Player": "Noel Acciari", 
-            "Team_Logo": TEAM_LOGOS["PHI"],
+            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/PHI_light.svg",
             "Team": "PHI", 
             "Pos": "C",
             "Cap_Hit": 1.40, 
@@ -595,7 +578,7 @@ if current_page == "Trade Intelligence":
         {
             "Photo": resolve_player_headshot("Joel Armia"),
             "Player": "Joel Armia", 
-            "Team_Logo": TEAM_LOGOS["MTL"],
+            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/MTL_light.svg",
             "Team": "MTL", 
             "Pos": "RW",
             "Cap_Hit": 3.40, 
