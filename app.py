@@ -9,7 +9,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Deep franchise theme injection with nuclear !important overrides for Streamlit tabs
+# --- Preds Executive Full-Canvas Styling ---
 st.markdown("""
 <style>
     /* Full Page Canvas, Main Body & App View Container */
@@ -41,65 +41,58 @@ st.markdown("""
     }
 
     /* ============================================================ */
-    /* ULTRA-VISIBLE HIGH-CONTRAST PREDATORS TABS                   */
+    /* CUSTOM HORIZONTAL NAVBAR (REPLACES ST.TABS)                  */
     /* ============================================================ */
     
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 10px !important;
-        background-color: transparent !important;
+    /* Hide the radio button circles */
+    div[data-testid="stRadio"] > label {
+        display: none !important;
     }
-
-    /* Inactive Tabs: Clean pill containers with crisp pure white text */
-    .stTabs [data-baseweb="tab"] {
-        background: rgba(255, 255, 255, 0.12) !important;
-        border: 1px solid rgba(255, 255, 255, 0.22) !important;
-        border-radius: 8px !important;
-        padding: 8px 18px !important;
-        transition: all 0.2s ease-in-out !important;
-        opacity: 1 !important;
+    div[data-testid="stRadio"] > div[role="radiogroup"] {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 12px !important;
+        margin-bottom: 16px !important;
+    }
+    div[data-testid="stRadio"] > div[role="radiogroup"] > label {
+        margin: 0 !important;
+        cursor: pointer !important;
+    }
+    div[data-testid="stRadio"] > div[role="radiogroup"] > label > div:first-child {
+        display: none !important; /* Hide radio dot */
     }
     
-    .stTabs [data-baseweb="tab"] p,
-    .stTabs [data-baseweb="tab"] span,
-    .stTabs [data-baseweb="tab"] div {
+    /* Inactive Nav Pill: Crisp Pure White Text on Elevated Navy Tile */
+    div[data-testid="stRadio"] > div[role="radiogroup"] > label > div[data-testid="stMarkdownContainer"] p {
+        background: #061F47 !important;
+        border: 1.5px solid rgba(255, 184, 28, 0.35) !important;
+        border-radius: 8px !important;
+        padding: 8px 22px !important;
         color: #FFFFFF !important;
         -webkit-text-fill-color: #FFFFFF !important;
         font-weight: 700 !important;
-        font-size: 1.05rem !important;
-        opacity: 1 !important;
+        font-size: 1rem !important;
+        transition: all 0.2s ease-in-out !important;
+        opacity: 1.0 !important;
     }
     
-    /* Hover State: Gold accent border & text glow */
-    .stTabs [data-baseweb="tab"]:hover {
-        background: rgba(255, 184, 28, 0.2) !important;
+    /* Inactive Nav Pill Hover */
+    div[data-testid="stRadio"] > div[role="radiogroup"] > label:hover > div[data-testid="stMarkdownContainer"] p {
         border-color: #FFB81C !important;
-    }
-    .stTabs [data-baseweb="tab"]:hover p,
-    .stTabs [data-baseweb="tab"]:hover span,
-    .stTabs [data-baseweb="tab"]:hover div {
         color: #FFB81C !important;
         -webkit-text-fill-color: #FFB81C !important;
+        background: #092C63 !important;
     }
 
-    /* ACTIVE TAB: Solid Predators Gold pill with Navy text */
-    .stTabs [data-baseweb="tab"][aria-selected="true"] {
-        background-color: #FFB81C !important;
-        border: 1px solid #FFB81C !important;
-        opacity: 1 !important;
-    }
-    .stTabs [data-baseweb="tab"][aria-selected="true"] p,
-    .stTabs [data-baseweb="tab"][aria-selected="true"] span,
-    .stTabs [data-baseweb="tab"][aria-selected="true"] div {
+    /* ACTIVE NAV PILL: Solid Predators Gold with Navy Text */
+    div[data-testid="stRadio"] > div[role="radiogroup"] > label[data-checked="true"] > div[data-testid="stMarkdownContainer"] p,
+    div[data-testid="stRadio"] > div[role="radiogroup"] > label:has(input:checked) > div[data-testid="stMarkdownContainer"] p {
+        background: #FFB81C !important;
+        border-color: #FFB81C !important;
         color: #041E42 !important;
         -webkit-text-fill-color: #041E42 !important;
         font-weight: 800 !important;
-    }
-
-    /* Hide redundant default underline highlight */
-    .stTabs [data-baseweb="tab-highlight"],
-    .stTabs div[data-baseweb="tab-highlight"],
-    .stTabs [data-baseweb="tab-border"] {
-        display: none !important;
+        box-shadow: 0 4px 14px rgba(255, 184, 28, 0.4) !important;
     }
 
     /* Header Container */
@@ -491,14 +484,20 @@ format_4dec = {
 }
 
 if not df.empty:
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "Offensive Impact", 
-        "Defensive Impact", 
-        "Special Teams Performance", 
-        "Complete Skater Statistics"
-    ])
+    # Custom high-contrast executive navigation pills
+    active_view = st.radio(
+        "Navigation",
+        options=[
+            "Offensive Impact", 
+            "Defensive Impact", 
+            "Special Teams Performance", 
+            "Complete Skater Statistics"
+        ],
+        horizontal=True,
+        label_visibility="collapsed"
+    )
 
-    with tab1:
+    if active_view == "Offensive Impact":
         st.markdown("**Ranked by Offensive Score (`Off_Score`):**")
         off_df = df[["Name", "Pos", "GP", "Off_Score", "P/60", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
         styled_off = (
@@ -508,7 +507,7 @@ if not df.empty:
         )
         st.dataframe(styled_off, use_container_width=True, hide_index=True)
 
-    with tab2:
+    elif active_view == "Defensive Impact":
         st.markdown("**Ranked by Defensive Score (`Def_Score`):**")
         def_df = df[["Name", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG", "FO%"]].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
         styled_def = (
@@ -518,7 +517,7 @@ if not df.empty:
         )
         st.dataframe(styled_def, use_container_width=True, hide_index=True)
 
-    with tab3:
+    elif active_view == "Special Teams Performance":
         st.markdown("**Ranked by Special Teams Impact (`PP_Score` & `PK_Score`):**")
         st_df = df[["Name", "Pos", "GP", "PP_Score", "PK_Score", "PPG", "SHG", "PIM", "TOI/GP"]].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
         styled_st = (
@@ -528,7 +527,7 @@ if not df.empty:
         )
         st.dataframe(styled_st, use_container_width=True, hide_index=True)
 
-    with tab4:
+    elif active_view == "Complete Skater Statistics":
         comp_df = df[[
             "Name", "Pos", "GP", "Off_Score", "Def_Score", "PP_Score", "PK_Score",
             "PTS", "G", "A", "+/-", "P/60", "TOI/GP", "SOG", "SH%", "PIM", 
