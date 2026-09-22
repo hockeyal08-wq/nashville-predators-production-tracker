@@ -1,4 +1,27 @@
+import os
+from pathlib import Path
+
+# --- 1. Programmatically write Streamlit Theme Engine config ---
+# This forces Streamlit's root chrome (including the >> sidebar chevron) to Gold
+config_dir = Path(".streamlit")
+config_file = config_dir / "config.toml"
+theme_config = """[theme]
+primaryColor = "#FFB81C"
+backgroundColor = "#041E42"
+secondaryBackgroundColor = "#03142D"
+textColor = "#FFFFFF"
+font = "sans serif"
+"""
+
+try:
+    config_dir.mkdir(exist_ok=True)
+    if not config_file.exists() or config_file.read_text() != theme_config:
+        config_file.write_text(theme_config)
+except Exception:
+    pass
+
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import requests
 
@@ -9,7 +32,53 @@ st.set_page_config(
     layout="wide"
 )
 
-# Deep franchise theme injection
+# --- 2. Real-Time DOM JS Observer: Force Chevron SVGs to Gold ---
+components.html("""
+<script>
+    function colorSidebarArrows() {
+        const doc = window.parent.document;
+        // Query all collapse / expand buttons & SVGs across all Streamlit versions
+        const selectors = [
+            '[data-testid="collapsedControl"]',
+            '[data-testid="stSidebarCollapseButton"]',
+            '[data-testid="stSidebarCollapsedControl"]'
+        ];
+        
+        selectors.forEach(sel => {
+            const containers = doc.querySelectorAll(sel);
+            containers.forEach(el => {
+                const btn = el.querySelector('button') || el;
+                btn.style.setProperty('background-color', '#061F47', 'important');
+                btn.style.setProperty('border', '2px solid #FFB81C', 'important');
+                btn.style.setProperty('border-radius', '8px', 'important');
+                btn.style.setProperty('box-shadow', '0 0 10px rgba(255, 184, 28, 0.4)', 'important');
+                
+                const svgs = el.querySelectorAll('svg');
+                svgs.forEach(svg => {
+                    svg.style.setProperty('fill', '#FFB81C', 'important');
+                    svg.style.setProperty('stroke', '#FFB81C', 'important');
+                    svg.style.setProperty('color', '#FFB81C', 'important');
+                    svg.style.setProperty('filter', 'drop-shadow(0 0 4px #FFB81C)', 'important');
+                    
+                    svg.querySelectorAll('*').forEach(child => {
+                        child.style.setProperty('fill', '#FFB81C', 'important');
+                        child.style.setProperty('stroke', '#FFB81C', 'important');
+                    });
+                });
+            });
+        });
+    }
+
+    // Run immediately and observe continuous DOM state changes
+    colorSidebarArrows();
+    const observer = new MutationObserver(() => {
+        colorSidebarArrows();
+    });
+    observer.observe(window.parent.document.body, { childList: true, subtree: true });
+</script>
+""", height=0, width=0)
+
+# --- 3. Deep Franchise CSS Styling ---
 st.markdown("""
 <style>
     /* Full Page Canvas, Main Body & App View Container */
@@ -38,38 +107,6 @@ st.markdown("""
         padding-top: 1.5rem !important;
         padding-bottom: 2rem !important;
         max-width: 95% !important;
-    }
-
-    /* ============================================================ */
-    /* FORCE SIDEBAR ARROWS TO PREDATORS GOLD VIA GRAPHICS FILTER   */
-    /* ============================================================ */
-    
-    /* Target the button container for both open and closed states */
-    [data-testid="stSidebarCollapsedControl"] button,
-    [data-testid="collapsedControl"] button,
-    [data-testid="stSidebarCollapseButton"] button {
-        background-color: #061F47 !important;
-        border: 2px solid #FFB81C !important;
-        border-radius: 10px !important;
-        box-shadow: 0 0 12px rgba(255, 184, 28, 0.35) !important;
-        padding: 4px 8px !important;
-    }
-
-    /* Target the SVG arrows directly:
-       Convert grey -> Pure Predators Gold (#FFB81C) using graphics matrix */
-    [data-testid="stSidebarCollapsedControl"] svg,
-    [data-testid="collapsedControl"] svg,
-    [data-testid="stSidebarCollapseButton"] svg {
-        filter: invert(75%) sepia(85%) saturate(1400%) hue-rotate(350deg) brightness(103%) contrast(105%) !important;
-        opacity: 1 !important;
-        transform: scale(1.15) !important;
-        transition: transform 0.2s ease-in-out !important;
-    }
-
-    [data-testid="stSidebarCollapsedControl"] button:hover svg,
-    [data-testid="collapsedControl"] button:hover svg,
-    [data-testid="stSidebarCollapseButton"] button:hover svg {
-        transform: scale(1.3) !important;
     }
 
     /* Header Container */
@@ -237,7 +274,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Sidebar Controls (Interactive Gold & Navy Buttons) ---
+# --- Sidebar Controls ---
 st.sidebar.markdown("### Filter Settings")
 
 # 1. Season Selection
@@ -331,14 +368,12 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
-        # Raw percentage decimals
         sh_pct = s.get("shootingPctg", 0.0)
         sh_pct = float(sh_pct) if sh_pct is not None else 0.0
 
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = float(fo_pct) if fo_pct is not None else 0.0
 
-        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
