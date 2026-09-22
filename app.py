@@ -9,7 +9,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- Complete Preds Navy & Gold Theme Injection (Everything in app.py) ---
+# --- Complete Preds Navy & Gold Theme Injection ---
 st.markdown("""
 <style>
     /* Full Page Canvas, Main Body & App View Container */
@@ -297,7 +297,9 @@ def load_club_skater_stats(season, game_type):
         df = df[df["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
     return df
 
+# --- Predators Gold (Top 15%) & Red (Bottom 15%) Outlier Styling ---
 def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0.15):
+    """Styles top 15% in Predators Gold and bottom 15% in Red (min 5 GP required)."""
     styler_df = pd.DataFrame('', index=data_df.index, columns=data_df.columns)
     eligible_mask = data_df["GP"] >= min_gp
     eligible_df = data_df[eligible_mask]
@@ -320,9 +322,11 @@ def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0
             if pd.isna(val):
                 continue
             if val >= high_thresh:
-                styler_df.loc[idx, col] = 'background-color: rgba(30, 81, 40, 0.65); color: #E8F5E9; font-weight: 600;'
+                # Official Predators Gold (#FFB81C) with Dark Navy text
+                styler_df.loc[idx, col] = 'background-color: rgba(255, 184, 28, 0.75); color: #041E42; font-weight: bold;'
             elif val <= low_thresh:
-                styler_df.loc[idx, col] = 'background-color: rgba(120, 20, 20, 0.60); color: #FFEBEE; font-weight: 600;'
+                # Subdued Crimson Red with White text
+                styler_df.loc[idx, col] = 'background-color: rgba(220, 38, 38, 0.55); color: #FFFFFF; font-weight: bold;'
                 
     return styler_df
 
@@ -413,7 +417,7 @@ st.divider()
 
 # --- Tabbed Analytical Views with 4-Decimal Precision ---
 st.subheader("Roster Performance & Advanced Indices")
-st.caption("Benchmark Tiers: Muted Emerald = Top 15% percentile | Subdued Crimson = Bottom 15% percentile (Minimum 5 GP required)")
+st.caption("Benchmark Tiers: Gold = Top 15% percentile | Red = Bottom 15% percentile (Minimum 5 GP required)")
 
 format_4dec = {
     "Off_Score": "{:.4f}",
