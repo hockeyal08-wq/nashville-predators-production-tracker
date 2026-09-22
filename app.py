@@ -362,7 +362,7 @@ with p_cols[2]:
 current_page = st.session_state["current_page"]
 
 # ==============================================================================
-# VERIFIED HEADSHOT OVERRIDES (Roster Hub Only)
+# VERIFIED HEADSHOT OVERRIDES
 # ==============================================================================
 VERIFIED_MANUAL_HEADSHOTS = {
     "Steven Stamkos": "https://assets.nhle.com/mugs/nhl/latest/8474564.png",
@@ -482,7 +482,7 @@ if current_page == "Line Combinations":
     render_nhl_player_cap(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout", 8480249, "$2.82M", "UFA '27")
 
     # Defensive Pairing 3
-    st.markdown('<div class="line-header-banner"><span>DEFENSIVE PAIRING 3 | MOBILITY & CREASE PROTECTION</span><span class="line-cap-total">Pair Cap: $4.55M</span></div>', unsafe_allow_html=True)
+    st.markdown('<div class="line-header-banner"><span>DEFENSIVE PAIRING 3 | MOBILITY & CREASE PROTECTION</span><span class="line-cap-total">Line Cap: $4.55M</span></div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
     render_nhl_player_cap(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater", 8482482, "$1.30M", "RFA '28")
     render_nhl_player_cap(d2, 46, "Ilya Lyubushkin", "RD", "Physical Net-Front Suppression", 8480950, "$3.25M", "UFA '27")
@@ -502,7 +502,7 @@ if current_page == "Trade Intelligence":
     st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
     st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses (NMC/NTC-free).")
 
-    # VETTED ACQUISITION TARGETS DATABASE (Using Team Logo SVG as Primary Asset)
+    # VETTED ACQUISITION TARGETS DATABASE WITH STATS & CHEM FITS
     realistic_targets = [
         {
             "Team_Logo": TEAM_LOGOS["PIT"],
@@ -514,8 +514,9 @@ if current_page == "Trade Intelligence":
             "Category": "Top-Six Forward", 
             "Deadline_Posture": "🟢 Top BUY Target",
             "Brunette_Fit": 95, 
-            "Archetype": "Proven Playoff Top-Line Winger / Relentless Motor",
-            "Tactical_Scouting": "Two-time Stanley Cup champion actively made available as Pittsburgh cycles through a multi-year retool. World-class forechecking speed and high-compete board work that fits Andrew Brunette's system seamlessly."
+            "P_60": 2.84,
+            "SOG_60": 9.42,
+            "Chem_Fit": "Line 2 RW alongside Stamkos & Bourque | High F1 Forecheck Motor"
         },
         {
             "Team_Logo": TEAM_LOGOS["PIT"],
@@ -527,8 +528,9 @@ if current_page == "Trade Intelligence":
             "Category": "Top-Six Forward", 
             "Deadline_Posture": "🟢 BUY Target",
             "Brunette_Fit": 92, 
-            "Archetype": "High-Volume Release / Skill Finisher",
-            "Tactical_Scouting": "Perennial trade-block fixture on a non-contending Penguins roster with full trade maneuverability. Generates rapid rush shots that take pressure off Steven Stamkos."
+            "P_60": 2.51,
+            "SOG_60": 10.15,
+            "Chem_Fit": "PP2 Unit Quarterback / High-Volume High-Slot Release"
         },
         {
             "Team_Logo": TEAM_LOGOS["ANA"],
@@ -540,8 +542,9 @@ if current_page == "Trade Intelligence":
             "Category": "Top-Six Forward", 
             "Deadline_Posture": "🔵 Secondary Scorer",
             "Brunette_Fit": 93, 
-            "Archetype": "High-IQ Playmaker / Power Play Distributor",
-            "Tactical_Scouting": "Smart veteran distributor with extensive familiarity with Nashville hockey ops. High-end vision to quarterback secondary power-play units and stabilize middle-six minutes."
+            "P_60": 2.76,
+            "SOG_60": 6.80,
+            "Chem_Fit": "Middle-Six Playmaker / Zone-Entry Transition Anchor"
         },
         {
             "Team_Logo": TEAM_LOGOS["SEA"],
@@ -553,8 +556,9 @@ if current_page == "Trade Intelligence":
             "Category": "Top-4 Defensive Upgrade", 
             "Deadline_Posture": "🟡 Value BUY",
             "Brunette_Fit": 91, 
-            "Archetype": "Heavy Physical Shutdown RD / Clean Exit",
-            "Tactical_Scouting": "Under-the-radar right defenseman who suppresses neutral-zone rush entries at a top-tier rate. Highly cost-effective upgrade with complete roster flexibility."
+            "P_60": 0.85,
+            "SOG_60": 3.20,
+            "Chem_Fit": "Pairing 3 RD with Wilsby / Heavy Physical Shot Suppression"
         },
         {
             "Team_Logo": TEAM_LOGOS["PHI"],
@@ -566,8 +570,9 @@ if current_page == "Trade Intelligence":
             "Category": "Bottom-Six / PK Depth", 
             "Deadline_Posture": "🟡 Depth Grinder",
             "Brunette_Fit": 94, 
-            "Archetype": "Hard-Nosed Playoff Wall / PK Shot Blocker",
-            "Tactical_Scouting": "Fearless checking center who wins key defensive-zone draws, blocks point shots, and brings heavy physical identity to a bottom-six checking role."
+            "P_60": 1.20,
+            "SOG_60": 5.40,
+            "Chem_Fit": "Line 4 Center / PK1 Shield / Defensive Zone Faceoff Specialist"
         },
         {
             "Team_Logo": TEAM_LOGOS["MTL"],
@@ -579,8 +584,9 @@ if current_page == "Trade Intelligence":
             "Category": "Bottom-Six / PK Depth", 
             "Deadline_Posture": "🔵 PK Specialist BUY",
             "Brunette_Fit": 89, 
-            "Archetype": "6'3\" Low-Cycle Puck Protector / Short-Handed Weapon",
-            "Tactical_Scouting": "Elite takeaway winger who uses his large frame to dominate board battles. High-impact addition for late-game defensive leads and penalty killing without contract blocks."
+            "P_60": 1.45,
+            "SOG_60": 6.10,
+            "Chem_Fit": "Line 3/4 Board Battle Protector / Short-Handed Threat"
         }
     ]
 
@@ -618,7 +624,7 @@ if current_page == "Trade Intelligence":
 
     st.markdown("#### Real-Time Acquisition Target Registry (NMC-Free)")
     
-    # Render targets as an executive card grid featuring team logos
+    # Render targets as an executive card grid featuring team logos, stats, and chem fits
     for i, row in filtered_df.iterrows():
         with st.container(border=True):
             c1, c2, c3 = st.columns([1.2, 3.5, 5])
@@ -630,8 +636,8 @@ if current_page == "Trade Intelligence":
                 st.markdown(f"**Action:** {row['Deadline_Posture']}")
                 st.markdown(f"**Scheme Fit:** {row['Brunette_Fit']}/100")
             with c3:
-                st.markdown(f"**Archetype:** `{row['Archetype']}`")
-                st.info(f"**Tactical Evaluation:** {row['Tactical_Scouting']}")
+                st.markdown(f"**Analytics Profile:** `{row['P_60']} P/60` | `{row['SOG_60']} SOG/60`")
+                st.info(f"**Line Chemistry Fit:** {row['Chem_Fit']}")
 
     st.stop()
 
