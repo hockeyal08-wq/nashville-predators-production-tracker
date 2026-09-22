@@ -9,7 +9,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- Complete Preds Navy & Gold Theme Injection ---
+# --- Preds Executive Theming ---
 st.markdown("""
 <style>
     /* Full Page Canvas, Main Body & App View Container */
@@ -40,15 +40,22 @@ st.markdown("""
         max-width: 95% !important;
     }
 
-    /* Tabs Styling */
+    /* --- PREDATORS GOLD TABS --- */
     button[data-baseweb="tab"] {
-        color: #94A3B8 !important;
+        color: #E2E8F0 !important;
         font-weight: 700 !important;
-        font-size: 0.95rem !important;
+        font-size: 1.05rem !important;
+        padding: 10px 18px !important;
+    }
+    button[data-baseweb="tab"]:hover {
+        color: #FFB81C !important;
     }
     button[data-baseweb="tab"][aria-selected="true"] {
         color: #FFB81C !important;
-        border-bottom-color: #FFB81C !important;
+        border-bottom: 3px solid #FFB81C !important;
+    }
+    div[data-baseweb="tab-border"] {
+        background-color: rgba(255, 184, 28, 0.25) !important;
     }
 
     /* Header Container */
@@ -164,7 +171,14 @@ st.markdown("""
         color: #041E42 !important;
     }
 
-    /* Headings */
+    /* Benchmark Caption Styling */
+    .benchmark-caption {
+        color: #FFB81C !important;
+        font-size: 0.92rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 14px !important;
+    }
+
     h1, h2, h3, h4 {
         color: #FFFFFF !important;
     }
@@ -239,7 +253,6 @@ def load_club_skater_stats(season, game_type):
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = round(fo_pct * 100, 4) if isinstance(fo_pct, float) and fo_pct <= 1.0 else round(float(fo_pct), 4)
 
-        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
@@ -297,9 +310,9 @@ def load_club_skater_stats(season, game_type):
         df = df[df["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
     return df
 
-# --- Predators Gold (Top 15%) & Red (Bottom 15%) Outlier Styling ---
+# --- Soft Green (Top 15%) & Soft Red (Bottom 15%) Table Outlier Styling ---
 def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0.15):
-    """Styles top 15% in Predators Gold and bottom 15% in Red (min 5 GP required)."""
+    """Clean data presentation: Soft green for top 15%, soft red for bottom 15%."""
     styler_df = pd.DataFrame('', index=data_df.index, columns=data_df.columns)
     eligible_mask = data_df["GP"] >= min_gp
     eligible_df = data_df[eligible_mask]
@@ -322,11 +335,9 @@ def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0
             if pd.isna(val):
                 continue
             if val >= high_thresh:
-                # Official Predators Gold (#FFB81C) with Dark Navy text
-                styler_df.loc[idx, col] = 'background-color: rgba(255, 184, 28, 0.75); color: #041E42; font-weight: bold;'
+                styler_df.loc[idx, col] = 'background-color: rgba(34, 197, 94, 0.35); font-weight: bold;'
             elif val <= low_thresh:
-                # Subdued Crimson Red with White text
-                styler_df.loc[idx, col] = 'background-color: rgba(220, 38, 38, 0.55); color: #FFFFFF; font-weight: bold;'
+                styler_df.loc[idx, col] = 'background-color: rgba(239, 68, 68, 0.35); font-weight: bold;'
                 
     return styler_df
 
@@ -417,7 +428,9 @@ st.divider()
 
 # --- Tabbed Analytical Views with 4-Decimal Precision ---
 st.subheader("Roster Performance & Advanced Indices")
-st.caption("Benchmark Tiers: Gold = Top 15% percentile | Red = Bottom 15% percentile (Minimum 5 GP required)")
+
+# Styled yellow benchmark line
+st.markdown('<div class="benchmark-caption">⚡ Benchmark Tiers: Green = Top 15% percentile | Red = Bottom 15% percentile (Minimum 5 GP required)</div>', unsafe_allow_html=True)
 
 format_4dec = {
     "Off_Score": "{:.4f}",
