@@ -352,12 +352,13 @@ def load_roster_handedness(season):
 
 @st.cache_data(ttl=1800)
 def load_zone_faceoffs(season, game_type):
-    """Fetches O-Zone, N-Zone, and D-Zone faceoff percentages directly from NHL REST reporting."""
+    """Fetches O-Zone, N-Zone, and D-Zone faceoff percentages directly from NHL REST reporting for all Nashville skaters."""
     zone_dict = {}
     url = (
         f"https://api.nhle.com/stats/rest/en/skater/faceoffpercentages"
-        f"?isAggregate=false&isGame=false&sort=%5B%7B%22property%22:%22totalFaceoffs%22,%22direction%22:%22DESC%22%7D%5D"
-        f"&cayenneExp=seasonId={season}%20and%20gameTypeId={game_type}"
+        f"?isAggregate=false&isGame=false&limit=100"
+        f"&sort=%5B%7B%22property%22:%22totalFaceoffs%22,%22direction%22:%22DESC%22%7D%5D"
+        f"&cayenneExp=seasonId={season}%20and%20gameTypeId={game_type}%20and%20teamTriCode=%27NSH%27"
     )
     try:
         res = requests.get(url, timeout=6)
