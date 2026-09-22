@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 
 # --- 1. Programmatically write Streamlit Theme Engine config ---
-# This forces Streamlit's root chrome (including the >> sidebar chevron) to Gold
 config_dir = Path(".streamlit")
 config_file = config_dir / "config.toml"
 theme_config = """[theme]
@@ -32,22 +31,28 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- 2. Real-Time DOM JS Observer: Force Chevron SVGs to Gold ---
+# --- 2. Real-Time DOM JS Observer: Keep Chevron Permanently Visible & Gold ---
 components.html("""
 <script>
-    function colorSidebarArrows() {
+    function forcePermanentChevron() {
         const doc = window.parent.document;
-        // Query all collapse / expand buttons & SVGs across all Streamlit versions
         const selectors = [
-            '[data-testid="collapsedControl"]',
             '[data-testid="stSidebarCollapseButton"]',
+            '[data-testid="collapsedControl"]',
             '[data-testid="stSidebarCollapsedControl"]'
         ];
         
         selectors.forEach(sel => {
             const containers = doc.querySelectorAll(sel);
             containers.forEach(el => {
+                // Remove Streamlit's auto-hide fade rule
+                el.style.setProperty('opacity', '1', 'important');
+                el.style.setProperty('visibility', 'visible', 'important');
+                el.style.setProperty('display', 'flex', 'important');
+
                 const btn = el.querySelector('button') || el;
+                btn.style.setProperty('opacity', '1', 'important');
+                btn.style.setProperty('visibility', 'visible', 'important');
                 btn.style.setProperty('background-color', '#061F47', 'important');
                 btn.style.setProperty('border', '2px solid #FFB81C', 'important');
                 btn.style.setProperty('border-radius', '8px', 'important');
@@ -55,24 +60,25 @@ components.html("""
                 
                 const svgs = el.querySelectorAll('svg');
                 svgs.forEach(svg => {
+                    svg.style.setProperty('opacity', '1', 'important');
+                    svg.style.setProperty('visibility', 'visible', 'important');
                     svg.style.setProperty('fill', '#FFB81C', 'important');
                     svg.style.setProperty('stroke', '#FFB81C', 'important');
                     svg.style.setProperty('color', '#FFB81C', 'important');
-                    svg.style.setProperty('filter', 'drop-shadow(0 0 4px #FFB81C)', 'important');
                     
                     svg.querySelectorAll('*').forEach(child => {
                         child.style.setProperty('fill', '#FFB81C', 'important');
                         child.style.setProperty('stroke', '#FFB81C', 'important');
+                        child.style.setProperty('opacity', '1', 'important');
                     });
                 });
             });
         });
     }
 
-    // Run immediately and observe continuous DOM state changes
-    colorSidebarArrows();
+    forcePermanentChevron();
     const observer = new MutationObserver(() => {
-        colorSidebarArrows();
+        forcePermanentChevron();
     });
     observer.observe(window.parent.document.body, { childList: true, subtree: true });
 </script>
@@ -107,6 +113,68 @@ st.markdown("""
         padding-top: 1.5rem !important;
         padding-bottom: 2rem !important;
         max-width: 95% !important;
+    }
+
+    /* ============================================================ */
+    /* FORCE PERMANENT VISIBILITY & SPORTY GOLD ARROW               */
+    /* ============================================================ */
+    
+    /* Disarm Streamlit hover-only auto-hide */
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="collapsedControl"],
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="stSidebarCollapseButton"] button,
+    [data-testid="collapsedControl"] button,
+    [data-testid="stSidebarCollapsedControl"] button {
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: flex !important;
+    }
+
+    /* Sporty Navy & Gold Button Box */
+    [data-testid="stSidebarCollapseButton"] button,
+    [data-testid="collapsedControl"] button,
+    [data-testid="stSidebarCollapsedControl"] button {
+        background-color: #061F47 !important;
+        border: 2px solid #FFB81C !important;
+        border-radius: 8px !important;
+        padding: 4px 8px !important;
+        box-shadow: 0 0 10px rgba(255, 184, 28, 0.4) !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+
+    /* Hover State */
+    [data-testid="stSidebarCollapseButton"] button:hover,
+    [data-testid="collapsedControl"] button:hover,
+    [data-testid="stSidebarCollapsedControl"] button:hover {
+        background-color: #FFB81C !important;
+        box-shadow: 0 0 16px rgba(255, 184, 28, 0.7) !important;
+        transform: scale(1.06);
+    }
+
+    /* Ensure arrow SVG is fully opaque & colored gold */
+    [data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="collapsedControl"] svg,
+    [data-testid="stSidebarCollapsedControl"] svg,
+    [data-testid="stSidebarCollapseButton"] svg *,
+    [data-testid="collapsedControl"] svg *,
+    [data-testid="stSidebarCollapsedControl"] svg * {
+        opacity: 1 !important;
+        visibility: visible !important;
+        fill: #FFB81C !important;
+        stroke: #FFB81C !important;
+        color: #FFB81C !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"] button:hover svg,
+    [data-testid="collapsedControl"] button:hover svg,
+    [data-testid="stSidebarCollapsedControl"] button:hover svg,
+    [data-testid="stSidebarCollapseButton"] button:hover svg *,
+    [data-testid="collapsedControl"] button:hover svg *,
+    [data-testid="stSidebarCollapsedControl"] button:hover svg * {
+        fill: #041E42 !important;
+        stroke: #041E42 !important;
+        color: #041E42 !important;
     }
 
     /* Header Container */
@@ -368,12 +436,14 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
+        # Raw percentage decimals
         sh_pct = s.get("shootingPctg", 0.0)
         sh_pct = float(sh_pct) if sh_pct is not None else 0.0
 
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = float(fo_pct) if fo_pct is not None else 0.0
 
+        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
