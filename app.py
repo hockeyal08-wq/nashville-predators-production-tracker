@@ -362,25 +362,36 @@ with p_cols[2]:
 current_page = st.session_state["current_page"]
 
 # ==============================================================================
-# VERIFIED HEADSHOT OVERRIDES (Locked with exact NHL CDN IDs)
+# VERIFIED HEADSHOT OVERRIDES
 # ==============================================================================
 VERIFIED_MANUAL_HEADSHOTS = {
     "Steven Stamkos": "https://assets.nhle.com/mugs/nhl/latest/8474564.png",
     "Jonathan Marchessault": "https://assets.nhle.com/mugs/nhl/latest/8476539.png",
     "Roman Josi": "https://assets.nhle.com/mugs/nhl/latest/8474600.png",
-    "Matthew Wood": "https://assets.nhle.com/mugs/nhl/latest/8484241.png",
-    "Bryan Rust": "https://assets.nhle.com/mugs/nhl/latest/8475848.png",
-    "Rickard Rakell": "https://assets.nhle.com/mugs/nhl/latest/8476460.png",
-    "Mikael Granlund": "https://assets.nhle.com/mugs/nhl/latest/8475794.png",
-    "Will Borgen": "https://assets.nhle.com/mugs/nhl/latest/8479379.png",
-    "Noel Acciari": "https://assets.nhle.com/mugs/nhl/latest/8478496.png",
-    "Joel Armia": "https://assets.nhle.com/mugs/nhl/latest/8476346.png"
+    "Matthew Wood": "https://assets.nhle.com/mugs/nhl/latest/8484241.png"
 }
 
 @st.cache_data(ttl=86400)
 def resolve_player_headshot(player_name, fallback_id=None):
     if player_name in VERIFIED_MANUAL_HEADSHOTS:
         return VERIFIED_MANUAL_HEADSHOTS[player_name]
+    try:
+        search_query = player_name.replace(" ", "%20")
+        url = f"https://search.d3.nhle.com/api/v1/search/player?culture=en-us&limit=3&q={search_query}"
+        res = requests.get(url, timeout=4)
+        if res.status_code == 200:
+            hits = res.json()
+            if hits:
+                p_id = hits[0].get("playerId")
+                if p_id:
+                    landing_res = requests.get(f"https://api-web.nhle.com/v1/player/{p_id}/landing", timeout=4)
+                    if landing_res.status_code == 200:
+                        headshot = landing_res.json().get("headshot")
+                        if headshot:
+                            return headshot
+                    return f"https://assets.nhle.com/mugs/nhl/latest/{p_id}.png"
+    except Exception:
+        pass
     if fallback_id:
         return f"https://assets.nhle.com/mugs/nhl/latest/{fallback_id}.png"
     return PREDS_LOGO_URL
@@ -491,10 +502,10 @@ if current_page == "Trade Intelligence":
     st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
     st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses (NMC/NTC-free).")
 
-    # VETTED ACQUISITION TARGETS DATABASE
+    # VETTED ACQUISITION TARGETS DATABASE WITH EXACT VERIFIED NHL IDs
     realistic_targets = [
         {
-            "Photo": resolve_player_headshot("Bryan Rust"),
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8475848.png",
             "Player": "Bryan Rust", 
             "Team_Logo": TEAM_LOGOS["PIT"],
             "Team": "PIT", 
@@ -508,7 +519,7 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Two-time Stanley Cup champion actively made available as Pittsburgh cycles through a multi-year retool. World-class forechecking speed and high-compete board work that fits Andrew Brunette's system seamlessly."
         },
         {
-            "Photo": resolve_player_headshot("Rickard Rakell"),
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8476460.png",
             "Player": "Rickard Rakell", 
             "Team_Logo": TEAM_LOGOS["PIT"],
             "Team": "PIT", 
@@ -522,7 +533,7 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Perennial trade-block fixture on a non-contending Penguins roster with full trade maneuverability. Generates rapid rush shots that take pressure off Steven Stamkos."
         },
         {
-            "Photo": resolve_player_headshot("Mikael Granlund"),
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8475794.png",
             "Player": "Mikael Granlund", 
             "Team_Logo": TEAM_LOGOS["ANA"],
             "Team": "ANA", 
@@ -536,7 +547,7 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Smart veteran distributor with extensive familiarity with Nashville hockey ops. High-end vision to quarterback secondary power-play units and stabilize middle-six minutes."
         },
         {
-            "Photo": resolve_player_headshot("Will Borgen"),
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8479379.png",
             "Player": "Will Borgen", 
             "Team_Logo": TEAM_LOGOS["SEA"],
             "Team": "SEA", 
@@ -550,7 +561,7 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Under-the-radar right defenseman who suppresses neutral-zone rush entries at a top-tier rate. Highly cost-effective upgrade with complete roster flexibility."
         },
         {
-            "Photo": resolve_player_headshot("Noel Acciari"),
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8478496.png",
             "Player": "Noel Acciari", 
             "Team_Logo": TEAM_LOGOS["PHI"],
             "Team": "PHI", 
@@ -564,7 +575,7 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Fearless checking center who wins key defensive-zone draws, blocks point shots, and brings heavy physical identity to a bottom-six checking role."
         },
         {
-            "Photo": resolve_player_headshot("Joel Armia"),
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8476346.png",
             "Player": "Joel Armia", 
             "Team_Logo": TEAM_LOGOS["MTL"],
             "Team": "MTL", 
