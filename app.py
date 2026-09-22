@@ -4,7 +4,6 @@ import requests
 
 PREDS_LOGO_URL = "https://assets.nhle.com/logos/nhl/svg/NSH_light.svg"
 
-# Mapping team tricots to official NHL SVG logo URLs for the trade table
 TEAM_LOGOS = {
     "PIT": "https://assets.nhle.com/logos/nhl/svg/PIT_light.svg",
     "SJS": "https://assets.nhle.com/logos/nhl/svg/SJS_light.svg",
@@ -485,7 +484,6 @@ if current_page == "Trade Intelligence":
     st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
     st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses (NMC/NTC-free).")
 
-    # VETTED ACQUISITION TARGETS DATABASE WITH STATS & CHEM FITS
     realistic_targets = [
         {
             "Team_Logo": TEAM_LOGOS["PIT"],
@@ -581,7 +579,6 @@ if current_page == "Trade Intelligence":
 
     target_df = pd.DataFrame(realistic_targets)
 
-    # Interactive Filtering Controls
     f_cols = st.columns([1.2, 1.2, 1.2, 1.4])
     with f_cols[0]:
         cat_opts = ["All Categories", "Top-Six Forward", "Top-4 Defensive Upgrade", "Bottom-Six / PK Depth"]
@@ -595,7 +592,6 @@ if current_page == "Trade Intelligence":
     with f_cols[3]:
         min_fit = st.slider("Min Brunette Scheme Fit", min_value=85, max_value=96, value=88)
 
-    # Filter Application
     filtered_df = target_df[target_df["Brunette_Fit"] >= min_fit].copy()
 
     if sel_cat != "All Categories":
@@ -613,7 +609,6 @@ if current_page == "Trade Intelligence":
 
     st.markdown("#### Real-Time Acquisition Target Registry (NMC-Free)")
     
-    # Render targets as an executive card grid featuring team logos, P/GP & SOG/GP stats, and chem fits
     for i, row in filtered_df.iterrows():
         with st.container(border=True):
             c1, c2, c3 = st.columns([1.2, 3.5, 5])
@@ -636,7 +631,6 @@ if current_page == "Trade Intelligence":
 
 st.sidebar.markdown("### Filter Settings")
 
-# 1. Season Selection
 season_map = {
     "26/27": "20262027",
     "25/26": "20252026",
@@ -656,7 +650,6 @@ for i, label in enumerate(["26/27", "25/26", "24/25", "23/24"]):
 
 selected_season = season_map[st.session_state["selected_season_label"]]
 
-# 2. Game Type Selection
 st.sidebar.markdown('<div class="filter-label">Game Type</div>', unsafe_allow_html=True)
 if "selected_game_type" not in st.session_state:
     st.session_state["selected_game_type"] = "Regular Season"
@@ -672,7 +665,6 @@ for i, gt in enumerate(["Regular Season", "Playoffs"]):
 game_type_label = st.session_state["selected_game_type"]
 game_type_code = "2" if game_type_label == "Regular Season" else "3"
 
-# 3. Position Group Selection
 st.sidebar.markdown('<div class="filter-label">Position Group</div>', unsafe_allow_html=True)
 if "selected_pos_group" not in st.session_state:
     st.session_state["selected_pos_group"] = "All Skaters"
