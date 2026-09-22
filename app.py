@@ -41,54 +41,65 @@ st.markdown("""
     }
 
     /* ============================================================ */
-    /* HIGH-CONTRAST PREDATORS TABS                                 */
+    /* ULTRA-VISIBLE HIGH-CONTRAST PREDATORS TABS                   */
     /* ============================================================ */
     
-    /* Inactive Tab Text: Crisp bright white/silver for immediate visibility */
-    .stTabs [data-baseweb="tab"] p,
-    .stTabs [data-baseweb="tab"] span,
-    .stTabs [data-baseweb="tab"] div,
-    .stTabs [data-baseweb="tab"] {
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-        opacity: 0.95 !important;
-        font-weight: 700 !important;
-        font-size: 1.05rem !important;
-        letter-spacing: 0.3px !important;
-    }
-    
-    /* Inactive Tab Hover: Lights up gold before clicking */
-    .stTabs [data-baseweb="tab"]:hover p,
-    .stTabs [data-baseweb="tab"]:hover span,
-    .stTabs [data-baseweb="tab"]:hover div,
-    .stTabs [data-baseweb="tab"]:hover {
-        color: #FFB81C !important;
-        -webkit-text-fill-color: #FFB81C !important;
-        opacity: 1.0 !important;
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px !important;
+        background-color: transparent !important;
     }
 
-    /* ACTIVE TAB: Bold Predators Gold */
-    .stTabs [aria-selected="true"],
-    .stTabs [aria-selected="true"] p,
-    .stTabs [aria-selected="true"] span,
-    .stTabs [aria-selected="true"] div,
-    .stTabs button[aria-selected="true"] * {
+    /* Inactive Tabs: Clean pill containers with crisp pure white text */
+    .stTabs [data-baseweb="tab"] {
+        background: rgba(255, 255, 255, 0.12) !important;
+        border: 1px solid rgba(255, 255, 255, 0.22) !important;
+        border-radius: 8px !important;
+        padding: 8px 18px !important;
+        transition: all 0.2s ease-in-out !important;
+        opacity: 1 !important;
+    }
+    
+    .stTabs [data-baseweb="tab"] p,
+    .stTabs [data-baseweb="tab"] span,
+    .stTabs [data-baseweb="tab"] div {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        font-weight: 700 !important;
+        font-size: 1.05rem !important;
+        opacity: 1 !important;
+    }
+    
+    /* Hover State: Gold accent border & text glow */
+    .stTabs [data-baseweb="tab"]:hover {
+        background: rgba(255, 184, 28, 0.2) !important;
+        border-color: #FFB81C !important;
+    }
+    .stTabs [data-baseweb="tab"]:hover p,
+    .stTabs [data-baseweb="tab"]:hover span,
+    .stTabs [data-baseweb="tab"]:hover div {
         color: #FFB81C !important;
         -webkit-text-fill-color: #FFB81C !important;
-        opacity: 1.0 !important;
+    }
+
+    /* ACTIVE TAB: Solid Predators Gold pill with Navy text */
+    .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        background-color: #FFB81C !important;
+        border: 1px solid #FFB81C !important;
+        opacity: 1 !important;
+    }
+    .stTabs [data-baseweb="tab"][aria-selected="true"] p,
+    .stTabs [data-baseweb="tab"][aria-selected="true"] span,
+    .stTabs [data-baseweb="tab"][aria-selected="true"] div {
+        color: #041E42 !important;
+        -webkit-text-fill-color: #041E42 !important;
         font-weight: 800 !important;
     }
 
-    /* ACTIVE TAB UNDERLINE BAR */
+    /* Hide redundant default underline highlight */
     .stTabs [data-baseweb="tab-highlight"],
-    .stTabs div[data-baseweb="tab-highlight"] {
-        background-color: #FFB81C !important;
-        height: 3px !important;
-    }
-
-    /* Tab Rail Divider */
+    .stTabs div[data-baseweb="tab-highlight"],
     .stTabs [data-baseweb="tab-border"] {
-        background-color: rgba(255, 184, 28, 0.35) !important;
+        display: none !important;
     }
 
     /* Header Container */
