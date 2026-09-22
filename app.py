@@ -1,4 +1,3 @@
-Python
 import streamlit as st
 import pandas as pd
 import requests
@@ -520,9 +519,9 @@ if current_page == "Trade Intelligence":
     realistic_targets = [
         # --- TOP-SIX FORWARDS ---
         {
-            "Photo": resolve_player_headshot("BryanRust"),
+            "Photo": resolve_player_headshot("Bryan Rust"),
             "Player": "Bryan Rust", 
-            "Team_Logo": TEAM_LOGOS["PIT"],
+            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/PIT_light.svg",
             "Team": "PIT", 
             "Cap_Hit": 5.125, 
             "Status": "Signed thru '28 (Trade Block)",
@@ -533,9 +532,9 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Two-time Stanley Cup champion actively made available as Pittsburgh cycles through a multi-year retool. World-class forechecking speed and high-compete board work that fits Andrew Brunette's system seamlessly."
         },
         {
-            "Photo": resolve_player_headshot("RickardRakell"),
+            "Photo": resolve_player_headshot("Rickard Rakell"),
             "Player": "Rickard Rakell", 
-            "Team_Logo": TEAM_LOGOS["PIT"],
+            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/PIT_light.svg",
             "Team": "PIT", 
             "Cap_Hit": 5.00, 
             "Status": "Pending UFA '28 (No NMC)",
@@ -546,9 +545,9 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Perennial trade-block fixture on a non-contending Penguins roster with full trade maneuverability. Generates rapid rush shots that take pressure off Steven Stamkos."
         },
         {
-            "Photo": resolve_player_headshot("MikaelGranlund"),
+            "Photo": resolve_player_headshot("Mikael Granlund"),
             "Player": "Mikael Granlund", 
-            "Team_Logo": TEAM_LOGOS["ANA"],
+            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/ANA_light.svg",
             "Team": "ANA", 
             "Cap_Hit": 7.00, 
             "Status": "Signed thru '28",
@@ -561,9 +560,9 @@ if current_page == "Trade Intelligence":
 
         # --- TOP-4 DEFENSIVE UPGRADES ---
         {
-            "Photo": resolve_player_headshot("WillBorgen"),
+            "Photo": resolve_player_headshot("Will Borgen"),
             "Player": "Will Borgen", 
-            "Team_Logo": TEAM_LOGOS["SEA"],
+            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/SEA_light.svg",
             "Team": "SEA", 
             "Cap_Hit": 2.70, 
             "Status": "Pending UFA '27 (No NMC)",
@@ -576,9 +575,9 @@ if current_page == "Trade Intelligence":
 
         # --- BOTTOM-SIX & PK DEPTH ---
         {
-            "Photo": resolve_player_headshot("NoelAcciari"),
+            "Photo": resolve_player_headshot("Noel Acciari"),
             "Player": "Noel Acciari", 
-            "Team_Logo": TEAM_LOGOS["PHI"],
+            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/PHI_light.svg",
             "Team": "PHI", 
             "Cap_Hit": 1.40, 
             "Status": "Signed thru '28",
@@ -589,15 +588,16 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Fearless checking center who wins key defensive-zone draws, blocks point shots, and brings heavy physical identity to a bottom-six checking role."
         },
         {
-            "Photo": resolve_player_headshot("JoelArmia"),
+            "Photo": resolve_player_headshot("Joel Armia"),
             "Player": "Joel Armia", 
-            "Team_Logo": TEAM_LOGOS["MTL"],
+            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/MTL_light.svg",
             "Team": "MTL", 
             "Cap_Hit": 3.40, 
             "Status": "Expiring Contract (No NMC)",
             "Category": "Bottom-Six / PK Depth", 
             "Deadline_Posture": "🔵 PK Specialist BUY",
-            "Brunette_Fit": 89, "Archetype": "6'3\" Low-Cycle Puck Protector / Short-Handed Weapon",
+            "Brunette_Fit": 89, 
+            "Archetype": "6'3\" Low-Cycle Puck Protector / Short-Handed Weapon",
             "Tactical_Scouting": "Elite takeaway winger who uses his large frame to dominate board battles. High-impact addition for late-game defensive leads and penalty killing without contract blocks."
         }
     ]
