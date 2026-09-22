@@ -4,6 +4,16 @@ import requests
 
 PREDS_LOGO_URL = "https://assets.nhle.com/logos/nhl/svg/NSH_light.svg"
 
+# Mapping team tricots to official NHL SVG logo URLs for the trade table
+TEAM_LOGOS = {
+    "PIT": "https://assets.nhle.com/logos/nhl/svg/PIT_light.svg",
+    "SJS": "https://assets.nhle.com/logos/nhl/svg/SJS_light.svg",
+    "ANA": "https://assets.nhle.com/logos/nhl/svg/ANA_light.svg",
+    "SEA": "https://assets.nhle.com/logos/nhl/svg/SEA_light.svg",
+    "PHI": "https://assets.nhle.com/logos/nhl/svg/PHI_light.svg",
+    "MTL": "https://assets.nhle.com/logos/nhl/svg/MTL_light.svg"
+}
+
 st.set_page_config(
     page_title="Nashville Predators Hockey Operations Dashboard",
     layout="wide",
@@ -493,53 +503,101 @@ if current_page == "Line Combinations":
     st.stop()
 
 # ==============================================================================
-# PAGE 2: TRADE DEADLINE & REALISTIC BUY TARGET INTELLIGENCE (NMC-FREE)
+# PAGE 2: TRADE DEADLINE & REALISTIC BUY TARGET INTELLIGENCE (WITH MANUAL ICONS)
 # ==============================================================================
 if current_page == "Trade Intelligence":
     st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
     st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses (NMC/NTC-free).")
 
-    # VETTED ACQUISITION TARGETS DATABASE (Strictly active, non-retired, non-extended external players, properly categorized)
+    # VETTED ACQUISITION TARGETS DATABASE WITH EXPLICIT MANUALLY ADDED ICONS
     realistic_targets = [
         # --- TOP-SIX FORWARDS ---
         {
-            "Player": "Bryan Rust", "Pos": "RW", "Team": "PIT", "Cap_Hit": 5.125, "Status": "Signed thru '28 (Trade Block)",
-            "Category": "Top-Six Forward", "Deadline_Posture": "Top BUY Target",
-            "Brunette_Fit": 95, "Archetype": "Proven Playoff Top-Line Winger / Relentless Motor",
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8475848.png",
+            "Player": "Bryan Rust", 
+            "Team_Logo": TEAM_LOGOS["PIT"],
+            "Team": "PIT", 
+            "Pos": "RW",
+            "Cap_Hit": 5.125, 
+            "Status": "Signed thru '28 (Trade Block)",
+            "Category": "Top-Six Forward", 
+            "Deadline_Posture": "🟢 Top BUY Target",
+            "Brunette_Fit": 95, 
+            "Archetype": "Proven Playoff Top-Line Winger / Relentless Motor",
             "Tactical_Scouting": "Two-time Stanley Cup champion actively made available as Pittsburgh cycles through a multi-year retool. World-class forechecking speed and high-compete board work that fits Andrew Brunette's system seamlessly."
         },
         {
-            "Player": "Rickard Rakell", "Pos": "RW/LW", "Team": "PIT", "Cap_Hit": 5.00, "Status": "Pending UFA '28 (No NMC)",
-            "Category": "Top-Six Forward", "Deadline_Posture": "BUY Target",
-            "Brunette_Fit": 92, "Archetype": "High-Volume Release / Skill Finisher",
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8476460.png",
+            "Player": "Rickard Rakell", 
+            "Team_Logo": TEAM_LOGOS["PIT"],
+            "Team": "PIT", 
+            "Pos": "RW",
+            "Cap_Hit": 5.00, 
+            "Status": "Pending UFA '28 (No NMC)",
+            "Category": "Top-Six Forward", 
+            "Deadline_Posture": "🟢 BUY Target",
+            "Brunette_Fit": 92, 
+            "Archetype": "High-Volume Release / Skill Finisher",
             "Tactical_Scouting": "Perennial trade-block fixture on a non-contending Penguins roster with full trade maneuverability. Generates rapid rush shots that take pressure off Steven Stamkos."
         },
         {
-            "Player": "Mikael Granlund", "Pos": "C/LW", "Team": "ANA", "Cap_Hit": 7.00, "Status": "Signed thru '28",
-            "Category": "Top-Six Forward", "Deadline_Posture": "Secondary Scorer / Playmaker",
-            "Brunette_Fit": 93, "Archetype": "High-IQ Playmaker / Power Play Distributor",
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8475794.png",
+            "Player": "Mikael Granlund", 
+            "Team_Logo": TEAM_LOGOS["ANA"],
+            "Team": "ANA", 
+            "Pos": "C",
+            "Cap_Hit": 7.00, 
+            "Status": "Signed thru '28",
+            "Category": "Top-Six Forward", 
+            "Deadline_Posture": "🔵 Secondary Scorer",
+            "Brunette_Fit": 93, 
+            "Archetype": "High-IQ Playmaker / Power Play Distributor",
             "Tactical_Scouting": "Smart veteran distributor with extensive familiarity with Nashville hockey ops. High-end vision to quarterback secondary power-play units and stabilize middle-six minutes."
         },
 
         # --- TOP-4 DEFENSIVE UPGRADES ---
         {
-            "Player": "Will Borgen", "Pos": "RD", "Team": "SEA", "Cap_Hit": 2.70, "Status": "Pending UFA '27 (No NMC)",
-            "Category": "Top-4 Defensive Upgrade", "Deadline_Posture": "Value BUY",
-            "Brunette_Fit": 91, "Archetype": "Heavy Physical Shutdown RD / Clean Exit",
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8479379.png",
+            "Player": "Will Borgen", 
+            "Team_Logo": TEAM_LOGOS["SEA"],
+            "Team": "SEA", 
+            "Pos": "RD",
+            "Cap_Hit": 2.70, 
+            "Status": "Pending UFA '27 (No NMC)",
+            "Category": "Top-4 Defensive Upgrade", 
+            "Deadline_Posture": "🟡 Value BUY",
+            "Brunette_Fit": 91, 
+            "Archetype": "Heavy Physical Shutdown RD / Clean Exit",
             "Tactical_Scouting": "Under-the-radar right defenseman who suppresses neutral-zone rush entries at a top-tier rate. Highly cost-effective upgrade with complete roster flexibility."
         },
 
         # --- BOTTOM-SIX & PK DEPTH ---
         {
-            "Player": "Noel Acciari", "Pos": "C/RW", "Team": "PHI", "Cap_Hit": 1.40, "Status": "Signed thru '28",
-            "Category": "Bottom-Six / PK Depth", "Deadline_Posture": "Depth Grinder",
-            "Brunette_Fit": 94, "Archetype": "Hard-Nosed Playoff Wall / PK Shot Blocker",
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8478496.png",
+            "Player": "Noel Acciari", 
+            "Team_Logo": TEAM_LOGOS["PHI"],
+            "Team": "PHI", 
+            "Pos": "C",
+            "Cap_Hit": 1.40, 
+            "Status": "Signed thru '28",
+            "Category": "Bottom-Six / PK Depth", 
+            "Deadline_Posture": "🟡 Depth Grinder",
+            "Brunette_Fit": 94, 
+            "Archetype": "Hard-Nosed Playoff Wall / PK Shot Blocker",
             "Tactical_Scouting": "Fearless checking center who wins key defensive-zone draws, blocks point shots, and brings heavy physical identity to a bottom-six checking role."
         },
         {
-            "Player": "Joel Armia", "Pos": "RW", "Team": "MTL", "Cap_Hit": 3.40, "Status": "Expiring Contract (No NMC)",
-            "Category": "Bottom-Six / PK Depth", "Deadline_Posture": "PK Specialist BUY",
-            "Brunette_Fit": 89, "Archetype": "6'3\" Low-Cycle Puck Protector / Short-Handed Weapon",
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8476346.png",
+            "Player": "Joel Armia", 
+            "Team_Logo": TEAM_LOGOS["MTL"],
+            "Team": "MTL", 
+            "Pos": "RW",
+            "Cap_Hit": 3.40, 
+            "Status": "Expiring Contract (No NMC)",
+            "Category": "Bottom-Six / PK Depth", 
+            "Deadline_Posture": "🔵 PK Specialist BUY",
+            "Brunette_Fit": 89, 
+            "Archetype": "6'3\" Low-Cycle Puck Protector / Short-Handed Weapon",
             "Tactical_Scouting": "Elite takeaway winger who uses his large frame to dominate board battles. High-impact addition for late-game defensive leads and penalty killing without contract blocks."
         }
     ]
@@ -574,19 +632,20 @@ if current_page == "Trade Intelligence":
         filtered_df = filtered_df[filtered_df["Pos"].str.contains("D")]
 
     if sel_strat != "All Postures":
-        filtered_df = filtered_df[filtered_df["Deadline_Posture"].str.contains(sel_strat.split()[0])]
+        filtered_df = filtered_df[filtered_df["Deadline_Posture"].str.contains(sel_strat.split()[-1])]
 
     st.markdown("#### Real-Time Acquisition Target Registry (NMC-Free)")
     
     st.dataframe(
         filtered_df[[
-            "Player", "Pos", "Team", "Cap_Hit", "Category", "Deadline_Posture", 
+            "Photo", "Player", "Team_Logo", "Pos", "Cap_Hit", "Category", "Deadline_Posture", 
             "Brunette_Fit", "Archetype", "Tactical_Scouting"
         ]].sort_values(by="Brunette_Fit", ascending=False),
         column_config={
+            "Photo": st.column_config.ImageColumn("", width="small"),
             "Player": st.column_config.TextColumn("Target Skater", width="medium"),
+            "Team_Logo": st.column_config.ImageColumn("Team", width="small"),
             "Pos": st.column_config.TextColumn("Pos", width="small"),
-            "Team": st.column_config.TextColumn("Team", width="small"),
             "Cap_Hit": st.column_config.NumberColumn("Cap Hit ($M)", format="$%.2fM"),
             "Category": st.column_config.TextColumn("Player Tier", width="medium"),
             "Deadline_Posture": st.column_config.TextColumn("Deadline Action", width="medium"),
