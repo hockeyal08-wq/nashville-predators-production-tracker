@@ -339,49 +339,49 @@ if current_page == "Line Combinations":
     # Forward Lines (LW - C - RW Pattern)
     st.markdown('<div class="line-header-banner">FORWARD LINE 1 | MATCHUP & HEAVY CYCLE</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 9, "Filip Forsberg", "LW", "Sniper / Cycle Touch", 8476887)
-    render_nhl_player(c2, 90, "Ryan O'Reilly", "C", "200-Ft Anchor / Ozone Draws", 8475158)
-    render_nhl_player(c3, 81, "Jonathan Marchessault", "RW", "Perimeter Release / Boards", 8476539)
+    render_nhl_player(c1, 9, "Filip Forsberg", "LW", "Sniper / Cycle Touch", 8476887)[cite: 3]
+    render_nhl_player(c2, 90, "Ryan O'Reilly", "C", "200-Ft Anchor / Ozone Draws", 8475158)[cite: 3]
+    render_nhl_player(c3, 81, "Jonathan Marchessault", "RW", "Perimeter Release / Boards", 8476539)[cite: 3]
 
     st.markdown('<div class="line-header-banner">FORWARD LINE 2 | RUSH STRIKE & HIGH-SLOT FINISHING</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer", 8474564)
-    render_nhl_player(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor", 8482142)
-    render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484241)
+    render_nhl_player(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer", 8474564)[cite: 3]
+    render_nhl_player(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor", 8482142)[cite: 3]
+    render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484241)[cite: 3]
 
     st.markdown('<div class="line-header-banner">FORWARD LINE 3 | RELENTLESS F1/F2 FORECHECK & TURNOVER CREATION</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 79, "Ross Colton", "LW", "Puck-Hound / Physical Pressure", 8479525)
-    render_nhl_player(c2, 18, "Jack Drury", "C", "Neutral-Zone Transition Detail", 8480835)
-    render_nhl_player(c3, 21, "Nils Höglander", "RW", "5v5 Motor / Cycle Finisher", 8481535)
+    render_nhl_player(c1, 79, "Ross Colton", "LW", "Puck-Hound / Physical Pressure", 8479525)[cite: 3]
+    render_nhl_player(c2, 18, "Jack Drury", "C", "Neutral-Zone Transition Detail", 8480835)[cite: 3]
+    render_nhl_player(c3, 21, "Nils Höglander", "RW", "5v5 Motor / Cycle Finisher", 8481535)[cite: 3]
 
     st.markdown('<div class="line-header-banner">FORWARD LINE 4 | TRANSITION PACE & DEFENSIVE IQ</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 14, "Alexander Kerfoot", "LW", "Two-Way Versatility", 8477021)
-    render_nhl_player(c2, 51, "Vitali Pinchuk", "C", "6'3\" Transition Frame", 8486189)
-    render_nhl_player(c3, 89, "Ozzy Wiesblatt", "RW", "North-South Energy / Agitator", 8482103)
+    render_nhl_player(c1, 14, "Alexander Kerfoot", "LW", "Two-Way Versatility", 8477021)[cite: 3]
+    render_nhl_player(c2, 51, "Vitali Pinchuk", "C", "6'3\" Transition Frame", 8486189)[cite: 3]
+    render_nhl_player(c3, 89, "Ozzy Wiesblatt", "RW", "North-South Energy / Agitator", 8482103)[cite: 3]
 
-    # Defense Pairings (LD - RD Pattern)
+    # Defensive Pairings (LD - RD Pattern)
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 1 | ELITE DUAL-THREAT TRANSITION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 41, "Nicolas Hague", "LD", "6'6\" Physical Anchor / Box-Outs", 8480838)
-    render_nhl_player(d2, 59, "Roman Josi", "RD", "Weak-Side Activation / Rush Rover", 8474563)
+    render_nhl_player(d1, 41, "Nicolas Hague", "LD", "6'6\" Physical Anchor / Box-Outs", 8480051)[cite: 3]
+    render_nhl_player(d2, 59, "Roman Josi", "RD", "Weak-Side Activation / Rush Rover", 8474563)[cite: 3]
 
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 2 | TWO-WAY RUSH SUPPRESSION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 76, "Brady Skjei", "LD", "Exit Skating / Mobility", 8477932)
-    render_nhl_player(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout", 8480249)
+    render_nhl_player(d1, 76, "Brady Skjei", "LD", "Exit Skating / Mobility", 8476869)[cite: 3]
+    render_nhl_player(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout", 8480249)[cite: 3]
 
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 3 | MOBILITY & CREASE PROTECTION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater", 8482482)
-    render_nhl_player(d2, 46, "Ilya Lyubushkin", "RD", "Physical Net-Front Suppression", 8480950)
+    render_nhl_player(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater", 8482482)[cite: 3]
+    render_nhl_player(d2, 46, "Ilya Lyubushkin", "RD", "Physical Net-Front Suppression", 8480950)[cite: 3]
 
     # Goaltending Tandem
     st.markdown('<div class="line-header-banner">GOALTENDING TANDEM</div>', unsafe_allow_html=True)
     g1, g2 = st.columns(2)
-    render_nhl_player(g1, 74, "Juuse Saros", "G", "Starting Goaltender (Franchise Anchor)", 8477424)
-    render_nhl_player(g2, 29, "Justus Annunen", "G", "Backup Goaltender (High-End Tandem)", 8481020)
+    render_nhl_player(g1, 74, "Juuse Saros", "G", "Starting Goaltender (Franchise Anchor)", 8477424)[cite: 3]
+    render_nhl_player(g2, 29, "Justus Annunen", "G", "Backup Goaltender (High-End Tandem)", 8481020)[cite: 3]
 
     st.stop()
 
@@ -460,7 +460,7 @@ KNOWN_D_HANDEDNESS = {
     8474563: "L",  # Roman Josi
     8475172: "R",  # Luke Schenn
     8475222: "L",  # Ryan McDonagh
-    8477932: "L",  # Brady Skjei
+    8476869: "L",  # Brady Skjei
     8478469: "L",  # Jeremy Lauzon
     8479323: "R",  # Dante Fabbro
     8479410: "R",  # Alexandre Carrier
@@ -470,7 +470,7 @@ KNOWN_D_HANDEDNESS = {
     8483488: "L",  # Tanner Molendyk
     8484153: "R",  # Andrew Gibson
     8480950: "R",  # Ilya Lyubushkin
-    8480838: "L",  # Nicolas Hague
+    8480051: "L",  # Nicolas Hague
     8480249: "R",  # Nick Perbix
     8482482: "L",  # Adam Wilsby
 }
