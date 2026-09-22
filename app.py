@@ -11,106 +11,106 @@ st.set_page_config(
 )
 
 # Deep franchise theme injection
-st.markdown("""
+st.markdown(f"""
 <style>
     /* Full Page Canvas, Main Body & App View Container */
-    html, body, [data-testid="stAppViewContainer"], .stApp {
+    html, body, [data-testid="stAppViewContainer"], .stApp {{
         background-color: #041E42 !important;
         color: #F8FAFC !important;
         font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif !important;
-    }
+    }}
     
     /* Top Toolbar / Header */
-    [data-testid="stHeader"] {
+    [data-testid="stHeader"] {{
         background-color: rgba(4, 30, 66, 0.95) !important;
-    }
+    }}
 
     /* Left Sidebar Theming */
-    [data-testid="stSidebar"], [data-testid="stSidebarContent"] {
+    [data-testid="stSidebar"], [data-testid="stSidebarContent"] {{
         background-color: #03142D !important;
         border-right: 1.5px solid rgba(255, 184, 28, 0.3) !important;
-    }
-    [data-testid="stSidebar"] * {
+    }}
+    [data-testid="stSidebar"] * {{
         color: #F8FAFC !important;
-    }
+    }}
 
     /* Page Padding & Spacing */
-    .block-container {
+    .block-container {{
         padding-top: 1.5rem !important;
         padding-bottom: 2rem !important;
         max-width: 95% !important;
-    }
+    }}
 
     /* Sidebar Collapse Button Styling */
     [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarCollapseButton"] button {
+    [data-testid="stSidebarCollapseButton"] button {{
         opacity: 1 !important;
         visibility: visible !important;
         display: flex !important;
-    }
+    }}
 
-    [data-testid="stSidebarCollapseButton"] button {
+    [data-testid="stSidebarCollapseButton"] button {{
         background-color: #061F47 !important;
         border: 2px solid #FFB81C !important;
         border-radius: 8px !important;
         padding: 4px 8px !important;
         box-shadow: 0 0 10px rgba(255, 184, 28, 0.4) !important;
         transition: all 0.2s ease-in-out !important;
-    }
+    }}
 
-    [data-testid="stSidebarCollapseButton"] button:hover {
+    [data-testid="stSidebarCollapseButton"] button:hover {{
         background-color: #FFB81C !important;
         box-shadow: 0 0 16px rgba(255, 184, 28, 0.7) !important;
         transform: scale(1.05);
-    }
+    }}
 
     [data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stSidebarCollapseButton"] svg * {
+    [data-testid="stSidebarCollapseButton"] svg * {{
         opacity: 1 !important;
         visibility: visible !important;
         fill: #FFB81C !important;
         stroke: #FFB81C !important;
         color: #FFB81C !important;
-    }
+    }}
 
     [data-testid="stSidebarCollapseButton"] button:hover svg,
-    [data-testid="stSidebarCollapseButton"] button:hover svg * {
+    [data-testid="stSidebarCollapseButton"] button:hover svg * {{
         fill: #041E42 !important;
         stroke: #041E42 !important;
         color: #041E42 !important;
-    }
+    }}
 
     /* Header Container */
-    .header-container {
+    .header-container {{
         display: flex;
         align-items: center;
         gap: 22px;
         margin-bottom: 24px;
         border-bottom: 2px solid #FFB81C;
         padding-bottom: 18px;
-    }
-    .header-logo {
+    }}
+    .header-logo {{
         width: 85px;
         height: auto;
         object-fit: contain;
-    }
-    .header-title-box h1 {
+    }}
+    .header-title-box h1 {{
         font-size: 2.2rem;
         font-weight: 800;
         letter-spacing: -0.5px;
         margin: 0;
         color: #FFFFFF !important;
-    }
-    .header-subtitle {
+    }}
+    .header-subtitle {{
         font-size: 0.95rem;
         color: #FFB81C !important;
         margin-top: 5px;
         font-weight: 600;
         letter-spacing: 0.3px;
-    }
+    }}
 
     /* Executive Spotlight Showcase Card */
-    .spotlight-card {
+    .spotlight-card {{
         background: linear-gradient(135deg, #092652 0%, #03142D 100%);
         border: 2px solid #FFB81C;
         border-radius: 12px;
@@ -118,15 +118,15 @@ st.markdown("""
         box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
         margin-bottom: 28px;
         color: #FFFFFF;
-    }
-    .spotlight-title {
+    }}
+    .spotlight-title {{
         font-size: 2.2rem;
         font-weight: 800;
         margin: 0;
         color: #FFB81C !important;
         letter-spacing: -0.5px;
-    }
-    .badge {
+    }}
+    .badge {{
         display: inline-block;
         background: rgba(255, 184, 28, 0.15);
         border: 1px solid rgba(255, 184, 28, 0.5);
@@ -139,57 +139,57 @@ st.markdown("""
         margin-bottom: 14px;
         color: #FFB81C !important;
         letter-spacing: 0.5px;
-    }
-    .stat-pill-container {
+    }}
+    .stat-pill-container {{
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 14px;
         margin-top: 12px;
-    }
-    .stat-pill {
+    }}
+    .stat-pill {{
         background: #04142B;
         border: 1px solid rgba(255, 184, 28, 0.3);
         border-radius: 8px;
         padding: 12px 16px;
         text-align: left;
-    }
-    .stat-pill-label {
+    }}
+    .stat-pill-label {{
         font-size: 0.7rem;
         text-transform: uppercase;
         color: #94A3B8 !important;
         font-weight: 700;
         letter-spacing: 0.6px;
-    }
-    .stat-pill-val {
+    }}
+    .stat-pill-val {{
         font-size: 1.4rem;
         font-weight: 800;
         color: #FFFFFF !important;
         margin-top: 3px;
-    }
-    .stat-pill-sub {
+    }}
+    .stat-pill-sub {{
         font-size: 0.75rem;
         color: #FFB81C !important;
         margin-top: 3px;
         font-weight: 600;
-    }
+    }}
 
     /* EA NHL Style Line Card */
-    .nhl-player-card {
+    .nhl-player-card {{
         background: linear-gradient(180deg, #092652 0%, #03142D 100%);
         border: 1.5px solid rgba(255, 184, 28, 0.4);
         border-radius: 10px;
-        padding: 12px 14px;
+        padding: 14px 12px;
         text-align: center;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
         transition: transform 0.2s ease, border-color 0.2s ease;
         margin-bottom: 12px;
-    }
-    .nhl-player-card:hover {
+    }}
+    .nhl-player-card:hover {{
         transform: translateY(-2px);
         border-color: #FFB81C;
         box-shadow: 0 6px 18px rgba(255, 184, 28, 0.35);
-    }
-    .nhl-mug {
+    }}
+    .nhl-mug {{
         width: 82px;
         height: 82px;
         object-fit: cover;
@@ -198,29 +198,29 @@ st.markdown("""
         margin: 0 auto 8px auto;
         display: block;
         background-color: #04142B;
-    }
-    .nhl-num-pos {
-        font-size: 0.75rem;
+    }}
+    .nhl-num-pos {{
+        font-size: 0.78rem;
         font-weight: 800;
         color: #FFB81C;
         letter-spacing: 0.5px;
-    }
-    .nhl-name {
-        font-size: 1.02rem;
+    }}
+    .nhl-name {{
+        font-size: 1.05rem;
         font-weight: 800;
         color: #FFFFFF;
         margin: 2px 0 4px 0;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-    }
-    .nhl-tag {
+    }}
+    .nhl-tag {{
         font-size: 0.72rem;
         color: #94A3B8;
         font-weight: 600;
-    }
+    }}
 
-    .line-header-banner {
+    .line-header-banner {{
         background-color: #061F47;
         border-left: 4px solid #FFB81C;
         padding: 8px 14px;
@@ -231,10 +231,10 @@ st.markdown("""
         margin-bottom: 10px;
         letter-spacing: 0.3px;
         border-radius: 4px;
-    }
+    }}
 
     /* Predators Gold Rounded Buttons */
-    div[data-testid="stButton"] button[kind="secondary"] {
+    div[data-testid="stButton"] button[kind="secondary"] {{
         background-color: #061F47 !important;
         border: 2px solid #FFB81C !important;
         border-radius: 10px !important;
@@ -245,12 +245,12 @@ st.markdown("""
         padding: 8px 16px !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
         transition: all 0.2s ease-in-out !important;
-    }
-    div[data-testid="stButton"] button[kind="secondary"]:hover {
+    }}
+    div[data-testid="stButton"] button[kind="secondary"]:hover {{
         background-color: rgba(255, 184, 28, 0.2) !important;
         box-shadow: 0 0 12px rgba(255, 184, 28, 0.5) !important;
-    }
-    div[data-testid="stButton"] button[kind="primary"] {
+    }}
+    div[data-testid="stButton"] button[kind="primary"] {{
         background-color: #FFB81C !important;
         border: 2px solid #FFB81C !important;
         border-radius: 10px !important;
@@ -260,9 +260,9 @@ st.markdown("""
         font-size: 0.95rem !important;
         padding: 8px 16px !important;
         box-shadow: 0 4px 14px rgba(255, 184, 28, 0.45) !important;
-    }
+    }}
 
-    .filter-label {
+    .filter-label {{
         font-size: 0.92rem;
         font-weight: 700;
         color: #FFB81C;
@@ -270,14 +270,14 @@ st.markdown("""
         margin-bottom: 6px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-    }
+    }}
     
-    [data-testid="stDataFrame"] {
+    [data-testid="stDataFrame"] {{
         border-radius: 12px;
         overflow: hidden;
         border: 1px solid rgba(255, 184, 28, 0.3);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
-    }
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -292,7 +292,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Top Navigation in Sidebar ---
+# Top Navigation in Sidebar
 st.sidebar.markdown("### Navigation Mode")
 if "current_page" not in st.session_state:
     st.session_state["current_page"] = "Skater Analytics"
@@ -329,59 +329,59 @@ if current_page == "Line Combinations":
         img_url = f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png"
         col.markdown(f"""
         <div class="nhl-player-card">
-            <img class="nhl-mug" src="{img_url}" alt="{name}" onerror="this.src='https://assets.nhle.com/mugs/nhl/default-skater.png';">
+            <img class="nhl-mug" src="{img_url}" alt="{name}" onerror="this.onerror=null; this.src='{PREDS_LOGO_URL}';">
             <div class="nhl-num-pos">#{num} • {pos}</div>
             <div class="nhl-name">{name}</div>
             <div class="nhl-tag">{role_tag}</div>
         </div>
         """, unsafe_allow_html=True)
 
-    # Forward Lines
+    # Forward Lines (LW - C - RW Pattern)
     st.markdown('<div class="line-header-banner">FORWARD LINE 1 | MATCHUP & HEAVY CYCLE</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 9, "Filip Forsberg", "LW", "Sniper / Cycle Touch", 8476887) #[cite: 3]
-    render_nhl_player(c2, 90, "Ryan O'Reilly", "C", "200-Ft Anchor / Ozone Draws", 8475158) #[cite: 3]
-    render_nhl_player(c3, 81, "Jonathan Marchessault", "RW", "Perimeter Release / Boards", 8476539) #[cite: 3]
+    render_nhl_player(c1, 9, "Filip Forsberg", "LW", "Sniper / Cycle Touch", 8476887)[cite: 3]
+    render_nhl_player(c2, 90, "Ryan O'Reilly", "C", "200-Ft Anchor / Ozone Draws", 8475158)[cite: 3]
+    render_nhl_player(c3, 81, "Jonathan Marchessault", "RW", "Perimeter Release / Boards", 8476539)[cite: 3]
 
     st.markdown('<div class="line-header-banner">FORWARD LINE 2 | RUSH STRIKE & HIGH-SLOT FINISHING</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer", 8474564) #[cite: 3]
-    render_nhl_player(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor", 8482142) #[cite: 3]
-    render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484241) #[cite: 3]
+    render_nhl_player(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer", 8474564)[cite: 3]
+    render_nhl_player(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor", 8482142)[cite: 3]
+    render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484241)[cite: 3]
 
     st.markdown('<div class="line-header-banner">FORWARD LINE 3 | RELENTLESS F1/F2 FORECHECK & TURNOVER CREATION</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 79, "Ross Colton", "LW", "Puck-Hound / Physical Pressure", 8479525) #[cite: 3]
-    render_nhl_player(c2, 18, "Jack Drury", "C", "Neutral-Zone Transition Detail", 8480835) #[cite: 3]
-    render_nhl_player(c3, 21, "Nils Höglander", "RW", "5v5 Motor / Cycle Finisher", 8481535) #[cite: 3]
+    render_nhl_player(c1, 79, "Ross Colton", "LW", "Puck-Hound / Physical Pressure", 8479525)[cite: 3]
+    render_nhl_player(c2, 18, "Jack Drury", "C", "Neutral-Zone Transition Detail", 8480835)[cite: 3]
+    render_nhl_player(c3, 21, "Nils Höglander", "RW", "5v5 Motor / Cycle Finisher", 8481535)[cite: 3]
 
     st.markdown('<div class="line-header-banner">FORWARD LINE 4 | TRANSITION PACE & DEFENSIVE IQ</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 14, "Alexander Kerfoot", "LW", "Two-Way Versatility", 8477021) #[cite: 3]
-    render_nhl_player(c2, 51, "Vitali Pinchuk", "C", "6'3\" Transition Frame", 8486189) #[cite: 3]
-    render_nhl_player(c3, 89, "Ozzy Wiesblatt", "RW", "North-South Energy / Agitator", 8482103) #[cite: 3]
+    render_nhl_player(c1, 14, "Alexander Kerfoot", "LW", "Two-Way Versatility", 8477021)[cite: 3]
+    render_nhl_player(c2, 51, "Vitali Pinchuk", "C", "6'3\" Transition Frame", 8486189)[cite: 3]
+    render_nhl_player(c3, 89, "Ozzy Wiesblatt", "RW", "North-South Energy / Agitator", 8482103)[cite: 3]
 
-    # Defense Pairings
+    # Defense Pairings (LD - RD Pattern)
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 1 | ELITE DUAL-THREAT TRANSITION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 41, "Nicolas Hague", "LD", "6'6\" Physical Anchor / Box-Outs", 8480838) #[cite: 3]
-    render_nhl_player(d2, 59, "Roman Josi", "RD", "Weak-Side Activation / Rush Rover", 8474563) #[cite: 3]
+    render_nhl_player(d1, 41, "Nicolas Hague", "LD", "6'6\" Physical Anchor / Box-Outs", 8480838)[cite: 3]
+    render_nhl_player(d2, 59, "Roman Josi", "RD", "Weak-Side Activation / Rush Rover", 8474563)[cite: 3]
 
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 2 | TWO-WAY RUSH SUPPRESSION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 76, "Brady Skjei", "LD", "Exit Skating / Mobility", 8477932) #[cite: 3]
-    render_nhl_player(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout", 8480249) #[cite: 3]
+    render_nhl_player(d1, 76, "Brady Skjei", "LD", "Exit Skating / Mobility", 8477932)[cite: 3]
+    render_nhl_player(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout", 8480249)[cite: 3]
 
     st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 3 | MOBILITY & CREASE PROTECTION</div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater", 8482482) #[cite: 3]
-    render_nhl_player(d2, 46, "Ilya Lyubushkin", "RD", "Physical Net-Front Suppression", 8477447) #[cite: 3]
+    render_nhl_player(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater", 8482482)[cite: 3]
+    render_nhl_player(d2, 46, "Ilya Lyubushkin", "RD", "Physical Net-Front Suppression", 8480950)[cite: 3]
 
-    # Goaltending Crease
+    # Goaltending Tandem
     st.markdown('<div class="line-header-banner">GOALTENDING TANDEM</div>', unsafe_allow_html=True)
     g1, g2 = st.columns(2)
-    render_nhl_player(g1, 74, "Juuse Saros", "G", "Starting Goaltender (Franchise Anchor)", 8477424) #[cite: 3]
-    render_nhl_player(g2, 29, "Justus Annunen", "G", "Backup Goaltender (High-End Tandem)", 8481020) #[cite: 3]
+    render_nhl_player(g1, 74, "Juuse Saros", "G", "Starting Goaltender (Franchise Anchor)", 8477424)[cite: 3]
+    render_nhl_player(g2, 29, "Justus Annunen", "G", "Backup Goaltender (High-End Tandem)", 8481020)[cite: 3]
 
     st.stop()
 
@@ -389,7 +389,6 @@ if current_page == "Line Combinations":
 # PAGE 2: SKATER ANALYTICS & PERFORMANCE HUB
 # ==============================================================================
 
-# --- Sidebar Controls ---
 st.sidebar.markdown("### Filter Settings")
 
 # 1. Season Selection
@@ -457,7 +456,6 @@ position_filter = st.session_state["selected_pos_group"]
 BASE_URL = "https://api-web.nhle.com/v1"
 TEAM_TRICODE = "NSH"
 
-# Known handedness map for Predators defensemen across recent seasons
 KNOWN_D_HANDEDNESS = {
     8474563: "L",  # Roman Josi
     8475172: "R",  # Luke Schenn
@@ -471,7 +469,7 @@ KNOWN_D_HANDEDNESS = {
     8481541: "R",  # Spencer Stastney
     8483488: "L",  # Tanner Molendyk
     8484153: "R",  # Andrew Gibson
-    8477447: "R",  # Ilya Lyubushkin
+    8480950: "R",  # Ilya Lyubushkin
     8480838: "L",  # Nicolas Hague
     8480249: "R",  # Nick Perbix
     8482482: "L",  # Adam Wilsby
@@ -500,12 +498,10 @@ def load_roster_handedness(season):
 def load_zone_faceoffs(season, game_type):
     """Fetches O-Zone, N-Zone, and D-Zone faceoff percentages using Nashville franchiseId (34) and teamId (18)."""
     zone_dict = {}
-    
     urls = [
         f"https://api.nhle.com/stats/rest/en/skater/faceoffpercentages?isAggregate=false&isGame=false&limit=100&sort=%5B%7B%22property%22:%22totalFaceoffs%22,%22direction%22:%22DESC%22%7D%5D&cayenneExp=seasonId={season}%20and%20gameTypeId={game_type}%20and%20franchiseId=34",
         f"https://api.nhle.com/stats/rest/en/skater/faceoffpercentages?isAggregate=false&isGame=false&limit=100&sort=%5B%7B%22property%22:%22totalFaceoffs%22,%22direction%22:%22DESC%22%7D%5D&cayenneExp=seasonId={season}%20and%20gameTypeId={game_type}%20and%20teamId=18",
     ]
-    
     for url in urls:
         try:
             res = requests.get(url, timeout=5)
@@ -532,7 +528,6 @@ def load_zone_faceoffs(season, game_type):
                         break
         except Exception:
             continue
-
     return zone_dict
 
 @st.cache_data(ttl=900)
@@ -683,7 +678,7 @@ else:
     <div class="spotlight-card">
         <div style="display: flex; gap: 28px; align-items: center; flex-wrap: wrap;">
             <div style="flex-shrink: 0; text-align: center;">
-                <img src="{p['Photo']}" style="width: 145px; height: 145px; object-fit: cover; border-radius: 50%; border: 2px solid #FFB81C; box-shadow: 0 6px 18px rgba(0,0,0,0.65);">
+                <img src="{p['Photo']}" onerror="this.onerror=null; this.src='{PREDS_LOGO_URL}';" style="width: 145px; height: 145px; object-fit: cover; border-radius: 50%; border: 2px solid #FFB81C; box-shadow: 0 6px 18px rgba(0,0,0,0.65);">
             </div>
             <div style="flex-grow: 1; min-width: 280px;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -746,7 +741,7 @@ else:
 
 st.divider()
 
-# --- Tabbed Analytical Views ---
+# Tabbed Analytical Views
 st.subheader("Skater Performance")
 
 if not df.empty:
