@@ -885,7 +885,7 @@ def load_club_stats(season, game_type):
         gs = g.get("gamesStarted", 0)
         wins = g.get("wins", 0)
         losses = g.get("losses", 0)
-        ot_losses = g.get("otLosses", 0)
+        ot_losses = g.get("otLosses") if g.get("otLosses") is not None else g.get("ot", 0)
         sa = g.get("shotsAgainst", 0)
         ga = g.get("goalsAgainst", 0)
         sv = g.get("saves", 0)
@@ -897,7 +897,6 @@ def load_club_stats(season, game_type):
         gaa = round(float(raw_gaa), 2)
         
         so = g.get("shutouts", 0)
-        toi = g.get("timeOnIce", 0)
 
         first_name = g.get("firstName", {}).get("default", "")
         last_name = g.get("lastName", {}).get("default", "")
@@ -972,7 +971,7 @@ else:
                     <div class="stat-pill-container">
                         <div class="stat-pill">
                             <div class="stat-pill-label">Save Percentage</div>
-                            <div class="stat-pill-val">{p['SV%']}%</div>
+                            <div class="stat-pill-val">{p['SV%']:.2f}%</div>
                             <div class="stat-pill-sub">{p['SV']} Saves</div>
                         </div>
                         <div class="stat-pill">
@@ -1062,7 +1061,7 @@ else:
                         st.image(skater["Photo"], use_container_width=True)
                         st.caption(f"**{skater['Skater']}** | {skater['Pos']}")
                         if position_filter == "Goaltenders":
-                            st.caption(f"{skater['W']} W | {skater['SV%']}% SV%")
+                            st.caption(f"{skater['W']} W | {skater['SV%']:.2f}% SV%")
                         else:
                             st.caption(f"{skater['PTS']} PTS ({skater['GP']} GP)")
                         if st.button("Select", key=f"btn_{skater['PlayerId']}", use_container_width=True):
