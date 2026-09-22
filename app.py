@@ -42,7 +42,7 @@ st.markdown("""
     }
 
     /* ============================================================ */
-    /* RESTORED: SIDEBAR COLLAPSE ARROW BOX (NAVY + GOLD)           */
+    /* SIDEBAR COLLAPSE ARROW BOX (NAVY + GOLD)                     */
     /* ============================================================ */
     [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarCollapseButton"] button {
@@ -341,12 +341,14 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
+        # Raw percentage decimals
         sh_pct = s.get("shootingPctg", 0.0)
         sh_pct = float(sh_pct) if sh_pct is not None else 0.0
 
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = float(fo_pct) if fo_pct is not None else 0.0
 
+        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
@@ -368,6 +370,19 @@ def load_club_skater_stats(season, game_type):
         pp_score = round(((pp_goals / gp) * 3.0) + (sog60 * 0.1), 4) if gp > 0 else 0.0
         pk_score = round((toi_gp_min * 0.05) + ((sh_goals / gp) * 4.0) - (pim60 * 0.1), 4) if gp > 0 else 0.0
 
+        raw_pos = s.get("positionCode", "N/A")
+        shoots = s.get("shootsCatches", "")
+
+        # Granular positional mapping
+        if raw_pos == "L":
+            pos_code = "LW"
+        elif raw_pos == "R":
+            pos_code = "RW"
+        elif raw_pos == "D":
+            pos_code = f"{shoots}D" if shoots in ["L", "R"] else "D"
+        else:
+            pos_code = raw_pos
+
         player_id = s.get("playerId")
         first_name = s.get("firstName", {}).get("default", "")
         last_name = s.get("lastName", {}).get("default", "")
@@ -376,7 +391,7 @@ def load_club_skater_stats(season, game_type):
             "PlayerId": player_id,
             "Photo": s.get("headshot", f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png"),
             "Skater": f"{first_name} {last_name}",
-            "Pos": s.get("positionCode", "N/A"),
+            "Pos": pos_code,
             "GP": int(gp),
             "G": int(goals),
             "A": int(assists),
@@ -409,9 +424,9 @@ with st.spinner("Loading NHL operations data..."):
 
 if not df.empty:
     if position_filter == "Forwards":
-        df = df[df["Pos"].isin(["C", "L", "R", "F"])].reset_index(drop=True)
+        df = df[df["Pos"].isin(["C", "LW", "RW", "F"])].reset_index(drop=True)
     elif position_filter == "Defensemen":
-        df = df[df["Pos"] == "D"].reset_index(drop=True)
+        df = df[df["Pos"].isin(["D", "LD", "RD"])].reset_index(drop=True)
 
 # --- Spotlight Header ---
 if df.empty:
