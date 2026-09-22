@@ -515,7 +515,7 @@ if current_page == "Trade Intelligence":
             "Deadline_Posture": "🟢 Top BUY Target",
             "Brunette_Fit": 95, 
             "P_GP": 0.82,
-            "SOG_60": 9.42,
+            "SOG_GP": 3.10,
             "Chem_Fit": "Line 2 RW alongside Stamkos & Bourque | High F1 Forecheck Motor"
         },
         {
@@ -529,7 +529,7 @@ if current_page == "Trade Intelligence":
             "Deadline_Posture": "🟢 BUY Target",
             "Brunette_Fit": 92, 
             "P_GP": 0.74,
-            "SOG_60": 10.15,
+            "SOG_GP": 3.35,
             "Chem_Fit": "PP2 Unit Quarterback / High-Volume High-Slot Release"
         },
         {
@@ -543,7 +543,7 @@ if current_page == "Trade Intelligence":
             "Deadline_Posture": "🔵 Secondary Scorer",
             "Brunette_Fit": 93, 
             "P_GP": 0.85,
-            "SOG_60": 6.80,
+            "SOG_GP": 2.40,
             "Chem_Fit": "Middle-Six Playmaker / Zone-Entry Transition Anchor"
         },
         {
@@ -557,7 +557,7 @@ if current_page == "Trade Intelligence":
             "Deadline_Posture": "🟡 Value BUY",
             "Brunette_Fit": 91, 
             "P_GP": 0.24,
-            "SOG_60": 3.20,
+            "SOG_GP": 1.15,
             "Chem_Fit": "Pairing 3 RD with Wilsby / Heavy Physical Shot Suppression"
         },
         {
@@ -571,7 +571,7 @@ if current_page == "Trade Intelligence":
             "Deadline_Posture": "🟡 Depth Grinder",
             "Brunette_Fit": 94, 
             "P_GP": 0.35,
-            "SOG_60": 5.40,
+            "SOG_GP": 1.75,
             "Chem_Fit": "Line 4 Center / PK1 Shield / Defensive Zone Faceoff Specialist"
         },
         {
@@ -585,7 +585,7 @@ if current_page == "Trade Intelligence":
             "Deadline_Posture": "🔵 PK Specialist BUY",
             "Brunette_Fit": 89, 
             "P_GP": 0.42,
-            "SOG_60": 6.10,
+            "SOG_GP": 2.05,
             "Chem_Fit": "Line 3/4 Board Battle Protector / Short-Handed Threat"
         }
     ]
@@ -624,7 +624,7 @@ if current_page == "Trade Intelligence":
 
     st.markdown("#### Real-Time Acquisition Target Registry (NMC-Free)")
     
-    # Render targets as an executive card grid featuring team logos, P/GP stats, and chem fits
+    # Render targets as an executive card grid featuring team logos, P/GP & SOG/GP stats, and chem fits
     for i, row in filtered_df.iterrows():
         with st.container(border=True):
             c1, c2, c3 = st.columns([1.2, 3.5, 5])
@@ -636,7 +636,7 @@ if current_page == "Trade Intelligence":
                 st.markdown(f"**Action:** {row['Deadline_Posture']}")
                 st.markdown(f"**Scheme Fit:** {row['Brunette_Fit']}/100")
             with c3:
-                st.markdown(f"**Analytics Profile:** `{row['P_GP']} P/GP` | `{row['SOG_60']} SOG/60`")
+                st.markdown(f"**Analytics Profile:** `{row['P_GP']} P/GP` | `{row['SOG_GP']} SOG/GP`")
                 st.info(f"**Line Chemistry Fit:** {row['Chem_Fit']}")
 
     st.stop()
@@ -818,13 +818,13 @@ def load_club_skater_stats(season, game_type):
         total_toi_min = toi_gp_min * gp
 
         pgp = round((pts / gp), 4) if gp > 0 else 0.0
-        sog60 = round((shots / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
+        soggp = round((shots / gp), 4) if gp > 0 else 0.0
         pm60 = round((plus_minus / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
         pim60 = round((pim / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
 
-        off_score = round(pgp * 10 + (sog60 * 0.25) + ((pp_goals / gp) * 1.5), 4) if gp > 0 else 0.0
+        off_score = round(pgp * 10 + (soggp * 2.5) + ((pp_goals / gp) * 1.5), 4) if gp > 0 else 0.0
         def_score = round((pm60 * 1.5) + (toi_gp_min * 0.1) + ((sh_goals / gp) * 2.0) - (pim60 * 0.2), 4) if gp > 0 else 0.0
-        pp_score = round(((pp_goals / gp) * 3.0) + (sog60 * 0.1), 4) if gp > 0 else 0.0
+        pp_score = round(((pp_goals / gp) * 3.0) + (soggp * 0.5), 4) if gp > 0 else 0.0
         pk_score = round((toi_gp_min * 0.05) + ((sh_goals / gp) * 4.0) - (pim60 * 0.1), 4) if gp > 0 else 0.0
 
         raw_pos = s.get("positionCode", "N/A")
@@ -874,7 +874,7 @@ def load_club_skater_stats(season, game_type):
             "DZ_FO%": dz_fo,
             "TOI/GP": round(toi_gp_min, 2),
             "P/GP": pgp,
-            "SOG/60": sog60,
+            "SOG/GP": soggp,
             "+/- /60": pm60,
             "Off_Score": off_score,
             "Def_Score": def_score,
@@ -924,7 +924,7 @@ else:
                             <span class="badge">POS: {p['Pos']}</span>
                             <span class="badge">GP: {p['GP']}</span>
                             <span class="badge">TOI/GP: {p['TOI/GP']:.2f} MIN</span>
-                            <span class="badge">SOG: {p['SOG']}</span>
+                            <span class="badge">SOG/GP: {p['SOG/GP']:.2f}</span>
                         </div>
                     </div>
                     <img src="{PREDS_LOGO_URL}" style="width: 60px; opacity: 0.9;" alt="Predators">
@@ -1025,6 +1025,7 @@ if not df.empty:
         "NZ_FO%": st.column_config.ProgressColumn("NZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
         "DZ_FO%": st.column_config.ProgressColumn("DZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
         "P/GP": st.column_config.ProgressColumn("P/GP", min_value=0.0, max_value=float(df["P/GP"].max() or 2.0), format="%.2f"),
+        "SOG/GP": st.column_config.ProgressColumn("SOG/GP", min_value=0.0, max_value=float(df["SOG/GP"].max() or 6.0), format="%.2f"),
         "Off_Score": st.column_config.ProgressColumn("Offensive Impact", min_value=0.0, max_value=float(df["Off_Score"].max() or 6.0), format="%.2f"),
         "Def_Score": st.column_config.ProgressColumn("Defensive Impact", min_value=float(df["Def_Score"].min() or -3.0), max_value=float(df["Def_Score"].max() or 5.0), format="%.2f"),
         "PP_Score": st.column_config.ProgressColumn("PP Impact", min_value=0.0, max_value=float(df["PP_Score"].max() or 5.0), format="%.2f"),
@@ -1032,7 +1033,7 @@ if not df.empty:
     }
 
     if active_view == "Offensive Impact":
-        cols = ["Photo", "Skater", "Pos", "GP", "Off_Score", "P/GP", "SOG/60", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]
+        cols = ["Photo", "Skater", "Pos", "GP", "Off_Score", "P/GP", "SOG/GP", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]
         off_view = qualified_df[cols].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
         st.dataframe(off_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
@@ -1058,7 +1059,7 @@ if not df.empty:
     elif active_view == "Complete Skater Statistics":
         cols = [
             "Photo", "Skater", "Pos", "GP", "Off_Score", "Def_Score", "PP_Score", "PK_Score",
-            "PTS", "G", "A", "+/-", "P/GP", "TOI/GP", "SOG", "SH%", "FO%", "PIM", 
+            "PTS", "G", "A", "+/-", "P/GP", "SOG/GP", "TOI/GP", "SOG", "SH%", "FO%", "PIM", 
             "PPG", "SHG", "GWG"
         ]
         comp_view = qualified_df[cols].sort_values(by="PTS", ascending=False).reset_index(drop=True)
@@ -1070,7 +1071,7 @@ if not df.empty:
         else:
             cols = [
                 "Photo", "Skater", "Pos", "GP", "PTS", "G", "A", "+/-", 
-                "TOI/GP", "SOG", "SH%", "PIM", "P/GP", "Off_Score", "Def_Score"
+                "TOI/GP", "SOG", "SH%", "PIM", "P/GP", "SOG/GP", "Off_Score", "Def_Score"
             ]
             lim_view = limited_df[cols].sort_values(by="GP", ascending=False).reset_index(drop=True)
             st.dataframe(lim_view, column_config=base_column_config, use_container_width=True, hide_index=True)
