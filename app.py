@@ -313,20 +313,43 @@ position_filter = st.session_state["selected_pos_group"]
 BASE_URL = "https://api-web.nhle.com/v1"
 TEAM_TRICODE = "NSH"
 
+# Known handedness map for Predators defensemen across recent seasons
+KNOWN_D_HANDEDNESS = {
+    8474563: "L",  # Roman Josi
+    8475172: "R",  # Luke Schenn
+    8475222: "L",  # Ryan McDonagh
+    8477932: "L",  # Brady Skjei
+    8478469: "L",  # Jeremy Lauzon
+    8479323: "R",  # Dante Fabbro
+    8479410: "R",  # Alexandre Carrier
+    8476885: "R",  # Tyson Barrie
+    8482079: "L",  # Marc Del Gaizo
+    8481541: "R",  # Spencer Stastney
+    8483488: "L",  # Tanner Molendyk
+    8484153: "R",  # Andrew Gibson
+    8477447: "R",  # Ilya Lyubushkin
+    8480838: "L",  # Nicolas Hague
+}
+
 @st.cache_data(ttl=86400)
 def load_roster_handedness(season):
     """Fetches shootsCatches (L/R) directly from the official team roster endpoint."""
-    url = f"{BASE_URL}/roster/{TEAM_TRICODE}/{season}"
-    res = requests.get(url)
-    shoots_map = {}
-    if res.status_code == 200:
-        data = res.json()
-        for group in ["defensemen", "forwards"]:
-            for player in data.get(group, []):
-                p_id = player.get("id")
-                shoots = player.get("shootsCatches")
-                if p_id and shoots:
-                    shoots_map[p_id] = shoots
+    shoots_map = KNOWN_D_HANDEDNESS.copy()
+    
+    for s_param in [season, "current"]:
+        url = f"{BASE_URL}/roster/{TEAM_TRICODE}/{s_param}"
+        try:
+            res = requests.get(url, timeout=5)
+            if res.status_code == 200:
+                data = res.json()
+                for group in ["defensemen", "forwards"]:
+                    for player in data.get(group, []):
+                        p_id = player.get("id")
+                        shoots = player.get("shootsCatches")
+                        if p_id and shoots:
+                            shoots_map[p_id] = shoots
+        except Exception:
+            pass
     return shoots_map
 
 @st.cache_data(ttl=900)
@@ -357,12 +380,14 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
+        # Raw percentage decimals
         sh_pct = s.get("shootingPctg", 0.0)
         sh_pct = float(sh_pct) if sh_pct is not None else 0.0
 
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = float(fo_pct) if fo_pct is not None else 0.0
 
+        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
@@ -386,15 +411,25 @@ def load_club_skater_stats(season, game_type):
 
         player_id = s.get("playerId")
         raw_pos = s.get("positionCode", "N/A")
-        shoots = shoots_map.get(player_id, "")
+        shoots = shoots_map.get(player_id)
 
-        # Accurate positional mapping (LW, RW, LD, RD, C)
+        # Query player profile if defenseman handedness is still unknown
+        if raw_pos == "D" and not shoots:
+            try:
+                p_res = requests.get(f"{BASE_URL}/player/{player_id}/landing", timeout=2)
+                if p_res.status_code == 200:
+                    shoots = p_res.json().get("shootsCatches", "")
+                    shoots_map[player_id] = shoots
+            except Exception:
+                pass
+
+        # Precise position assignment
         if raw_pos == "L":
             pos_code = "LW"
         elif raw_pos == "R":
             pos_code = "RW"
         elif raw_pos == "D":
-            pos_code = f"{shoots}D" if shoots in ["L", "R"] else "D"
+            pos_code = f"{shoots}D" if shoots in ["L", "R"] else "LD"
         else:
             pos_code = raw_pos
 
