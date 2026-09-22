@@ -41,32 +41,33 @@ st.markdown("""
     }
 
     /* ============================================================ */
-    /* SIDEBAR SELECTBOX: PREDATORS NAVY & GOLD ROUNDED RECTANGLE   */
+    /* BULLETPROOF SELECTBOX STYLING (KILLS THE WHITE BOX)          */
     /* ============================================================ */
     
-    /* Input Container Box (Forces background away from white) */
-    [data-testid="stSidebar"] div[data-baseweb="select"] > div,
-    [data-testid="stSidebar"] div[data-baseweb="select"] > div > div {
+    /* Target every container layer inside selectbox */
+    .stSelectbox div[data-baseweb="select"],
+    .stSelectbox div[data-baseweb="select"] > div,
+    .stSelectbox div[data-baseweb="select"] > div:first-child,
+    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {
         background-color: #061F47 !important;
+        background: #061F47 !important;
         border: 2px solid #FFB81C !important;
         border-radius: 10px !important;
-        color: #FFFFFF !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
     }
-    
-    /* Force pure white high-contrast text inside the select input */
-    [data-testid="stSidebar"] div[data-baseweb="select"] span,
-    [data-testid="stSidebar"] div[data-baseweb="select"] p,
-    [data-testid="stSidebar"] div[data-baseweb="select"] div {
+
+    /* Selected Value Text: Crisp High-Contrast Pure White */
+    .stSelectbox [data-baseweb="select"] *,
+    .stSelectbox [data-baseweb="select"] span,
+    .stSelectbox [data-baseweb="select"] div {
         color: #FFFFFF !important;
         -webkit-text-fill-color: #FFFFFF !important;
         font-weight: 700 !important;
-        font-size: 0.95rem !important;
-        opacity: 1.0 !important;
+        font-size: 1rem !important;
+        opacity: 1 !important;
     }
 
-    /* Dropdown Chevron Arrow Icon */
-    [data-testid="stSidebar"] div[data-baseweb="select"] svg {
+    /* Dropdown Arrow Icon */
+    .stSelectbox [data-baseweb="select"] svg {
         fill: #FFB81C !important;
     }
 
@@ -253,7 +254,6 @@ st.markdown(f"""
 # --- Sidebar Controls ---
 st.sidebar.header("Filter Settings")
 
-# Format '20252026' into '25/26'
 season_display_map = {
     "20262027": "26/27",
     "20252026": "25/26",
@@ -316,7 +316,6 @@ def load_club_skater_stats(season, game_type):
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = float(fo_pct) if fo_pct is not None else 0.0
 
-        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
