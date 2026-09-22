@@ -369,7 +369,7 @@ with p_cols[2]:
 current_page = st.session_state["current_page"]
 
 # ==============================================================================
-# VERIFIED HEADSHOT OVERRIDES (Guaranteed accurate NHL CDN Mug URLs)
+# VERIFIED HEADSHOT OVERRIDES
 # ==============================================================================
 VERIFIED_MANUAL_HEADSHOTS = {
     "Steven Stamkos": "https://assets.nhle.com/mugs/nhl/latest/8474564.png",
@@ -498,13 +498,13 @@ if current_page == "Trade Intelligence":
     st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
     st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses (NMC/NTC-free).")
 
-    # VETTED ACQUISITION TARGETS DATABASE WITH DIRECT VERIFIED HEADSHOTS
+    # VETTED ACQUISITION TARGETS DATABASE WITH EXPLICIT VERIFIED HEADSHOTS
     realistic_targets = [
         # --- TOP-SIX FORWARDS ---
         {
-            "Photo": resolve_player_headshot("Bryan Rust"),
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8475848.png",
             "Player": "Bryan Rust", 
-            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/PIT_light.svg",
+            "Team_Logo": TEAM_LOGOS["PIT"],
             "Team": "PIT", 
             "Pos": "RW",
             "Cap_Hit": 5.125, 
@@ -516,9 +516,9 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Two-time Stanley Cup champion actively made available as Pittsburgh cycles through a multi-year retool. World-class forechecking speed and high-compete board work that fits Andrew Brunette's system seamlessly."
         },
         {
-            "Photo": resolve_player_headshot("Rickard Rakell"),
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8476460.png",
             "Player": "Rickard Rakell", 
-            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/PIT_light.svg",
+            "Team_Logo": TEAM_LOGOS["PIT"],
             "Team": "PIT", 
             "Pos": "RW",
             "Cap_Hit": 5.00, 
@@ -530,9 +530,9 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Perennial trade-block fixture on a non-contending Penguins roster with full trade maneuverability. Generates rapid rush shots that take pressure off Steven Stamkos."
         },
         {
-            "Photo": resolve_player_headshot("Mikael Granlund"),
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8475794.png",
             "Player": "Mikael Granlund", 
-            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/ANA_light.svg",
+            "Team_Logo": TEAM_LOGOS["ANA"],
             "Team": "ANA", 
             "Pos": "C",
             "Cap_Hit": 7.00, 
@@ -546,9 +546,9 @@ if current_page == "Trade Intelligence":
 
         # --- TOP-4 DEFENSIVE UPGRADES ---
         {
-            "Photo": resolve_player_headshot("Will Borgen"),
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8479379.png",
             "Player": "Will Borgen", 
-            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/SEA_light.svg",
+            "Team_Logo": TEAM_LOGOS["SEA"],
             "Team": "SEA", 
             "Pos": "RD",
             "Cap_Hit": 2.70, 
@@ -562,9 +562,9 @@ if current_page == "Trade Intelligence":
 
         # --- BOTTOM-SIX & PK DEPTH ---
         {
-            "Photo": resolve_player_headshot("Noel Acciari"),
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8478496.png",
             "Player": "Noel Acciari", 
-            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/PHI_light.svg",
+            "Team_Logo": TEAM_LOGOS["PHI"],
             "Team": "PHI", 
             "Pos": "C",
             "Cap_Hit": 1.40, 
@@ -576,9 +576,9 @@ if current_page == "Trade Intelligence":
             "Tactical_Scouting": "Fearless checking center who wins key defensive-zone draws, blocks point shots, and brings heavy physical identity to a bottom-six checking role."
         },
         {
-            "Photo": resolve_player_headshot("Joel Armia"),
+            "Photo": "https://assets.nhle.com/mugs/nhl/latest/8476346.png",
             "Player": "Joel Armia", 
-            "Team_Logo": "https://assets.nhle.com/logos/nhl/svg/MTL_light.svg",
+            "Team_Logo": TEAM_LOGOS["MTL"],
             "Team": "MTL", 
             "Pos": "RW",
             "Cap_Hit": 3.40, 
