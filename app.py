@@ -40,6 +40,30 @@ st.markdown("""
         max-width: 95% !important;
     }
 
+    /* ============================================================ */
+    /* SIDEBAR TOGGLE & EXPAND CHEVRON ARROWS (PREDATORS GOLD)      */
+    /* ============================================================ */
+    
+    /* Target collapsed sidebar expand arrow (>>) */
+    [data-testid="collapsedControl"] svg,
+    [data-testid="collapsedControl"] svg path,
+    [data-testid="collapsedControl"] button svg,
+    [data-testid="collapsedControl"] button svg path {
+        fill: #FFB81C !important;
+        stroke: #FFB81C !important;
+        color: #FFB81C !important;
+    }
+
+    /* Target open sidebar collapse arrow (<<) */
+    [data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="stSidebarCollapseButton"] svg path,
+    [data-testid="stSidebarCollapseButton"] button svg,
+    [data-testid="stSidebarCollapseButton"] button svg path {
+        fill: #FFB81C !important;
+        stroke: #FFB81C !important;
+        color: #FFB81C !important;
+    }
+
     /* Header Container */
     .header-container {
         display: flex;
@@ -544,3 +568,4 @@ if not df.empty:
             ]
             lim_view = limited_df[cols].sort_values(by="GP", ascending=False).reset_index(drop=True)
             st.dataframe(lim_view, column_config=base_column_config, use_container_width=True, hide_index=True)
+Steps:
