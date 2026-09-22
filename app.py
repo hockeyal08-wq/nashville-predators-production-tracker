@@ -4,6 +4,7 @@ import requests
 
 PREDS_LOGO_URL = "https://assets.nhle.com/logos/nhl/svg/NSH_light.svg"
 
+# Mapping team tricots to official NHL SVG logo URLs for the trade table
 TEAM_LOGOS = {
     "PIT": "https://assets.nhle.com/logos/nhl/svg/PIT_light.svg",
     "SJS": "https://assets.nhle.com/logos/nhl/svg/SJS_light.svg",
@@ -374,6 +375,23 @@ VERIFIED_MANUAL_HEADSHOTS = {
 def resolve_player_headshot(player_name, fallback_id=None):
     if player_name in VERIFIED_MANUAL_HEADSHOTS:
         return VERIFIED_MANUAL_HEADSHOTS[player_name]
+    try:
+        search_query = player_name.replace(" ", "%20")
+        url = f"https://search.d3.nhle.com/api/v1/search/player?culture=en-us&limit=3&q={search_query}"
+        res = requests.get(url, timeout=4)
+        if res.status_code == 200:
+            hits = res.json()
+            if hits:
+                p_id = hits[0].get("playerId")
+                if p_id:
+                    landing_res = requests.get(f"https://api-web.nhle.com/v1/player/{p_id}/landing", timeout=4)
+                    if landing_res.status_code == 200:
+                        headshot = landing_res.json().get("headshot")
+                        if headshot:
+                            return headshot
+                    return f"https://assets.nhle.com/mugs/nhl/latest/{p_id}.png"
+    except Exception:
+        pass
     if fallback_id:
         return f"https://assets.nhle.com/mugs/nhl/latest/{fallback_id}.png"
     return PREDS_LOGO_URL
@@ -484,6 +502,7 @@ if current_page == "Trade Intelligence":
     st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
     st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses (NMC/NTC-free).")
 
+    # VETTED ACQUISITION TARGETS DATABASE WITH STATS, PROJECTIONS & CHEM FITS
     realistic_targets = [
         {
             "Team_Logo": TEAM_LOGOS["PIT"],
@@ -496,8 +515,9 @@ if current_page == "Trade Intelligence":
             "Deadline_Posture": "🟢 Top BUY Target",
             "Role_Success": "Top-Six Winger | Core Playoff Scoring Catalyst & Forecheck Engine",
             "Brunette_Fit": 95, 
-            "P_GP": 0.82,
-            "SOG_GP": 3.10,
+            "P_GP": 0.90,
+            "SOG_GP": 2.54,
+            "Proj_Pts": 72,
             "Chem_Fit": "Line 2 RW alongside Stamkos & Bourque | High F1 Forecheck Motor"
         },
         {
@@ -511,8 +531,9 @@ if current_page == "Trade Intelligence":
             "Deadline_Posture": "🟢 BUY Target",
             "Role_Success": "Top-Six Winger | Secondary Scoring Push & PP2 Quarterback",
             "Brunette_Fit": 92, 
-            "P_GP": 0.74,
-            "SOG_GP": 3.35,
+            "P_GP": 0.80,
+            "SOG_GP": 2.77,
+            "Proj_Pts": 64,
             "Chem_Fit": "PP2 Unit Quarterback / High-Volume High-Slot Release"
         },
         {
@@ -526,8 +547,9 @@ if current_page == "Trade Intelligence":
             "Deadline_Posture": "🔵 Secondary Scorer",
             "Role_Success": "Middle-Six Playmaker | Transition Stabilizer & Play Driver",
             "Brunette_Fit": 93, 
-            "P_GP": 0.85,
-            "SOG_GP": 2.40,
+            "P_GP": 0.70,
+            "SOG_GP": 2.02,
+            "Proj_Pts": 57,
             "Chem_Fit": "Middle-Six Playmaker / Zone-Entry Transition Anchor"
         },
         {
@@ -541,8 +563,9 @@ if current_page == "Trade Intelligence":
             "Deadline_Posture": "🟡 Value BUY",
             "Role_Success": "Shutdown Defenseman | Pair 3 Anchor & Rush Suppression Specialist",
             "Brunette_Fit": 91, 
-            "P_GP": 0.24,
-            "SOG_GP": 1.15,
+            "P_GP": 0.31,
+            "SOG_GP": 1.10,
+            "Proj_Pts": 25,
             "Chem_Fit": "Pairing 3 RD with Wilsby / Heavy Physical Shot Suppression"
         },
         {
@@ -556,8 +579,9 @@ if current_page == "Trade Intelligence":
             "Deadline_Posture": "🟡 Depth Grinder",
             "Role_Success": "Checking Forward | PK1 Anchor & Defensive Zone Draw Specialist",
             "Brunette_Fit": 94, 
-            "P_GP": 0.35,
-            "SOG_GP": 1.75,
+            "P_GP": 0.28,
+            "SOG_GP": 1.35,
+            "Proj_Pts": 22,
             "Chem_Fit": "Line 4 Center / PK1 Shield / Defensive Zone Faceoff Specialist"
         },
         {
@@ -571,14 +595,16 @@ if current_page == "Trade Intelligence":
             "Deadline_Posture": "🔵 PK Specialist BUY",
             "Role_Success": "Penalty Killer / Forechecker | Board Battle Protector & Late-Lead Guard",
             "Brunette_Fit": 89, 
-            "P_GP": 0.42,
-            "SOG_GP": 2.05,
+            "P_GP": 0.38,
+            "SOG_GP": 1.85,
+            "Proj_Pts": 30,
             "Chem_Fit": "Line 3/4 Board Battle Protector / Short-Handed Threat"
         }
     ]
 
     target_df = pd.DataFrame(realistic_targets)
 
+    # Interactive Filtering Controls
     f_cols = st.columns([1.2, 1.2, 1.2, 1.4])
     with f_cols[0]:
         cat_opts = ["All Categories", "Top-Six Forward", "Top-4 Defensive Upgrade", "Bottom-Six / PK Depth"]
@@ -592,6 +618,7 @@ if current_page == "Trade Intelligence":
     with f_cols[3]:
         min_fit = st.slider("Min Brunette Scheme Fit", min_value=85, max_value=96, value=88)
 
+    # Filter Application
     filtered_df = target_df[target_df["Brunette_Fit"] >= min_fit].copy()
 
     if sel_cat != "All Categories":
@@ -609,6 +636,7 @@ if current_page == "Trade Intelligence":
 
     st.markdown("#### Real-Time Acquisition Target Registry (NMC-Free)")
     
+    # Render targets as an executive card grid featuring team logos, P/GP, SOG/GP, Point Projections, and chem fits
     for i, row in filtered_df.iterrows():
         with st.container(border=True):
             c1, c2, c3 = st.columns([1.2, 3.5, 5])
@@ -617,20 +645,21 @@ if current_page == "Trade Intelligence":
             with c2:
                 st.markdown(f"### **{row['Player']}** ({row['Pos']})")
                 st.caption(f"**Tier:** {row['Category']} | **Cap Hit:** ${row['Cap_Hit']:.3f}M")
-                st.markdown(f"**Role & Postsuccess:** {row['Role_Success']}")
+                st.markdown(f"**Role & Postseason Success:** {row['Role_Success']}")
                 st.markdown(f"**Scheme Fit:** {row['Brunette_Fit']}/100")
             with c3:
-                st.markdown(f"**Analytics Profile:** `{row['P_GP']} P/GP` | `{row['SOG_GP']} SOG/GP`")
+                st.markdown(f"**Projections & Rate Stats:** `{row['P_GP']} P/GP` | `{row['SOG_GP']} SOG/GP` | **Point Proj:** `{row['Proj_Pts']} PTS`")
                 st.info(f"**Line Chemistry Fit:** {row['Chem_Fit']}")
 
     st.stop()
 
 # ==============================================================================
-# PAGE 3: SKATER & GOALTENDER ANALYTICS & PERFORMANCE HUB
+# PAGE 3: SKATER ANALYTICS & PERFORMANCE HUB
 # ==============================================================================
 
 st.sidebar.markdown("### Filter Settings")
 
+# 1. Season Selection
 season_map = {
     "26/27": "20262027",
     "25/26": "20252026",
@@ -638,7 +667,7 @@ season_map = {
     "23/24": "20232024"
 }
 if "selected_season_label" not in st.session_state:
-    st.session_state["selected_season_label"] = "25/26"
+    st.session_state["selected_season_label"] = "26/27"
 
 s_cols = st.sidebar.columns(2)
 for i, label in enumerate(["26/27", "25/26", "24/25", "23/24"]):
@@ -650,6 +679,7 @@ for i, label in enumerate(["26/27", "25/26", "24/25", "23/24"]):
 
 selected_season = season_map[st.session_state["selected_season_label"]]
 
+# 2. Game Type Selection
 st.sidebar.markdown('<div class="filter-label">Game Type</div>', unsafe_allow_html=True)
 if "selected_game_type" not in st.session_state:
     st.session_state["selected_game_type"] = "Regular Season"
@@ -665,18 +695,28 @@ for i, gt in enumerate(["Regular Season", "Playoffs"]):
 game_type_label = st.session_state["selected_game_type"]
 game_type_code = "2" if game_type_label == "Regular Season" else "3"
 
+# 3. Position Group Selection
 st.sidebar.markdown('<div class="filter-label">Position Group</div>', unsafe_allow_html=True)
 if "selected_pos_group" not in st.session_state:
     st.session_state["selected_pos_group"] = "All Skaters"
 
-pos_groups = ["All Skaters", "Forwards", "Defensemen", "Goaltenders"]
-pg_cols = st.sidebar.columns(2)
-for i, pg in enumerate(pos_groups):
-    with pg_cols[i % 2]:
-        btn_type = "primary" if st.session_state["selected_pos_group"] == pg else "secondary"
-        if st.button(pg, key=f"btn_pos_{pg}", type=btn_type, use_container_width=True):
-            st.session_state["selected_pos_group"] = pg
-            st.rerun()
+btn_type_all = "primary" if st.session_state["selected_pos_group"] == "All Skaters" else "secondary"
+if st.sidebar.button("All Skaters", key="btn_pos_all", type=btn_type_all, use_container_width=True):
+    st.session_state["selected_pos_group"] = "All Skaters"
+    st.rerun()
+
+pos_sub_cols = st.sidebar.columns(2)
+with pos_sub_cols[0]:
+    btn_type_f = "primary" if st.session_state["selected_pos_group"] == "Forwards" else "secondary"
+    if st.button("Forwards", key="btn_pos_f", type=btn_type_f, use_container_width=True):
+        st.session_state["selected_pos_group"] = "Forwards"
+        st.rerun()
+
+with pos_sub_cols[1]:
+    btn_type_d = "primary" if st.session_state["selected_pos_group"] == "Defensemen" else "secondary"
+    if st.button("Defensemen", key="btn_pos_d", type=btn_type_d, use_container_width=True):
+        st.session_state["selected_pos_group"] = "Defensemen"
+        st.rerun()
 
 position_filter = st.session_state["selected_pos_group"]
 
@@ -739,20 +779,21 @@ def load_zone_faceoffs(season, game_type):
     return zone_dict
 
 @st.cache_data(ttl=900)
-def load_club_stats(season, game_type):
+def load_club_skater_stats(season, game_type):
     url = f"{BASE_URL}/club-stats/{TEAM_TRICODE}/{season}/{game_type}"
     res = requests.get(url)
     if res.status_code != 200:
-        return pd.DataFrame(), pd.DataFrame()
+        return pd.DataFrame()
     
     data = res.json()
     skaters = data.get("skaters", [])
-    goalies = data.get("goalies", [])
+    if not skaters:
+        return pd.DataFrame()
 
     shoots_map = load_roster_handedness(season)
     zone_map = load_zone_faceoffs(season, game_type)
 
-    skater_rows = []
+    rows = []
     for s in skaters:
         player_id = s.get("playerId")
         gp = s.get("gamesPlayed", 0)
@@ -822,7 +863,7 @@ def load_club_stats(season, game_type):
         first_name = s.get("firstName", {}).get("default", "")
         last_name = s.get("lastName", {}).get("default", "")
 
-        skater_rows.append({
+        rows.append({
             "PlayerId": player_id,
             "Photo": s.get("headshot", f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png"),
             "Skater": f"{first_name} {last_name}",
@@ -853,201 +894,95 @@ def load_club_stats(season, game_type):
             "PK_Score": pk_score
         })
 
-    goalie_rows = []
-    for g in goalies:
-        player_id = g.get("playerId")
-        gp = g.get("gamesPlayed", 0)
-        gs = g.get("gamesStarted", 0)
-        wins = g.get("wins", 0)
-        losses = g.get("losses", 0)
-        
-        # Robust OTL mapping with difference fallback for archived seasons
-        ot_losses = g.get("otLosses")
-        if ot_losses is None:
-            ot_losses = g.get("ot")
-        if ot_losses is None:
-            ot_losses = g.get("overtimeLosses", 0)
-        if ot_losses == 0 and gp > (wins + losses):
-            ot_losses = gp - (wins + losses)
-
-        sa = g.get("shotsAgainst", 0)
-        ga = g.get("goalsAgainst", 0)
-        sv = g.get("saves", 0)
-        
-        raw_svp = g.get("savePctg") or g.get("savePct") or 0.0
-        if raw_svp == 0.0 and sa > 0:
-            raw_svp = sv / sa
-        svp = round(float(raw_svp) * 100.0, 2) if raw_svp <= 1.0 else round(float(raw_svp), 2)
-
-        gaa = round(float(g.get("goalsAgainstAverage") or 0.0), 2)
-        so = g.get("shutouts", 0)
-
-        first_name = g.get("firstName", {}).get("default", "")
-        last_name = g.get("lastName", {}).get("default", "")
-
-        goalie_rows.append({
-            "PlayerId": player_id,
-            "Photo": g.get("headshot", f"https://assets.nhle.com/mugs/nhl/latest/{player_id}.png"),
-            "Skater": f"{first_name} {last_name}",
-            "Pos": "G",
-            "GP": int(gp),
-            "GS": int(gs),
-            "W": int(wins),
-            "L": int(losses),
-            "OTL": int(ot_losses),
-            "SA": int(sa),
-            "GA": int(ga),
-            "SV": int(sv),
-            "SV%": svp,
-            "GAA": gaa,
-            "SO": int(so)
-        })
-
-    sdf = pd.DataFrame(skater_rows)
-    gdf = pd.DataFrame(goalie_rows)
-    if not sdf.empty:
-        sdf = sdf[sdf["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
-    if not gdf.empty:
-        gdf = gdf.sort_values(by="GP", ascending=False).reset_index(drop=True)
-    return sdf, gdf
+    df = pd.DataFrame(rows)
+    if not df.empty:
+        df = df[df["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
+    return df
 
 with st.spinner("Loading NHL operations data..."):
-    df, goalie_df = load_club_stats(selected_season, game_type_code)
+    df = load_club_skater_stats(selected_season, game_type_code)
 
-if position_filter == "Goaltenders":
-    display_df = goalie_df.copy()
-else:
-    display_df = df.copy()
-    if not display_df.empty:
-        if position_filter == "Forwards":
-            display_df = display_df[display_df["Pos"].isin(["C", "LW", "RW", "F"])].reset_index(drop=True)
-        elif position_filter == "Defensemen":
-            display_df = display_df[display_df["Pos"].isin(["D", "LD", "RD"])].reset_index(drop=True)
+if not df.empty:
+    if position_filter == "Forwards":
+        df = df[df["Pos"].isin(["C", "LW", "RW", "F"])].reset_index(drop=True)
+    elif position_filter == "Defensemen":
+        df = df[df["Pos"].isin(["D", "LD", "RD"])].reset_index(drop=True)
 
 # Spotlight Header
-if display_df.empty:
-    st.info(f"No {game_type_label.lower()} data recorded for {st.session_state['selected_season_label']} under {position_filter}.")
+if df.empty:
+    st.info(f"No {game_type_label.lower()} data recorded for {st.session_state['selected_season_label']}.")
 else:
-    if "selected_player_id" not in st.session_state or st.session_state["selected_player_id"] not in display_df["PlayerId"].values:
-        st.session_state["selected_player_id"] = int(display_df.iloc[0]["PlayerId"])
+    if "selected_player_id" not in st.session_state or st.session_state["selected_player_id"] not in df["PlayerId"].values:
+        st.session_state["selected_player_id"] = int(df.iloc[0]["PlayerId"])
 
-    p = display_df[display_df["PlayerId"] == st.session_state["selected_player_id"]].iloc[0]
-    
-    if position_filter == "Goaltenders":
-        spotlight_html = f"""
-        <div class="spotlight-card">
-            <div style="display: flex; gap: 28px; align-items: center; flex-wrap: wrap;">
-                <div style="flex-shrink: 0; text-align: center;">
-                    <img src="{p['Photo']}" onerror="this.onerror=null; this.src='{PREDS_LOGO_URL}';" style="width: 145px; height: 145px; object-fit: cover; border-radius: 50%; border: 2px solid #FFB81C; box-shadow: 0 6px 18px rgba(0,0,0,0.65);">
-                </div>
-                <div style="flex-grow: 1; min-width: 280px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+    p = df[df["PlayerId"] == st.session_state["selected_player_id"]].iloc[0]
+    fo_stat_line = (
+        f"OZ: {p['OZ_FO%']:.1f}% | DZ: {p['DZ_FO%']:.1f}%" 
+        if pd.notna(p['OZ_FO%']) and pd.notna(p['DZ_FO%']) 
+        else f"{p['SH%']:.1f}% Shooting Pctg"
+    )
+
+    spotlight_html = f"""
+    <div class="spotlight-card">
+        <div style="display: flex; gap: 28px; align-items: center; flex-wrap: wrap;">
+            <div style="flex-shrink: 0; text-align: center;">
+                <img src="{p['Photo']}" onerror="this.onerror=null; this.src='{PREDS_LOGO_URL}';" style="width: 145px; height: 145px; object-fit: cover; border-radius: 50%; border: 2px solid #FFB81C; box-shadow: 0 6px 18px rgba(0,0,0,0.65);">
+            </div>
+            <div style="flex-grow: 1; min-width: 280px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h2 class="spotlight-title">{p['Skater']}</h2>
                         <div>
-                            <h2 class="spotlight-title">{p['Skater']}</h2>
-                            <div>
-                                <span class="badge">POS: G</span>
-                                <span class="badge">GP: {p['GP']}</span>
-                                <span class="badge">RECORD: {p['W']}-{p['L']}-{p['OTL']}</span>
-                            </div>
+                            <span class="badge">POS: {p['Pos']}</span>
+                            <span class="badge">GP: {p['GP']}</span>
+                            <span class="badge">TOI/GP: {p['TOI/GP']:.2f} MIN</span>
+                            <span class="badge">SOG/GP: {p['SOG/GP']:.2f}</span>
                         </div>
-                        <img src="{PREDS_LOGO_URL}" style="width: 60px; opacity: 0.9;" alt="Predators">
                     </div>
-                    <div class="stat-pill-container">
-                        <div class="stat-pill">
-                            <div class="stat-pill-label">Save Percentage</div>
-                            <div class="stat-pill-val">{p['SV%']:.2f}%</div>
-                            <div class="stat-pill-sub">{p['SV']} Saves</div>
-                        </div>
-                        <div class="stat-pill">
-                            <div class="stat-pill-label">Goals Against Avg</div>
-                            <div class="stat-pill-val">{p['GAA']:.2f}</div>
-                            <div class="stat-pill-sub">{p['GA']} Goals Allowed</div>
-                        </div>
-                        <div class="stat-pill">
-                            <div class="stat-pill-label">Shutouts</div>
-                            <div class="stat-pill-val">{p['SO']} SO</div>
-                            <div class="stat-pill-sub">{p['GS']} Starts</div>
-                        </div>
-                        <div class="stat-pill">
-                            <div class="stat-pill-label">Overtime Losses</div>
-                            <div class="stat-pill-val">{p['OTL']} OTL</div>
-                            <div class="stat-pill-sub">OT Point Gainers</div>
-                        </div>
+                    <img src="{PREDS_LOGO_URL}" style="width: 60px; opacity: 0.9;" alt="Predators">
+                </div>
+                <div class="stat-pill-container">
+                    <div class="stat-pill">
+                        <div class="stat-pill-label">Scoring Production</div>
+                        <div class="stat-pill-val">{p['PTS']} PTS</div>
+                        <div class="stat-pill-sub">{p['G']}G, {p['A']}A</div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="stat-pill-label">Scoring Rate (P/GP)</div>
+                        <div class="stat-pill-val">{p['P/GP']:.2f}</div>
+                        <div class="stat-pill-sub">{fo_stat_line}</div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="stat-pill-label">Offensive Score</div>
+                        <div class="stat-pill-val">{p['Off_Score']:.4f}</div>
+                        <div class="stat-pill-sub">{p['PPG']} Power Play G</div>
+                    </div>
+                    <div class="stat-pill">
+                        <div class="stat-pill-label">Defensive Score</div>
+                        <div class="stat-pill-val">{p['Def_Score']:.4f}</div>
+                        <div class="stat-pill-sub">{p['+/-']:+d} Differential</div>
                     </div>
                 </div>
             </div>
         </div>
-        """
-    else:
-        fo_stat_line = (
-            f"OZ: {p['OZ_FO%']:.1f}% | DZ: {p['DZ_FO%']:.1f}%" 
-            if pd.notna(p['OZ_FO%']) and pd.notna(p['DZ_FO%']) 
-            else f"{p['SH%']:.1f}% Shooting Pctg"
-        )
-        spotlight_html = f"""
-        <div class="spotlight-card">
-            <div style="display: flex; gap: 28px; align-items: center; flex-wrap: wrap;">
-                <div style="flex-shrink: 0; text-align: center;">
-                    <img src="{p['Photo']}" onerror="this.onerror=null; this.src='{PREDS_LOGO_URL}';" style="width: 145px; height: 145px; object-fit: cover; border-radius: 50%; border: 2px solid #FFB81C; box-shadow: 0 6px 18px rgba(0,0,0,0.65);">
-                </div>
-                <div style="flex-grow: 1; min-width: 280px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div>
-                            <h2 class="spotlight-title">{p['Skater']}</h2>
-                            <div>
-                                <span class="badge">POS: {p['Pos']}</span>
-                                <span class="badge">GP: {p['GP']}</span>
-                                <span class="badge">TOI/GP: {p['TOI/GP']:.2f} MIN</span>
-                                <span class="badge">SOG/GP: {p['SOG/GP']:.2f}</span>
-                            </div>
-                        </div>
-                        <img src="{PREDS_LOGO_URL}" style="width: 60px; opacity: 0.9;" alt="Predators">
-                    </div>
-                    <div class="stat-pill-container">
-                        <div class="stat-pill">
-                            <div class="stat-pill-label">Scoring Production</div>
-                            <div class="stat-pill-val">{p['PTS']} PTS</div>
-                            <div class="stat-pill-sub">{p['G']}G, {p['A']}A</div>
-                        </div>
-                        <div class="stat-pill">
-                            <div class="stat-pill-label">Scoring Rate (P/GP)</div>
-                            <div class="stat-pill-val">{p['P/GP']:.2f}</div>
-                            <div class="stat-pill-sub">{fo_stat_line}</div>
-                        </div>
-                        <div class="stat-pill">
-                            <div class="stat-pill-label">Offensive Score</div>
-                            <div class="stat-pill-val">{p['Off_Score']:.4f}</div>
-                            <div class="stat-pill-sub">{p['PPG']} Power Play G</div>
-                        </div>
-                        <div class="stat-pill">
-                            <div class="stat-pill-label">Defensive Score</div>
-                            <div class="stat-pill-val">{p['Def_Score']:.4f}</div>
-                            <div class="stat-pill-sub">{p['+/-']:+d} Differential</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        """
+    </div>
+    """
     st.markdown(spotlight_html, unsafe_allow_html=True)
 
     # Roster Selector Grid
     st.markdown("#### Roster Selection")
     num_cols = 6
-    for i in range(0, len(display_df), num_cols):
+    for i in range(0, len(df), num_cols):
         cols = st.columns(num_cols)
         for j, col in enumerate(cols):
             idx = i + j
-            if idx < len(display_df):
-                skater = display_df.iloc[idx]
+            if idx < len(df):
+                skater = df.iloc[idx]
                 with col:
                     with st.container(border=True):
                         st.image(skater["Photo"], use_container_width=True)
                         st.caption(f"**{skater['Skater']}** | {skater['Pos']}")
-                        if position_filter == "Goaltenders":
-                            st.caption(f"{skater['W']}-{skater['L']}-{skater['OTL']} | {skater['SV%']:.2f}%")
-                        else:
-                            st.caption(f"{skater['PTS']} PTS ({skater['GP']} GP)")
+                        st.caption(f"{skater['PTS']} PTS ({skater['GP']} GP)")
                         if st.button("Select", key=f"btn_{skater['PlayerId']}", use_container_width=True):
                             st.session_state["selected_player_id"] = int(skater["PlayerId"])
                             st.rerun()
@@ -1055,120 +990,100 @@ else:
 st.divider()
 
 # Tabbed Analytical Views
-st.subheader("Performance Hub")
+st.subheader("Skater Performance")
 
-if not display_df.empty:
-    if position_filter == "Goaltenders":
-        st.markdown("#### Goaltender Statistics")
-        cols = ["Photo", "Skater", "GP", "GS", "W", "L", "OTL", "SA", "GA", "SV", "SV%", "GAA", "SO"]
-        goalie_column_config = {
-            "Photo": st.column_config.ImageColumn("", width="small"),
-            "Skater": st.column_config.TextColumn("Goaltender", width="medium"),
-            "GP": st.column_config.NumberColumn("GP", format="%d"),
-            "GS": st.column_config.NumberColumn("GS", format="%d"),
-            "W": st.column_config.NumberColumn("W", format="%d"),
-            "L": st.column_config.NumberColumn("L", format="%d"),
-            "OTL": st.column_config.NumberColumn("OTL", format="%d"),
-            "SA": st.column_config.NumberColumn("SA", format="%d"),
-            "GA": st.column_config.NumberColumn("GA", format="%d"),
-            "SV": st.column_config.NumberColumn("SV", format="%d"),
-            "SV%": st.column_config.ProgressColumn("SV%", min_value=85.0, max_value=95.0, format="%.2f%%"),
-            "GAA": st.column_config.NumberColumn("GAA", format="%.2f"),
-            "SO": st.column_config.NumberColumn("SO", format="%d"),
-        }
-        st.dataframe(display_df[cols], column_config=goalie_column_config, use_container_width=True, hide_index=True)
-    else:
-        qualified_df = display_df[display_df["GP"] >= 5].reset_index(drop=True)
-        limited_df = display_df[display_df["GP"] < 5].reset_index(drop=True)
+if not df.empty:
+    qualified_df = df[df["GP"] >= 5].reset_index(drop=True)
+    limited_df = df[df["GP"] < 5].reset_index(drop=True)
 
-        if "active_tab_view" not in st.session_state:
-            st.session_state["active_tab_view"] = "Offensive Impact"
+    if "active_tab_view" not in st.session_state:
+        st.session_state["active_tab_view"] = "Offensive Impact"
 
-        tabs = [
-            "Offensive Impact", 
-            "Defensive Impact", 
-            "Special Teams Performance",
-            "Faceoff Breakdown",
-            "Complete Skater Statistics",
-            "Limited Sample (< 5 GP)"
+    tabs = [
+        "Offensive Impact", 
+        "Defensive Impact", 
+        "Special Teams Performance",
+        "Faceoff Breakdown",
+        "Complete Skater Statistics",
+        "Limited Sample (< 5 GP)"
+    ]
+
+    nav_cols = st.columns(6)
+    for idx, tab_name in enumerate(tabs):
+        with nav_cols[idx]:
+            btn_type = "primary" if st.session_state["active_tab_view"] == tab_name else "secondary"
+            if st.button(tab_name, key=f"nav_btn_{idx}", type=btn_type, use_container_width=True):
+                st.session_state["active_tab_view"] = tab_name
+                st.rerun()
+
+    active_view = st.session_state["active_tab_view"]
+
+    base_column_config = {
+        "Photo": st.column_config.ImageColumn("", width="small"),
+        "Skater": st.column_config.TextColumn("Player", width="medium"),
+        "Pos": st.column_config.TextColumn("Pos", width="small"),
+        "GP": st.column_config.NumberColumn("GP", format="%d"),
+        "PTS": st.column_config.NumberColumn("PTS", format="%d"),
+        "G": st.column_config.NumberColumn("G", format="%d"),
+        "A": st.column_config.NumberColumn("A", format="%d"),
+        "SOG": st.column_config.NumberColumn("SOG", format="%d"),
+        "+/-": st.column_config.NumberColumn("+/-", format="%+d"),
+        "PIM": st.column_config.NumberColumn("PIM", format="%d"),
+        "TOI/GP": st.column_config.NumberColumn("TOI/GP", format="%.2f m"),
+        "SH%": st.column_config.ProgressColumn("SH%", min_value=0.0, max_value=35.0, format="%.1f%%"),
+        "Total_FO": st.column_config.NumberColumn("Total Draws", format="%d"),
+        "FO%": st.column_config.ProgressColumn("Overall FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
+        "OZ_FO%": st.column_config.ProgressColumn("OZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
+        "NZ_FO%": st.column_config.ProgressColumn("NZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
+        "DZ_FO%": st.column_config.ProgressColumn("DZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
+        "P/GP": st.column_config.ProgressColumn("P/GP", min_value=0.0, max_value=float(df["P/GP"].max() or 2.0), format="%.2f"),
+        "SOG/GP": st.column_config.ProgressColumn("SOG/GP", min_value=0.0, max_value=float(df["SOG/GP"].max() or 6.0), format="%.2f"),
+        "Off_Score": st.column_config.ProgressColumn("Offensive Impact", min_value=0.0, max_value=float(df["Off_Score"].max() or 6.0), format="%.2f"),
+        "Def_Score": st.column_config.ProgressColumn("Defensive Impact", min_value=float(df["Def_Score"].min() or -3.0), max_value=float(df["Def_Score"].max() or 5.0), format="%.2f"),
+        "PP_Score": st.column_config.ProgressColumn("PP Impact", min_value=0.0, max_value=float(df["PP_Score"].max() or 5.0), format="%.2f"),
+        "PK_Score": st.column_config.ProgressColumn("PK Impact", min_value=0.0, max_value=float(df["PK_Score"].max() or 4.0), format="%.2f"),
+    }
+
+    if active_view == "Offensive Impact":
+        cols = ["Photo", "Skater", "Pos", "GP", "Off_Score", "P/GP", "SOG/GP", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]
+        off_view = qualified_df[cols].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
+        st.dataframe(off_view, column_config=base_column_config, use_container_width=True, hide_index=True)
+
+    elif active_view == "Defensive Impact":
+        cols = ["Photo", "Skater", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG"]
+        def_view = qualified_df[cols].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
+        st.dataframe(def_view, column_config=base_column_config, use_container_width=True, hide_index=True)
+
+    elif active_view == "Special Teams Performance":
+        cols = ["Photo", "Skater", "Pos", "GP", "PP_Score", "PK_Score", "PPG", "SHG", "PIM", "TOI/GP"]
+        st_view = qualified_df[cols].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
+        st.dataframe(st_view, column_config=base_column_config, use_container_width=True, hide_index=True)
+
+    elif active_view == "Faceoff Breakdown":
+        fo_skaters = qualified_df[qualified_df["Total_FO"] > 0].copy()
+        if fo_skaters.empty:
+            st.info("No faceoffs recorded for skaters in this selection.")
+        else:
+            cols = ["Photo", "Skater", "Pos", "GP", "Total_FO", "FO%", "OZ_FO%", "NZ_FO%", "DZ_FO%"]
+            fo_view = fo_skaters[cols].sort_values(by="Total_FO", ascending=False).reset_index(drop=True)
+            st.dataframe(fo_view, column_config=base_column_config, use_container_width=True, hide_index=True)
+
+    elif active_view == "Complete Skater Statistics":
+        cols = [
+            "Photo", "Skater", "Pos", "GP", "Off_Score", "Def_Score", "PP_Score", "PK_Score",
+            "PTS", "G", "A", "+/-", "P/GP", "SOG/GP", "TOI/GP", "SOG", "SH%", "FO%", "PIM", 
+            "PPG", "SHG", "GWG"
         ]
+        comp_view = qualified_df[cols].sort_values(by="PTS", ascending=False).reset_index(drop=True)
+        st.dataframe(comp_view, column_config=base_column_config, use_container_width=True, hide_index=True)
 
-        nav_cols = st.columns(6)
-        for idx, tab_name in enumerate(tabs):
-            with nav_cols[idx]:
-                btn_type = "primary" if st.session_state["active_tab_view"] == tab_name else "secondary"
-                if st.button(tab_name, key=f"nav_btn_{idx}", type=btn_type, use_container_width=True):
-                    st.session_state["active_tab_view"] = tab_name
-                    st.rerun()
-
-        active_view = st.session_state["active_tab_view"]
-
-        base_column_config = {
-            "Photo": st.column_config.ImageColumn("", width="small"),
-            "Skater": st.column_config.TextColumn("Player", width="medium"),
-            "Pos": st.column_config.TextColumn("Pos", width="small"),
-            "GP": st.column_config.NumberColumn("GP", format="%d"),
-            "PTS": st.column_config.NumberColumn("PTS", format="%d"),
-            "G": st.column_config.NumberColumn("G", format="%d"),
-            "A": st.column_config.NumberColumn("A", format="%d"),
-            "SOG": st.column_config.NumberColumn("SOG", format="%d"),
-            "+/-": st.column_config.NumberColumn("+/-", format="%+d"),
-            "PIM": st.column_config.NumberColumn("PIM", format="%d"),
-            "TOI/GP": st.column_config.NumberColumn("TOI/GP", format="%.2f m"),
-            "SH%": st.column_config.ProgressColumn("SH%", min_value=0.0, max_value=35.0, format="%.1f%%"),
-            "Total_FO": st.column_config.NumberColumn("Total Draws", format="%d"),
-            "FO%": st.column_config.ProgressColumn("Overall FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
-            "OZ_FO%": st.column_config.ProgressColumn("OZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
-            "NZ_FO%": st.column_config.ProgressColumn("NZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
-            "DZ_FO%": st.column_config.ProgressColumn("DZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
-            "P/GP": st.column_config.ProgressColumn("P/GP", min_value=0.0, max_value=float(display_df["P/GP"].max() or 2.0), format="%.2f"),
-            "SOG/GP": st.column_config.ProgressColumn("SOG/GP", min_value=0.0, max_value=float(display_df["SOG/GP"].max() or 6.0), format="%.2f"),
-            "Off_Score": st.column_config.ProgressColumn("Offensive Impact", min_value=0.0, max_value=float(display_df["Off_Score"].max() or 6.0), format="%.2f"),
-            "Def_Score": st.column_config.ProgressColumn("Defensive Impact", min_value=float(display_df["Def_Score"].min() or -3.0), max_value=float(display_df["Def_Score"].max() or 5.0), format="%.2f"),
-            "PP_Score": st.column_config.ProgressColumn("PP Impact", min_value=0.0, max_value=float(display_df["PP_Score"].max() or 5.0), format="%.2f"),
-            "PK_Score": st.column_config.ProgressColumn("PK Impact", min_value=0.0, max_value=float(display_df["PK_Score"].max() or 4.0), format="%.2f"),
-        }
-
-        if active_view == "Offensive Impact":
-            cols = ["Photo", "Skater", "Pos", "GP", "Off_Score", "P/GP", "SOG/GP", "PTS", "G", "A", "SOG", "SH%", "PPG", "GWG"]
-            off_view = qualified_df[cols].sort_values(by="Off_Score", ascending=False).reset_index(drop=True)
-            st.dataframe(off_view, column_config=base_column_config, use_container_width=True, hide_index=True)
-
-        elif active_view == "Defensive Impact":
-            cols = ["Photo", "Skater", "Pos", "GP", "Def_Score", "+/- /60", "TOI/GP", "+/-", "PIM", "SHG"]
-            def_view = qualified_df[cols].sort_values(by="Def_Score", ascending=False).reset_index(drop=True)
-            st.dataframe(def_view, column_config=base_column_config, use_container_width=True, hide_index=True)
-
-        elif active_view == "Special Teams Performance":
-            cols = ["Photo", "Skater", "Pos", "GP", "PP_Score", "PK_Score", "PPG", "SHG", "PIM", "TOI/GP"]
-            st_view = qualified_df[cols].sort_values(by="PP_Score", ascending=False).reset_index(drop=True)
-            st.dataframe(st_view, column_config=base_column_config, use_container_width=True, hide_index=True)
-
-        elif active_view == "Faceoff Breakdown":
-            fo_skaters = qualified_df[qualified_df["Total_FO"] > 0].copy()
-            if fo_skaters.empty:
-                st.info("No faceoffs recorded for skaters in this selection.")
-            else:
-                cols = ["Photo", "Skater", "Pos", "GP", "Total_FO", "FO%", "OZ_FO%", "NZ_FO%", "DZ_FO%"]
-                fo_view = fo_skaters[cols].sort_values(by="Total_FO", ascending=False).reset_index(drop=True)
-                st.dataframe(fo_view, column_config=base_column_config, use_container_width=True, hide_index=True)
-
-        elif active_view == "Complete Skater Statistics":
+    elif active_view == "Limited Sample (< 5 GP)":
+        if limited_df.empty:
+            st.info("No skaters currently have fewer than 5 games played for this selection.")
+        else:
             cols = [
-                "Photo", "Skater", "Pos", "GP", "Off_Score", "Def_Score", "PP_Score", "PK_Score",
-                "PTS", "G", "A", "+/-", "P/GP", "SOG/GP", "TOI/GP", "SOG", "SH%", "FO%", "PIM", 
-                "PPG", "SHG", "GWG"
+                "Photo", "Skater", "Pos", "GP", "PTS", "G", "A", "+/-", 
+                "TOI/GP", "SOG", "SH%", "PIM", "P/GP", "SOG/GP", "Off_Score", "Def_Score"
             ]
-            comp_view = qualified_df[cols].sort_values(by="PTS", ascending=False).reset_index(drop=True)
-            st.dataframe(comp_view, column_config=base_column_config, use_container_width=True, hide_index=True)
-
-        elif active_view == "Limited Sample (< 5 GP)":
-            if limited_df.empty:
-                st.info("No skaters currently have fewer than 5 games played for this selection.")
-            else:
-                cols = [
-                    "Photo", "Skater", "Pos", "GP", "PTS", "G", "A", "+/-", 
-                    "TOI/GP", "SOG", "SH%", "PIM", "P/GP", "SOG/GP", "Off_Score", "Def_Score"
-                ]
-                lim_view = limited_df[cols].sort_values(by="GP", ascending=False).reset_index(drop=True)
-                st.dataframe(lim_view, column_config=base_column_config, use_container_width=True, hide_index=True)
+            lim_view = limited_df[cols].sort_values(by="GP", ascending=False).reset_index(drop=True)
+            st.dataframe(lim_view, column_config=base_column_config, use_container_width=True, hide_index=True)
