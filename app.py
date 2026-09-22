@@ -270,7 +270,7 @@ VERIFIED_MANUAL_HEADSHOTS = {
     "Steven Stamkos": "https://assets.nhle.com/mugs/nhl/latest/8474564.png",
     "Jonathan Marchessault": "https://assets.nhle.com/mugs/nhl/latest/8476539.png",
     "Roman Josi": "https://assets.nhle.com/mugs/nhl/latest/8474600.png",
-    "Matthew Wood": "https://assets.nhle.com/mugs/nhl/latest/8484152.png"
+    "Matthew Wood": "https://assets.nhle.com/mugs/nhl/latest/8484241.png"
 }
 
 @st.cache_data(ttl=86400)
