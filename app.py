@@ -4,9 +4,11 @@ import requests
 
 PREDS_LOGO_URL = "https://assets.nhle.com/logos/nhl/svg/NSH_light.svg"
 
+# Set layout wide and lock sidebar expanded by default
 st.set_page_config(
     page_title="Nashville Predators Hockey Operations Dashboard",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # Deep franchise theme injection
@@ -38,82 +40,6 @@ st.markdown("""
         padding-top: 1.5rem !important;
         padding-bottom: 2rem !important;
         max-width: 95% !important;
-    }
-
-    /* ============================================================ */
-    /* THE FIX: TARGET EVERY SIDEBAR COLLAPSE/EXPAND BUTTON VARIANT */
-    /* ============================================================ */
-    
-    /* 1. Target the button container itself (both open and closed states) */
-    header button[aria-label*="sidebar" i],
-    header button[aria-label*="Sidebar" i],
-    header [data-testid="collapsedControl"],
-    header [data-testid="stSidebarCollapsedControl"],
-    header [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebar"] button[aria-label*="sidebar" i],
-    [data-testid="stSidebar"] button[aria-label*="Sidebar" i],
-    [data-testid="stSidebarCollapseButton"] button {
-        background-color: #061F47 !important;
-        background: #061F47 !important;
-        border: 2px solid #FFB81C !important;
-        border-radius: 8px !important;
-        box-shadow: 0 0 10px rgba(255, 184, 28, 0.5) !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        padding: 4px 8px !important;
-    }
-
-    /* 2. Target the SVG icon inside that button */
-    header button[aria-label*="sidebar" i] svg,
-    header button[aria-label*="Sidebar" i] svg,
-    header [data-testid="collapsedControl"] svg,
-    header [data-testid="stSidebarCollapsedControl"] svg,
-    header [data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stSidebar"] button[aria-label*="sidebar" i] svg,
-    [data-testid="stSidebar"] button[aria-label*="Sidebar" i] svg,
-    [data-testid="stSidebarCollapseButton"] button svg {
-        fill: #FFB81C !important;
-        stroke: #FFB81C !important;
-        color: #FFB81C !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        filter: drop-shadow(0 0 4px #FFB81C) !important;
-    }
-
-    /* 3. Target all path, polygon, and line children inside the SVG */
-    header button[aria-label*="sidebar" i] svg *,
-    header button[aria-label*="Sidebar" i] svg *,
-    header [data-testid="collapsedControl"] svg *,
-    header [data-testid="stSidebarCollapsedControl"] svg *,
-    header [data-testid="stSidebarCollapseButton"] svg *,
-    [data-testid="stSidebar"] button[aria-label*="sidebar" i] svg *,
-    [data-testid="stSidebar"] button[aria-label*="Sidebar" i] svg *,
-    [data-testid="stSidebarCollapseButton"] button svg * {
-        fill: #FFB81C !important;
-        stroke: #FFB81C !important;
-        color: #FFB81C !important;
-        opacity: 1 !important;
-    }
-
-    /* Hover effect */
-    header button[aria-label*="sidebar" i]:hover,
-    header button[aria-label*="Sidebar" i]:hover,
-    [data-testid="stSidebar"] button[aria-label*="sidebar" i]:hover,
-    [data-testid="stSidebarCollapseButton"] button:hover {
-        background-color: #FFB81C !important;
-        box-shadow: 0 0 16px rgba(255, 184, 28, 0.8) !important;
-    }
-
-    header button[aria-label*="sidebar" i]:hover svg,
-    header button[aria-label*="Sidebar" i]:hover svg,
-    header button[aria-label*="sidebar" i]:hover svg *,
-    header button[aria-label*="Sidebar" i]:hover svg * {
-        fill: #041E42 !important;
-        stroke: #041E42 !important;
-        color: #041E42 !important;
     }
 
     /* Header Container */
@@ -281,7 +207,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Sidebar Controls ---
+# --- Sidebar Controls (Interactive Gold & Navy Buttons) ---
 st.sidebar.markdown("### Filter Settings")
 
 # 1. Season Selection
