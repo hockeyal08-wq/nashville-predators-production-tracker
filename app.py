@@ -379,11 +379,26 @@ def load_club_skater_stats(season, game_type):
         gw_goals = s.get("gameWinningGoals", 0)
 
         # Scale raw decimals up to whole percentages (e.g. 0.165 -> 16.5)
-        raw_sh = s.get("shootingPctg", 0.0)
+        raw_sh = s.get("shootingPctg") or s.get("shootingPct") or 0.0
         sh_pct = round(float(raw_sh) * 100.0, 1) if raw_sh is not None else 0.0
 
-        raw_fo = s.get("faceoffWinningPctg", 0.0)
-        fo_pct = round(float(raw_fo) * 100.0, 1) if raw_fo is not None else 0.0
+        # Look up faceoff percentage across all API schema variations
+        raw_fo = (
+            s.get("faceoffWinPct") 
+            if s.get("faceoffWinPct") is not None 
+            else s.get("faceoffWinningPctg") 
+            if s.get("faceoffWinningPctg") is not None 
+            else s.get("faceoffPct") 
+            if s.get("faceoffPct") is not None 
+            else s.get("faceoffPercentage")
+        )
+        
+        if raw_fo is not None:
+            raw_fo_float = float(raw_fo)
+            # If the API already passed a whole number (e.g. 52.3) vs a decimal (0.523)
+            fo_pct = round(raw_fo_float * 100.0, 1) if raw_fo_float <= 1.0 else round(raw_fo_float, 1)
+        else:
+            fo_pct = 0.0
 
         # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
