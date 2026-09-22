@@ -493,54 +493,48 @@ if current_page == "Line Combinations":
     st.stop()
 
 # ==============================================================================
-# PAGE 2: TRADE DEADLINE & REALISTIC BUY TARGET INTELLIGENCE
+# PAGE 2: TRADE DEADLINE & REALISTIC BUY TARGET INTELLIGENCE (NMC-FREE)
 # ==============================================================================
 if current_page == "Trade Intelligence":
     st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
-    st.caption("Active evaluations of available top-six wingers and shutdown depth pieces to reinforce Nashville's playoff push.")
+    st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses (NMC/NTC-free).")
 
-    # VETTED ACQUISITION TARGETS DATABASE (Strictly active, non-retired, non-extended external players)
+    # VETTED ACQUISITION TARGETS DATABASE (Strictly active, non-extended, full trade eligibility / no NMC)
     realistic_targets = [
-        # --- TOP-SIX WINGERS & FORWARDS ON REBUILDING / SELLER TEAMS ---
+        # --- TOP-SIX WINGERS & FORWARDS ON REBUILDING / SELLER TEAMS (NMC-FREE) ---
         {
-            "Player": "Bryan Rust", "Pos": "RW", "Team": "PIT", "Cap_Hit": 5.125, "Status": "Signed thru '28 (Trade Block)",
-            "Category": "Star on Rebuilding Team", "Deadline_Posture": "Top BUY Target",
-            "Brunette_Fit": 95, "Archetype": "Proven Playoff Top-Line Winger / Relentless Motor",
-            "Tactical_Scouting": "Two-time Stanley Cup champion actively made available as Pittsburgh cycles through a multi-year retool. World-class forechecking speed and high-compete board work that fits Andrew Brunette's system seamlessly."
-        },
-        {
-            "Player": "Rickard Rakell", "Pos": "RW/LW", "Team": "PIT", "Cap_Hit": 5.00, "Status": "Pending UFA '28",
+            "Player": "Rickard Rakell", "Pos": "RW/LW", "Team": "PIT", "Cap_Hit": 5.00, "Status": "Pending UFA '28 (No NMC)",
             "Category": "Star on Rebuilding Team", "Deadline_Posture": "BUY Target",
             "Brunette_Fit": 92, "Archetype": "High-Volume Release / Skill Finisher",
-            "Tactical_Scouting": "Perennial trade-block fixture on a non-contending Penguins roster. Generates rapid rush shots that would take defensive pressure off Steven Stamkos on the second line."
+            "Tactical_Scouting": "Perennial trade-block fixture on a non-contending Penguins roster with full trade maneuverability. Generates rapid rush shots that take pressure off Steven Stamkos."
         },
         {
-            "Player": "Mikael Granlund", "Pos": "C/LW", "Team": "SJS", "Cap_Hit": 5.00, "Status": "Expiring Rental",
+            "Player": "Mikael Granlund", "Pos": "C/LW", "Team": "SJS", "Cap_Hit": 5.00, "Status": "Expiring Rental (No NMC)",
             "Category": "Star on Rebuilding Team", "Deadline_Posture": "Rental BUY Target",
             "Brunette_Fit": 93, "Archetype": "High-IQ Playmaker / Power Play Distributor",
-            "Tactical_Scouting": "Familiar face to Nashville hockey ops. Carrying heavy offensive zone minutes on San Jose as an expiring rental; elite facilitator for secondary power-play units."
+            "Tactical_Scouting": "Familiar face to Nashville hockey ops. Carrying heavy offensive zone minutes on San Jose as an expiring rental without trade restrictions; elite facilitator for secondary power-play units."
         },
 
-        # --- SHUTDOWN DEFENSEMEN ON EXPIRING / SELLER TEAMS ---
+        # --- SHUTDOWN DEFENSEMEN ON EXPIRING / SELLER TEAMS (NMC-FREE) ---
         {
-            "Player": "Will Borgen", "Pos": "RD", "Team": "SEA", "Cap_Hit": 2.70, "Status": "Pending UFA '27",
+            "Player": "Will Borgen", "Pos": "RD", "Team": "SEA", "Cap_Hit": 2.70, "Status": "Pending UFA '27 (No NMC)",
             "Category": "Top-4 Defensive Upgrade", "Deadline_Posture": "Value BUY",
             "Brunette_Fit": 91, "Archetype": "Heavy Physical Shutdown RD / Clean Exit",
-            "Tactical_Scouting": "Under-the-radar right defenseman who suppresses neutral-zone rush entries at a top-tier rate. Highly cost-effective upgrade."
+            "Tactical_Scouting": "Under-the-radar right defenseman who suppresses neutral-zone rush entries at a top-tier rate. Highly cost-effective upgrade with complete roster flexibility."
         },
 
-        # --- ROLE PLAYERS, BOTTOM-SIX & SPECIAL TEAMS SPECIALISTS ---
+        # --- ROLE PLAYERS, BOTTOM-SIX & SPECIAL TEAMS SPECIALISTS (NMC-FREE) ---
         {
-            "Player": "Noel Acciari", "Pos": "C/RW", "Team": "PIT", "Cap_Hit": 2.00, "Status": "Expiring Contract",
+            "Player": "Noel Acciari", "Pos": "C/RW", "Team": "PIT", "Cap_Hit": 2.00, "Status": "Expiring Contract (No NMC)",
             "Category": "Role & Depth Piece", "Deadline_Posture": "Value BUY",
             "Brunette_Fit": 94, "Archetype": "Hard-Nosed Playoff Wall / PK Shot Blocker",
-            "Tactical_Scouting": "One of the most fearless checking centers in hockey. Wins key defensive-zone draws, blocks point shots, and brings instant identity to Nashville's 4th line."
+            "Tactical_Scouting": "One of the most fearless checking centers in hockey. Wins key defensive-zone draws, blocks point shots, and brings instant identity to Nashville's 4th line with zero movement clauses."
         },
         {
-            "Player": "Joel Armia", "Pos": "RW", "Team": "MTL", "Cap_Hit": 3.40, "Status": "Expiring Contract",
+            "Player": "Joel Armia", "Pos": "RW", "Team": "MTL", "Cap_Hit": 3.40, "Status": "Expiring Contract (No NMC)",
             "Category": "Role & Depth Piece", "Deadline_Posture": "PK Specialist BUY",
             "Brunette_Fit": 89, "Archetype": "6'3\" Low-Cycle Puck Protector / Short-Handed Weapon",
-            "Tactical_Scouting": "Elite takeaway winger who uses his large frame to dominate board battles. High-impact addition for late-game defensive leads and penalty killing."
+            "Tactical_Scouting": "Elite takeaway winger who uses his large frame to dominate board battles. High-impact addition for late-game defensive leads and penalty killing without contract blocks."
         }
     ]
 
@@ -576,7 +570,7 @@ if current_page == "Trade Intelligence":
     if sel_strat != "All Postures":
         filtered_df = filtered_df[filtered_df["Deadline_Posture"].str.contains(sel_strat.split()[0])]
 
-    st.markdown("#### Real-Time Acquisition Target Registry")
+    st.markdown("#### Real-Time Acquisition Target Registry (NMC-Free)")
     
     st.dataframe(
         filtered_df[[
@@ -985,7 +979,7 @@ if not df.empty:
         "DZ_FO%": st.column_config.ProgressColumn("DZ FO%", min_value=0.0, max_value=100.0, format="%.1f%%"),
         "P/60": st.column_config.ProgressColumn("P/60", min_value=0.0, max_value=float(df["P/60"].max() or 4.0), format="%.2f"),
         "Off_Score": st.column_config.ProgressColumn("Offensive Impact", min_value=0.0, max_value=float(df["Off_Score"].max() or 6.0), format="%.2f"),
-        "Def_Score": st.column_config.ProgressColumn("Defensive Impact", min_value=float(df["Def_Score"].min() or -3.0), max_value=float(df["Def_Score"].max() or 5.0), format="%.2f"),
+        "Def_Score": st.column_config.ProgressColumn("Defensive Impact", min_value=float(df["Def_Score"].min() -3.0), max_value=float(df["Def_Score"].max() or 5.0), format="%.2f"),
         "PP_Score": st.column_config.ProgressColumn("PP Impact", min_value=0.0, max_value=float(df["PP_Score"].max() or 5.0), format="%.2f"),
         "PK_Score": st.column_config.ProgressColumn("PK Impact", min_value=0.0, max_value=float(df["PK_Score"].max() or 4.0), format="%.2f"),
     }
