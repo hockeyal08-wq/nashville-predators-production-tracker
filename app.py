@@ -41,37 +41,45 @@ st.markdown("""
     }
 
     /* ============================================================ */
-    /* FORCE TABS TO PREDATORS GOLD / YELLOW                        */
+    /* HIGH-CONTRAST PREDATORS TABS                                 */
     /* ============================================================ */
     
-    /* Inactive Tab Text */
+    /* Inactive Tab Text: Crisp bright white/silver for immediate visibility */
     .stTabs [data-baseweb="tab"] p,
     .stTabs [data-baseweb="tab"] span,
+    .stTabs [data-baseweb="tab"] div,
     .stTabs [data-baseweb="tab"] {
-        color: #94A3B8 !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        opacity: 0.95 !important;
         font-weight: 700 !important;
         font-size: 1.05rem !important;
+        letter-spacing: 0.3px !important;
     }
     
-    /* Inactive Tab Hover */
+    /* Inactive Tab Hover: Lights up gold before clicking */
     .stTabs [data-baseweb="tab"]:hover p,
     .stTabs [data-baseweb="tab"]:hover span,
+    .stTabs [data-baseweb="tab"]:hover div,
     .stTabs [data-baseweb="tab"]:hover {
         color: #FFB81C !important;
+        -webkit-text-fill-color: #FFB81C !important;
+        opacity: 1.0 !important;
     }
 
-    /* ACTIVE TAB: Forces "Offensive Impact", etc. to Yellow */
+    /* ACTIVE TAB: Bold Predators Gold */
     .stTabs [aria-selected="true"],
     .stTabs [aria-selected="true"] p,
     .stTabs [aria-selected="true"] span,
     .stTabs [aria-selected="true"] div,
     .stTabs button[aria-selected="true"] * {
         color: #FFB81C !important;
-        font-weight: 800 !important;
         -webkit-text-fill-color: #FFB81C !important;
+        opacity: 1.0 !important;
+        font-weight: 800 !important;
     }
 
-    /* ACTIVE TAB UNDERLINE BAR: Forces red line to Yellow */
+    /* ACTIVE TAB UNDERLINE BAR */
     .stTabs [data-baseweb="tab-highlight"],
     .stTabs div[data-baseweb="tab-highlight"] {
         background-color: #FFB81C !important;
@@ -80,7 +88,7 @@ st.markdown("""
 
     /* Tab Rail Divider */
     .stTabs [data-baseweb="tab-border"] {
-        background-color: rgba(255, 184, 28, 0.25) !important;
+        background-color: rgba(255, 184, 28, 0.35) !important;
     }
 
     /* Header Container */
@@ -361,10 +369,8 @@ def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0
             if pd.isna(val):
                 continue
             if val >= high_thresh:
-                # Soft green background with bold dark text
                 styler_df.loc[idx, col] = 'background-color: rgba(34, 197, 94, 0.35); color: #041E42; font-weight: bold;'
             elif val <= low_thresh:
-                # Soft red background with bold white text
                 styler_df.loc[idx, col] = 'background-color: rgba(239, 68, 68, 0.40); color: #FFFFFF; font-weight: bold;'
                 
     return styler_df
