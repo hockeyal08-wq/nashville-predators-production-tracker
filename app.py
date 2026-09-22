@@ -4,6 +4,7 @@ import requests
 
 PREDS_LOGO_URL = "https://assets.nhle.com/logos/nhl/svg/NSH_light.svg"
 
+# Mapping team tricots to official NHL SVG logo URLs for the trade table
 TEAM_LOGOS = {
     "PIT": "https://assets.nhle.com/logos/nhl/svg/PIT_light.svg",
     "SJS": "https://assets.nhle.com/logos/nhl/svg/SJS_light.svg",
@@ -368,7 +369,7 @@ with p_cols[2]:
 current_page = st.session_state["current_page"]
 
 # ==============================================================================
-# VERIFIED HEADSHOT OVERRIDES (Locked with exact NHL CDN IDs)
+# VERIFIED HEADSHOT OVERRIDES
 # ==============================================================================
 VERIFIED_MANUAL_HEADSHOTS = {
     "Steven Stamkos": "https://assets.nhle.com/mugs/nhl/latest/8474564.png",
@@ -387,6 +388,23 @@ VERIFIED_MANUAL_HEADSHOTS = {
 def resolve_player_headshot(player_name, fallback_id=None):
     if player_name in VERIFIED_MANUAL_HEADSHOTS:
         return VERIFIED_MANUAL_HEADSHOTS[player_name]
+    try:
+        search_query = player_name.replace(" ", "%20")
+        url = f"https://search.d3.nhle.com/api/v1/search/player?culture=en-us&limit=3&q={search_query}"
+        res = requests.get(url, timeout=4)
+        if res.status_code == 200:
+            hits = res.json()
+            if hits:
+                p_id = hits[0].get("playerId")
+                if p_id:
+                    landing_res = requests.get(f"https://api-web.nhle.com/v1/player/{p_id}/landing", timeout=4)
+                    if landing_res.status_code == 200:
+                        headshot = landing_res.json().get("headshot")
+                        if headshot:
+                            return headshot
+                    return f"https://assets.nhle.com/mugs/nhl/latest/{p_id}.png"
+    except Exception:
+        pass
     if fallback_id:
         return f"https://assets.nhle.com/mugs/nhl/latest/{fallback_id}.png"
     return PREDS_LOGO_URL
@@ -491,15 +509,14 @@ if current_page == "Line Combinations":
     st.stop()
 
 # ==============================================================================
-# PAGE 2: TRADE DEADLINE & REALISTIC BUY TARGET INTELLIGENCE (WITH ICONS)
+# PAGE 2: TRADE DEADLINE & REALISTIC BUY TARGET INTELLIGENCE (CARD GRID)
 # ==============================================================================
 if current_page == "Trade Intelligence":
     st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
     st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses (NMC/NTC-free).")
 
-    # VETTED ACQUISITION TARGETS DATABASE WITH FORCED HEADSHOT FUNCTION MAPPING
+    # VETTED ACQUISITION TARGETS DATABASE
     realistic_targets = [
-        # --- TOP-SIX FORWARDS ---
         {
             "Photo": resolve_player_headshot("Bryan Rust"),
             "Player": "Bryan Rust", 
@@ -542,8 +559,6 @@ if current_page == "Trade Intelligence":
             "Archetype": "High-IQ Playmaker / Power Play Distributor",
             "Tactical_Scouting": "Smart veteran distributor with extensive familiarity with Nashville hockey ops. High-end vision to quarterback secondary power-play units and stabilize middle-six minutes."
         },
-
-        # --- TOP-4 DEFENSIVE UPGRADES ---
         {
             "Photo": resolve_player_headshot("Will Borgen"),
             "Player": "Will Borgen", 
@@ -558,8 +573,6 @@ if current_page == "Trade Intelligence":
             "Archetype": "Heavy Physical Shutdown RD / Clean Exit",
             "Tactical_Scouting": "Under-the-radar right defenseman who suppresses neutral-zone rush entries at a top-tier rate. Highly cost-effective upgrade with complete roster flexibility."
         },
-
-        # --- BOTTOM-SIX & PK DEPTH ---
         {
             "Photo": resolve_player_headshot("Noel Acciari"),
             "Player": "Noel Acciari", 
@@ -624,26 +637,21 @@ if current_page == "Trade Intelligence":
 
     st.markdown("#### Real-Time Acquisition Target Registry (NMC-Free)")
     
-    st.dataframe(
-        filtered_df[[
-            "Photo", "Player", "Team_Logo", "Pos", "Cap_Hit", "Category", "Deadline_Posture", 
-            "Brunette_Fit", "Archetype", "Tactical_Scouting"
-        ]].sort_values(by="Brunette_Fit", ascending=False),
-        column_config={
-            "Photo": st.column_config.ImageColumn("", width="small"),
-            "Player": st.column_config.TextColumn("Target Skater", width="medium"),
-            "Team_Logo": st.column_config.ImageColumn("Team", width="small"),
-            "Pos": st.column_config.TextColumn("Pos", width="small"),
-            "Cap_Hit": st.column_config.NumberColumn("Cap Hit ($M)", format="$%.2fM"),
-            "Category": st.column_config.TextColumn("Player Tier", width="medium"),
-            "Deadline_Posture": st.column_config.TextColumn("Deadline Action", width="medium"),
-            "Brunette_Fit": st.column_config.ProgressColumn("Brunette Scheme Fit", min_value=70, max_value=100, format="%d/100"),
-            "Archetype": st.column_config.TextColumn("Skillset & Profile", width="medium"),
-            "Tactical_Scouting": st.column_config.TextColumn("Nashville Tactical Evaluation", width="large")
-        },
-        use_container_width=True,
-        hide_index=True
-    )
+    # Render targets as an executive card grid
+    for i, row in filtered_df.iterrows():
+        with st.container(border=True):
+            c1, c2, c3 = st.columns([1.2, 3.5, 5])
+            with c1:
+                st.image(row["Photo"], width=85)
+                st.image(row["Team_Logo"], width=35)
+            with c2:
+                st.markdown(f"### **{row['Player']}** ({row['Pos']})")
+                st.caption(f"**Tier:** {row['Category']} | **Cap Hit:** ${row['Cap_Hit']:.3f}M")
+                st.markdown(f"**Action:** {row['Deadline_Posture']}")
+                st.markdown(f"**Scheme Fit:** {row['Brunette_Fit']}/100")
+            with c3:
+                st.markdown(f"**Archetype:** `{row['Archetype']}`")
+                st.info(f"**Tactical Evaluation:** {row['Tactical_Scouting']}")
 
     st.stop()
 
