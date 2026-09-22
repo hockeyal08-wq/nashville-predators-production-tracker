@@ -37,7 +37,7 @@ st.markdown(f"""
         max-width: 95% !important;
     }}
 
-    /* Force Sidebar Collapse Button Permanently Visible in Both Open and Collapsed States */
+    /* Permanent Sidebar Toggle */
     [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarCollapseButton"] button,
     [data-testid="collapsedControl"],
@@ -112,6 +112,41 @@ st.markdown(f"""
         letter-spacing: 0.3px;
     }}
 
+    /* Financial Metrics Banner */
+    .cap-strip {{
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 20px;
+    }}
+    .cap-cell {{
+        background: linear-gradient(135deg, #092652 0%, #03142D 100%);
+        border: 1.5px solid rgba(255, 184, 28, 0.4);
+        border-radius: 10px;
+        padding: 14px 18px;
+        text-align: left;
+    }}
+    .cap-cell-label {{
+        font-size: 0.72rem;
+        color: #94A3B8;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }}
+    .cap-cell-value {{
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #FFB81C;
+        margin-top: 4px;
+    }}
+    .cap-cell-sub {{
+        font-size: 0.75rem;
+        color: #E2E8F0;
+        margin-top: 2px;
+        font-weight: 600;
+    }}
+
+    /* Spotlight Card */
     .spotlight-card {{
         background: linear-gradient(135deg, #092652 0%, #03142D 100%);
         border: 2px solid #FFB81C;
@@ -175,6 +210,7 @@ st.markdown(f"""
         font-weight: 600;
     }}
 
+    /* NHL Line Card */
     .nhl-player-card {{
         background: linear-gradient(180deg, #092652 0%, #03142D 100%);
         border: 1.5px solid rgba(255, 184, 28, 0.4);
@@ -210,10 +246,16 @@ st.markdown(f"""
         font-size: 1.05rem;
         font-weight: 800;
         color: #FFFFFF;
-        margin: 2px 0 4px 0;
+        margin: 2px 0 2px 0;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+    }}
+    .nhl-cap-line {{
+        font-size: 0.78rem;
+        color: #38BDF8;
+        font-weight: 800;
+        margin-bottom: 3px;
     }}
     .nhl-tag {{
         font-size: 0.72rem;
@@ -232,6 +274,14 @@ st.markdown(f"""
         margin-bottom: 10px;
         letter-spacing: 0.3px;
         border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }}
+    .line-cap-total {{
+        font-size: 0.82rem;
+        color: #FFB81C;
+        font-weight: 700;
     }}
 
     div[data-testid="stButton"] button[kind="secondary"] {{
@@ -276,18 +326,18 @@ st.markdown(f"""
 <div class="header-container">
     <img src="{PREDS_LOGO_URL}" class="header-logo" alt="Nashville Predators">
     <div class="header-title-box">
-        <h1>Nashville Predators | Skater Analytics & Performance Index</h1>
-        <div class="header-subtitle">Hockey Operations Evaluation: Production Efficiency, Role Workload, and Two-Way Models</div>
+        <h1>Nashville Predators | Hockey Operations & Cap Management</h1>
+        <div class="header-subtitle">Executive Roster Modeling, 26/27 Cap Ledger & Real-Time Trade Deadline Target Intelligence</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # Top Navigation in Sidebar
-st.sidebar.markdown("### Navigation Mode")
+st.sidebar.markdown("### Operations Portal")
 if "current_page" not in st.session_state:
     st.session_state["current_page"] = "Skater Analytics"
 
-p_cols = st.sidebar.columns(2)
+p_cols = st.sidebar.columns(3)
 with p_cols[0]:
     btn_p1 = "primary" if st.session_state["current_page"] == "Skater Analytics" else "secondary"
     if st.button("Skater Hub", key="btn_nav_skaters", type=btn_p1, use_container_width=True):
@@ -300,10 +350,16 @@ with p_cols[1]:
         st.session_state["current_page"] = "Line Combinations"
         st.rerun()
 
+with p_cols[2]:
+    btn_p3 = "primary" if st.session_state["current_page"] == "Trade Intelligence" else "secondary"
+    if st.button("Target Ops", key="btn_nav_trades", type=btn_p3, use_container_width=True):
+        st.session_state["current_page"] = "Trade Intelligence"
+        st.rerun()
+
 current_page = st.session_state["current_page"]
 
 # ==============================================================================
-# DYNAMIC HEADSHOT RESOLVER WITH VERIFIED DIRECT OVERRIDES
+# VERIFIED HEADSHOT OVERRIDES
 # ==============================================================================
 VERIFIED_MANUAL_HEADSHOTS = {
     "Steven Stamkos": "https://assets.nhle.com/mugs/nhl/latest/8474564.png",
@@ -314,7 +370,6 @@ VERIFIED_MANUAL_HEADSHOTS = {
 
 @st.cache_data(ttl=86400)
 def resolve_player_headshot(player_name, fallback_id=None):
-    """Resolves headshots prioritizing verified manual URLs, then the NHL Search API, then fallback IDs."""
     if player_name in VERIFIED_MANUAL_HEADSHOTS:
         return VERIFIED_MANUAL_HEADSHOTS[player_name]
     try:
@@ -339,85 +394,286 @@ def resolve_player_headshot(player_name, fallback_id=None):
     return PREDS_LOGO_URL
 
 # ==============================================================================
-# PAGE 1: 26/27 LINE COMBINATIONS (EA SPORTS NHL STYLE)
+# PAGE 1: 26/27 LINE COMBINATIONS (WITH SALARY CAP LINES)
 # ==============================================================================
 if current_page == "Line Combinations":
-    st.subheader("26/27 Projected Line Combinations")
-    st.caption("Tactical Alignment: Andrew Brunette 1-2-2 High-Pace Forecheck & Weak-Side D-Activation")
+    st.subheader("26/27 Projected Line Combinations & Salary Distribution")
+    st.caption("Tactical Alignment: Andrew Brunette 1-2-2 High-Pace Forecheck | Official Cap Ceiling: $104.0M")
 
-    st.info(
-        "**System Alignment Overview:** The 26/27 lineup significantly improves neutral-zone rush speed and forecheck pressure "
-        "with additions like Mavrik Bourque, Nils Höglander, and Ross Colton. Nicolas Hague on D1 gives Roman Josi an anchor "
-        "to freely execute weak-side pinches below the faceoff dots."
-    )
+    # Financial Ledger Strip
+    st.markdown("""
+    <div class="cap-strip">
+        <div class="cap-cell">
+            <div class="cap-cell-label">Cap Ceiling (26/27)</div>
+            <div class="cap-cell-value">$104.00M</div>
+            <div class="cap-cell-sub">NHL Official Upper Limit</div>
+        </div>
+        <div class="cap-cell">
+            <div class="cap-cell-label">Active 20-Man Cap Hit</div>
+            <div class="cap-cell-value">$95.25M</div>
+            <div class="cap-cell-sub">Roster Cap Obligation</div>
+        </div>
+        <div class="cap-cell">
+            <div class="cap-cell-label">Accrued Cap Space</div>
+            <div class="cap-cell-value">$8.75M</div>
+            <div class="cap-cell-sub">Current Free Cap Space</div>
+        </div>
+        <div class="cap-cell">
+            <div class="cap-cell-label">Deadline Purchasing Power</div>
+            <div class="cap-cell-value">~$20.4M</div>
+            <div class="cap-cell-sub">Pro-Rated Day-of-Deadline Cap</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    def render_nhl_player(col, num, name, pos, role_tag, fallback_id):
+    def render_nhl_player_cap(col, num, name, pos, role_tag, fallback_id, aav_text, status_text):
         headshot_url = resolve_player_headshot(name, fallback_id)
         col.markdown(f"""
         <div class="nhl-player-card">
             <img class="nhl-mug" src="{headshot_url}" alt="{name}" onerror="this.onerror=null; this.src='{PREDS_LOGO_URL}';">
             <div class="nhl-num-pos">#{num} • {pos}</div>
             <div class="nhl-name">{name}</div>
+            <div class="nhl-cap-line">{aav_text} <span style="font-weight: 500; font-size: 0.72rem; color: #CBD5E1;">({status_text})</span></div>
             <div class="nhl-tag">{role_tag}</div>
         </div>
         """, unsafe_allow_html=True)
 
     # Forward Line 1
-    st.markdown('<div class="line-header-banner">FORWARD LINE 1 | MATCHUP & HEAVY CYCLE</div>', unsafe_allow_html=True)
+    st.markdown('<div class="line-header-banner"><span>FORWARD LINE 1 | MATCHUP & HEAVY CYCLE</span><span class="line-cap-total">Line Cap: $18.50M</span></div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 9, "Filip Forsberg", "LW", "Sniper / Cycle Touch", 8476887)
-    render_nhl_player(c2, 90, "Ryan O'Reilly", "C", "200-Ft Anchor / Ozone Draws", 8475158)
-    render_nhl_player(c3, 81, "Jonathan Marchessault", "RW", "Perimeter Release / Boards", 8476539)
+    render_nhl_player_cap(c1, 9, "Filip Forsberg", "LW", "Sniper / Cycle Touch", 8476887, "$8.50M", "UFA '30")
+    render_nhl_player_cap(c2, 90, "Ryan O'Reilly", "C", "200-Ft Anchor / Ozone Draws", 8475158, "$4.50M", "UFA '27")
+    render_nhl_player_cap(c3, 81, "Jonathan Marchessault", "RW", "Perimeter Release / Boards", 8476539, "$5.50M", "UFA '29")
 
     # Forward Line 2
-    st.markdown('<div class="line-header-banner">FORWARD LINE 2 | RUSH STRIKE & HIGH-SLOT FINISHING</div>', unsafe_allow_html=True)
+    st.markdown('<div class="line-header-banner"><span>FORWARD LINE 2 | RUSH STRIKE & HIGH-SLOT FINISHING</span><span class="line-cap-total">Line Cap: $12.35M</span></div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer", 8474564)
-    render_nhl_player(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor", 8482142)
-    render_nhl_player(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484241)
+    render_nhl_player_cap(c1, 91, "Steven Stamkos", "LW", "High-Slot One-Timer", 8474564, "$8.00M", "UFA '28")
+    render_nhl_player_cap(c2, 22, "Mavrik Bourque", "C", "Pace Playmaker / Distributor", 8482142, "$3.40M", "RFA '29")
+    render_nhl_player_cap(c3, 71, "Matthew Wood", "RW", "Power Forward / Net-Front", 8484241, "$0.95M", "ELC '28")
 
     # Forward Line 3
-    st.markdown('<div class="line-header-banner">FORWARD LINE 3 | RELENTLESS F1/F2 FORECHECK & TURNOVER CREATION</div>', unsafe_allow_html=True)
+    st.markdown('<div class="line-header-banner"><span>FORWARD LINE 3 | RELENTLESS F1/F2 FORECHECK & TURNOVER CREATION</span><span class="line-cap-total">Line Cap: $9.85M</span></div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 79, "Ross Colton", "LW", "Puck-Hound / Physical Pressure", 8479525)
-    render_nhl_player(c2, 18, "Jack Drury", "C", "Neutral-Zone Transition Detail", 8480835)
-    render_nhl_player(c3, 21, "Nils Hoglander", "RW", "5v5 Motor / Cycle Finisher", 8481535)
+    render_nhl_player_cap(c1, 79, "Ross Colton", "LW", "Puck-Hound / Physical Pressure", 8479525, "$4.00M", "UFA '27")
+    render_nhl_player_cap(c2, 18, "Jack Drury", "C", "Neutral-Zone Transition Detail", 8480835, "$2.85M", "UFA '28")
+    render_nhl_player_cap(c3, 21, "Nils Hoglander", "RW", "5v5 Motor / Cycle Finisher", 8481535, "$3.00M", "UFA '28")
 
     # Forward Line 4
-    st.markdown('<div class="line-header-banner">FORWARD LINE 4 | TRANSITION PACE & DEFENSIVE IQ</div>', unsafe_allow_html=True)
+    st.markdown('<div class="line-header-banner"><span>FORWARD LINE 4 | TRANSITION PACE & DEFENSIVE IQ</span><span class="line-cap-total">Line Cap: $4.90M</span></div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    render_nhl_player(c1, 14, "Alexander Kerfoot", "LW", "Two-Way Versatility", 8477021)
-    render_nhl_player(c2, 51, "Vitali Pinchuk", "C", "6'3\" Transition Frame", 8486189)
-    render_nhl_player(c3, 89, "Ozzy Wiesblatt", "RW", "North-South Energy / Agitator", 8482103)
+    render_nhl_player_cap(c1, 14, "Alexander Kerfoot", "LW", "Two-Way Versatility", 8477021, "$3.00M", "UFA '27")
+    render_nhl_player_cap(c2, 51, "Vitali Pinchuk", "C", "6'3\" Transition Frame", 8486189, "$0.95M", "ELC '28")
+    render_nhl_player_cap(c3, 89, "Ozzy Wiesblatt", "RW", "North-South Energy / Agitator", 8482103, "$0.95M", "RFA '27")
 
     # Defensive Pairing 1
-    st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 1 | ELITE DUAL-THREAT TRANSITION</div>', unsafe_allow_html=True)
+    st.markdown('<div class="line-header-banner"><span>DEFENSIVE PAIRING 1 | ELITE DUAL-THREAT TRANSITION</span><span class="line-cap-total">Pair Cap: $14.05M</span></div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 41, "Nicolas Hague", "LD", "6'6\" Physical Anchor / Box-Outs", 8480051)
-    render_nhl_player(d2, 58, "Roman Josi", "RD", "Weak-Side Activation / Rush Rover", 8474600)
+    render_nhl_player_cap(d1, 41, "Nicolas Hague", "LD", "6'6\" Physical Anchor / Box-Outs", 8480051, "$5.00M", "UFA '29")
+    render_nhl_player_cap(d2, 58, "Roman Josi", "RD", "Weak-Side Activation / Rush Rover", 8474600, "$9.05M", "UFA '28")
 
     # Defensive Pairing 2
-    st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 2 | TWO-WAY RUSH SUPPRESSION</div>', unsafe_allow_html=True)
+    st.markdown('<div class="line-header-banner"><span>DEFENSIVE PAIRING 2 | TWO-WAY RUSH SUPPRESSION</span><span class="line-cap-total">Pair Cap: $9.82M</span></div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 76, "Brady Skjei", "LD", "Exit Skating / Mobility", 8476869)
-    render_nhl_player(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout", 8480249)
+    render_nhl_player_cap(d1, 76, "Brady Skjei", "LD", "Exit Skating / Mobility", 8476869, "$7.00M", "UFA '31")
+    render_nhl_player_cap(d2, 48, "Nick Perbix", "RD", "Puck Retrieval / Safe Breakout", 8480249, "$2.82M", "UFA '27")
 
     # Defensive Pairing 3
-    st.markdown('<div class="line-header-banner">DEFENSIVE PAIRING 3 | MOBILITY & CREASE PROTECTION</div>', unsafe_allow_html=True)
+    st.markdown('<div class="line-header-banner"><span>DEFENSIVE PAIRING 3 | MOBILITY & CREASE PROTECTION</span><span class="line-cap-total">Pair Cap: $4.55M</span></div>', unsafe_allow_html=True)
     d1, d2 = st.columns(2)
-    render_nhl_player(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater", 8482482)
-    render_nhl_player(d2, 46, "Ilya Lyubushkin", "RD", "Physical Net-Front Suppression", 8480950)
+    render_nhl_player_cap(d1, 83, "Adam Wilsby", "LD", "Puck-Moving Transition Skater", 8482482, "$1.30M", "RFA '28")
+    render_nhl_player_cap(d2, 46, "Ilya Lyubushkin", "RD", "Physical Net-Front Suppression", 8480950, "$3.25M", "UFA '27")
 
     # Goaltending Tandem
-    st.markdown('<div class="line-header-banner">GOALTENDING TANDEM</div>', unsafe_allow_html=True)
+    st.markdown('<div class="line-header-banner"><span>GOALTENDING TANDEM</span><span class="line-cap-total">Tandem Cap: $10.23M</span></div>', unsafe_allow_html=True)
     g1, g2 = st.columns(2)
-    render_nhl_player(g1, 74, "Juuse Saros", "G", "Starting Goaltender (Franchise Anchor)", 8477424)
-    render_nhl_player(g2, 29, "Justus Annunen", "G", "Backup Goaltender (High-End Tandem)", 8481020)
+    render_nhl_player_cap(g1, 74, "Juuse Saros", "G", "Starting Goaltender (Franchise Anchor)", 8477424, "$7.74M", "UFA '33")
+    render_nhl_player_cap(g2, 29, "Justus Annunen", "G", "Backup Goaltender (High-End Tandem)", 8481020, "$2.49M", "RFA '28")
 
     st.stop()
 
 # ==============================================================================
-# PAGE 2: SKATER ANALYTICS & PERFORMANCE HUB
+# PAGE 2: TRADE DEADLINE & NHL UNLOCKED PLAYER INTELLIGENCE
+# ==============================================================================
+if current_page == "Trade Intelligence":
+    st.subheader("NHL Trade Deadline: Unlocked Roster Players & Scheme Fit Matrix")
+    st.caption("Active evaluations of pending 2027 UFAs and arbitration-eligible RFAs not locked in long-term across the NHL.")
+
+    # Executive Overview
+    st.info(
+        "**Cap Positioning Analysis:** Nashville enters the 2026-27 trade deadline window with **$8.75M in current uncommitted cap space** "
+        "(~$20.4M in day-of-deadline buying power). The Predators are uniquely positioned to either absorb a premier rental at full cap hit or "
+        "act as a broker using retained salary transactions to accumulate high draft picks."
+    )
+
+    # Strategy Selector
+    t_strat_cols = st.columns(3)
+    with t_strat_cols[0]:
+        with st.container(border=True):
+            st.markdown("### 🟢 BUY SCENARIO")
+            st.markdown("""
+            * **Objective**: Maximize Stamkos/Josi/Forsberg championship window.
+            * **Target Profile**: Top-4 shutdown RD partner or high-pace playmaking center.
+            * **Available Capital**: Up to $8.75M in cap; 2027 1st round pick, 2028 2nd.
+            """)
+    with t_strat_cols[1]:
+        with st.container(border=True):
+            st.markdown("### 🔴 SELL SCENARIO")
+            st.markdown("""
+            * **Objective**: Pivot to future re-tool if outside playoff cutline by late February.
+            * **Trade Chips**: Ryan O'Reilly ($4.5M, 50% retained = $2.25M), Ross Colton ($4.0M), Alexander Kerfoot ($3.0M), Ilya Lyubushkin ($3.25M).
+            * **Expected Return**: 1st-round pick + premium prospect capital.
+            """)
+    with t_strat_cols[2]:
+        with st.container(border=True):
+            st.markdown("### 🟡 HOLD SCENARIO")
+            st.markdown("""
+            * **Objective**: Guard development pipeline (Matthew Wood, Tanner Molendyk, Vitali Pinchuk).
+            * **Action**: Roll accumulated cap room forward into RFA extensions and summer 2027 UFA bids.
+            """)
+
+    st.divider()
+
+    # Dynamic Target Database of Unlocked Roster Players
+    unlocked_targets = [
+        {
+            "Player": "Alex DeBrincat", "Pos": "LW/RW", "Team": "DET", "Cap_Hit": 7.875, "Status": "Pending UFA '27",
+            "Age": 28, "Archetype": "High-Volume Sniper / Rapid Release",
+            "Brunette_Fit": 95, "Deadline_Action": "BUY Target",
+            "Tactical_Scouting": "Elite weak-side shooting threat. Seamless replacement on Line 1/2 wings; gives Josi a lethal backdoor one-timer option."
+        },
+        {
+            "Player": "Pavel Zacha", "Pos": "C/LW", "Team": "BOS", "Cap_Hit": 4.75, "Status": "Pending UFA '27",
+            "Age": 29, "Archetype": "Heavy Two-Way 200-Foot Center",
+            "Brunette_Fit": 92, "Deadline_Action": "BUY Target",
+            "Tactical_Scouting": "Possesses size (6'3\") and defensive accountability. Can take defensive-zone draw burden off Stamkos and shift to middle-six C."
+        },
+        {
+            "Player": "Jared McCann", "Pos": "C/LW", "Team": "SEA", "Cap_Hit": 5.00, "Status": "Pending UFA '27",
+            "Age": 30, "Archetype": "Transition Rush Shooter / Dual PP Threat",
+            "Brunette_Fit": 89, "Deadline_Action": "BUY Target",
+            "Tactical_Scouting": "High transition IQ with versatile positional flexibility. Fits Brunette's dynamic cycle-to-slot offensive scheme."
+        },
+        {
+            "Player": "Cale Makar", "Pos": "RD", "Team": "COL", "Cap_Hit": 9.00, "Status": "Pending UFA '27",
+            "Age": 27, "Archetype": "Generational Dual-Threat Rover RD",
+            "Brunette_Fit": 99, "Deadline_Action": "Dream Target / Buy",
+            "Tactical_Scouting": "Contract year entering summer 2027. Would solidify Nashville's blueline as the most mobile transition defense in the NHL alongside Josi and Skjei."
+        },
+        {
+            "Player": "Quinn Hughes", "Pos": "LD", "Team": "MIN", "Cap_Hit": 7.85, "Status": "Pending UFA '27",
+            "Age": 26, "Archetype": "Elite Transition Breakout Quarterback",
+            "Brunette_Fit": 94, "Deadline_Action": "Blockbuster Buy",
+            "Tactical_Scouting": "Dominant puck control in the neutral zone. Overlaps slightly with Josi's rover deployment but supercharges 5-man offensive cycles."
+        },
+        {
+            "Player": "Jason Robertson", "Pos": "LW", "Team": "DAL", "Cap_Hit": 7.75, "Status": "Pending UFA '27",
+            "Age": 27, "Archetype": "Elite Low-Cycle Playmaker & Net-Front Feeder",
+            "Brunette_Fit": 96, "Deadline_Action": "BUY Target",
+            "Tactical_Scouting": "World-class playmaking and offensive board battle touch. Would immediately become Nashville's premier top-six forward."
+        },
+        {
+            "Player": "Shayne Gostisbehere", "Pos": "LD/RD", "Team": "CAR", "Cap_Hit": 3.20, "Status": "Pending UFA '27",
+            "Age": 33, "Archetype": "Offensive Specialist / PP Distributor",
+            "Brunette_Fit": 82, "Deadline_Action": "Secondary Depth",
+            "Tactical_Scouting": "Power-play distributor and puck mover. Provides cheap offensive insurance if injury strikes Josi or Skjei."
+        },
+        {
+            "Player": "Artturi Lehkonen", "Pos": "LW", "Team": "COL", "Cap_Hit": 4.50, "Status": "Pending UFA '27",
+            "Age": 31, "Archetype": "Tenacious F1 Forechecker / Playoff Engine",
+            "Brunette_Fit": 97, "Deadline_Action": "BUY Target",
+            "Tactical_Scouting": "Perfect stylistic match for Andrew Brunette's 1-2-2 forecheck. Relentless puck retriever who unlocks skill wingers like Stamkos."
+        },
+        {
+            "Player": "Ryan O'Reilly", "Pos": "C", "Team": "NSH", "Cap_Hit": 4.50, "Status": "Pending UFA '27",
+            "Age": 35, "Archetype": "200-Foot Defensive Center / Faceoff Master",
+            "Brunette_Fit": 95, "Deadline_Action": "SELL Candidate (If Outside Playoff Cut)",
+            "Tactical_Scouting": "Current Preds anchor. Retaining 50% down to $2.25M would make him the single most coveted center on the entire rental market, easily yielding a 1st-round pick."
+        },
+        {
+            "Player": "Ross Colton", "Pos": "LW/C", "Team": "NSH", "Cap_Hit": 4.00, "Status": "Pending UFA '27",
+            "Age": 30, "Archetype": "Middle-Six Agitator / Heavy Net Driver",
+            "Brunette_Fit": 90, "Deadline_Action": "HOLD or SELL Candidate",
+            "Tactical_Scouting": "Physical two-way presence on Line 3. Valuable middle-six piece with Stanley Cup championship pedigree."
+        },
+        {
+            "Player": "Alexander Kerfoot", "Pos": "LW/C", "Team": "NSH", "Cap_Hit": 3.00, "Status": "Pending UFA '27",
+            "Age": 32, "Archetype": "Versatile Penalty Killer & Pace Forward",
+            "Brunette_Fit": 87, "Deadline_Action": "SELL Candidate (Rental)",
+            "Tactical_Scouting": "Expiring bottom-six utility forward. Can fetch a 3rd/4th-round draft pick to contender needing PK depth."
+        },
+        {
+            "Player": "Ilya Lyubushkin", "Pos": "RD", "Team": "NSH", "Cap_Hit": 3.25, "Status": "Pending UFA '27",
+            "Age": 32, "Archetype": "Physical Crease-Clearing Right-Shot D",
+            "Brunette_Fit": 84, "Deadline_Action": "SELL Candidate (Rental)",
+            "Tactical_Scouting": "High-demand right-handed defensive defenseman for physical playoff grind. Reliable 2nd/3rd-round pick asset."
+        },
+        {
+            "Player": "Nick Perbix", "Pos": "RD", "Team": "NSH", "Cap_Hit": 2.82, "Status": "Pending UFA '27",
+            "Age": 28, "Archetype": "Two-Way Shutdown RD / Clean Breakout",
+            "Brunette_Fit": 88, "Deadline_Action": "HOLD (Priority Extension Candidate)",
+            "Tactical_Scouting": "Provides essential right-shot balance on Pair 2 next to Skjei. Nashville should prioritize re-signing him over trading him."
+        },
+        {
+            "Player": "Adam Fantilli", "Pos": "C", "Team": "CBJ", "Cap_Hit": 0.95, "Status": "Pending RFA '27",
+            "Age": 21, "Archetype": "Franchise Power Center",
+            "Brunette_Fit": 98, "Deadline_Action": "Offer Sheet / Blockbuster",
+            "Tactical_Scouting": "Elite young power-center entering contract year. If Columbus faces cap constraints, Nashville has full draft capital to execute a maximum offer sheet."
+        }
+    ]
+
+    target_df = pd.DataFrame(unlocked_targets)
+
+    # Filtering Controls
+    f_cols = st.columns([1, 1, 1, 2])
+    with f_cols[0]:
+        pos_opts = ["All Positions", "Centers (C)", "Wingers (LW/RW)", "Defensemen (RD/LD)"]
+        sel_pos = st.selectbox("Filter Position", pos_opts)
+    with f_cols[1]:
+        strat_opts = ["All Actions", "BUY Target", "SELL Candidate", "HOLD"]
+        sel_strat = st.selectbox("Deadline Posture", strat_opts)
+    with f_cols[2]:
+        min_fit = st.slider("Min Brunette Scheme Fit", min_value=70, max_value=99, value=80)
+
+    # Filter Application
+    filtered_df = target_df[target_df["Brunette_Fit"] >= min_fit].copy()
+
+    if sel_pos == "Centers (C)":
+        filtered_df = filtered_df[filtered_df["Pos"].str.contains("C")]
+    elif sel_pos == "Wingers (LW/RW)":
+        filtered_df = filtered_df[filtered_df["Pos"].str.contains("LW|RW")]
+    elif sel_pos == "Defensemen (RD/LD)":
+        filtered_df = filtered_df[filtered_df["Pos"].str.contains("D")]
+
+    if sel_strat != "All Actions":
+        filtered_df = filtered_df[filtered_df["Deadline_Action"].str.contains(sel_strat.split()[0])]
+
+    st.markdown("#### Unlocked Player Target Registry")
+    
+    st.dataframe(
+        filtered_df[[
+            "Player", "Pos", "Team", "Cap_Hit", "Status", "Deadline_Action", 
+            "Brunette_Fit", "Archetype", "Tactical_Scouting"
+        ]].sort_values(by="Brunette_Fit", ascending=False),
+        column_config={
+            "Player": st.column_config.TextColumn("Target Skater", width="medium"),
+            "Pos": st.column_config.TextColumn("Pos", width="small"),
+            "Team": st.column_config.TextColumn("Current Team", width="small"),
+            "Cap_Hit": st.column_config.NumberColumn("Cap Hit ($M)", format="$%.2fM"),
+            "Status": st.column_config.TextColumn("Contract Status", width="medium"),
+            "Deadline_Action": st.column_config.TextColumn("Trade Posture", width="medium"),
+            "Brunette_Fit": st.column_config.ProgressColumn("Brunette Fit Score", min_value=60, max_value=100, format="%d/100"),
+            "Archetype": st.column_config.TextColumn("Player Style", width="medium"),
+            "Tactical_Scouting": st.column_config.TextColumn("Nashville Scheme Evaluation", width="large")
+        },
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.stop()
+
+# ==============================================================================
+# PAGE 3: SKATER ANALYTICS & PERFORMANCE HUB
 # ==============================================================================
 
 st.sidebar.markdown("### Filter Settings")
@@ -442,7 +698,6 @@ for i, label in enumerate(["26/27", "25/26", "24/25", "23/24"]):
 
 selected_season = season_map[st.session_state["selected_season_label"]]
 
-# 2. Game Type Selection
 st.sidebar.markdown('<div class="filter-label">Game Type</div>', unsafe_allow_html=True)
 if "selected_game_type" not in st.session_state:
     st.session_state["selected_game_type"] = "Regular Season"
@@ -458,7 +713,6 @@ for i, gt in enumerate(["Regular Season", "Playoffs"]):
 game_type_label = st.session_state["selected_game_type"]
 game_type_code = "2" if game_type_label == "Regular Season" else "3"
 
-# 3. Position Group Selection
 st.sidebar.markdown('<div class="filter-label">Position Group</div>', unsafe_allow_html=True)
 if "selected_pos_group" not in st.session_state:
     st.session_state["selected_pos_group"] = "All Skaters"
@@ -671,6 +925,7 @@ if not df.empty:
     elif position_filter == "Defensemen":
         df = df[df["Pos"].isin(["D", "LD", "RD"])].reset_index(drop=True)
 
+# Spotlight Header
 if df.empty:
     st.info(f"No {game_type_label.lower()} data recorded for {st.session_state['selected_season_label']}.")
 else:
@@ -731,6 +986,7 @@ else:
     """
     st.markdown(spotlight_html, unsafe_allow_html=True)
 
+    # Roster Selector Grid
     st.markdown("#### Roster Selection")
     num_cols = 6
     for i in range(0, len(df), num_cols):
@@ -750,6 +1006,7 @@ else:
 
 st.divider()
 
+# Tabbed Analytical Views
 st.subheader("Skater Performance")
 
 if not df.empty:
