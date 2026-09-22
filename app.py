@@ -515,7 +515,7 @@ if current_page == "Trade Intelligence":
     st.subheader("NHL Trade Deadline: Realistic Acquisition Targets & Cap Strategy")
     st.caption("Active evaluations of available top-six wingers and shutdown depth pieces carrying zero trade protection clauses (NMC/NTC-free).")
 
-    # VETTED ACQUISITION TARGETS DATABASE WITH PLAYER HEADSHOTS AND TEAM LOGOS
+    # VETTED ACQUISITION TARGETS DATABASE WITH PLAYER HEADSHOTS, TEAM LOGOS, AND POSITIONS
     realistic_targets = [
         # --- TOP-SIX FORWARDS ---
         {
@@ -523,6 +523,7 @@ if current_page == "Trade Intelligence":
             "Player": "Bryan Rust", 
             "Team_Logo": TEAM_LOGOS["PIT"],
             "Team": "PIT", 
+            "Pos": "RW",
             "Cap_Hit": 5.125, 
             "Status": "Signed thru '28 (Trade Block)",
             "Category": "Top-Six Forward", 
@@ -536,6 +537,7 @@ if current_page == "Trade Intelligence":
             "Player": "Rickard Rakell", 
             "Team_Logo": TEAM_LOGOS["PIT"],
             "Team": "PIT", 
+            "Pos": "RW",
             "Cap_Hit": 5.00, 
             "Status": "Pending UFA '28 (No NMC)",
             "Category": "Top-Six Forward", 
@@ -549,6 +551,7 @@ if current_page == "Trade Intelligence":
             "Player": "Mikael Granlund", 
             "Team_Logo": TEAM_LOGOS["ANA"],
             "Team": "ANA", 
+            "Pos": "C",
             "Cap_Hit": 7.00, 
             "Status": "Signed thru '28",
             "Category": "Top-Six Forward", 
@@ -564,6 +567,7 @@ if current_page == "Trade Intelligence":
             "Player": "Will Borgen", 
             "Team_Logo": TEAM_LOGOS["SEA"],
             "Team": "SEA", 
+            "Pos": "RD",
             "Cap_Hit": 2.70, 
             "Status": "Pending UFA '27 (No NMC)",
             "Category": "Top-4 Defensive Upgrade", 
@@ -579,6 +583,7 @@ if current_page == "Trade Intelligence":
             "Player": "Noel Acciari", 
             "Team_Logo": TEAM_LOGOS["PHI"],
             "Team": "PHI", 
+            "Pos": "C",
             "Cap_Hit": 1.40, 
             "Status": "Signed thru '28",
             "Category": "Bottom-Six / PK Depth", 
@@ -592,6 +597,7 @@ if current_page == "Trade Intelligence":
             "Player": "Joel Armia", 
             "Team_Logo": TEAM_LOGOS["MTL"],
             "Team": "MTL", 
+            "Pos": "RW",
             "Cap_Hit": 3.40, 
             "Status": "Expiring Contract (No NMC)",
             "Category": "Bottom-Six / PK Depth", 
