@@ -9,20 +9,55 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- Executive Nashville Predators Branding Palette ---
+# --- Complete Preds Navy & Gold Theme Injection (Everything in app.py) ---
 st.markdown("""
 <style>
-    .reportview-container .main .block-container {
-        padding-top: 1.5rem;
-        max-width: 95%;
+    /* Full Page Canvas, Main Body & App View Container */
+    html, body, [data-testid="stAppViewContainer"], .stApp {
+        background-color: #041E42 !important;
+        color: #F8FAFC !important;
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif !important;
     }
     
+    /* Top Toolbar / Header */
+    [data-testid="stHeader"] {
+        background-color: rgba(4, 30, 66, 0.95) !important;
+    }
+
+    /* Left Sidebar Theming */
+    [data-testid="stSidebar"], [data-testid="stSidebarContent"] {
+        background-color: #03142D !important;
+        border-right: 1.5px solid rgba(255, 184, 28, 0.3) !important;
+    }
+    [data-testid="stSidebar"] * {
+        color: #F8FAFC !important;
+    }
+
+    /* Page Padding & Spacing */
+    .block-container {
+        padding-top: 1.5rem !important;
+        padding-bottom: 2rem !important;
+        max-width: 95% !important;
+    }
+
+    /* Tabs Styling */
+    button[data-baseweb="tab"] {
+        color: #94A3B8 !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+    }
+    button[data-baseweb="tab"][aria-selected="true"] {
+        color: #FFB81C !important;
+        border-bottom-color: #FFB81C !important;
+    }
+
+    /* Header Container */
     .header-container {
         display: flex;
         align-items: center;
         gap: 22px;
         margin-bottom: 24px;
-        border-bottom: 1.5px solid rgba(255, 184, 28, 0.4);
+        border-bottom: 2px solid #FFB81C;
         padding-bottom: 18px;
     }
     .header-logo {
@@ -31,47 +66,49 @@ st.markdown("""
         object-fit: contain;
     }
     .header-title-box h1 {
-        font-size: 2.1rem;
+        font-size: 2.2rem;
         font-weight: 800;
         letter-spacing: -0.5px;
         margin: 0;
-        color: #FFFFFF;
+        color: #FFFFFF !important;
     }
     .header-subtitle {
         font-size: 0.95rem;
-        color: #94A3B8;
+        color: #FFB81C !important;
         margin-top: 5px;
-        font-weight: 500;
+        font-weight: 600;
+        letter-spacing: 0.3px;
     }
 
+    /* Executive Spotlight Showcase Card */
     .spotlight-card {
-        background: linear-gradient(135deg, #041E42 0%, #08162B 100%);
-        border: 1px solid rgba(255, 184, 28, 0.55);
+        background: linear-gradient(135deg, #092652 0%, #03142D 100%);
+        border: 2px solid #FFB81C;
         border-radius: 12px;
         padding: 24px 30px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
         margin-bottom: 28px;
         color: #FFFFFF;
     }
     .spotlight-title {
-        font-size: 2.1rem;
-        font-weight: 700;
+        font-size: 2.2rem;
+        font-weight: 800;
         margin: 0;
-        color: #FFB81C;
+        color: #FFB81C !important;
         letter-spacing: -0.5px;
     }
     .badge {
         display: inline-block;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 184, 28, 0.35);
+        background: rgba(255, 184, 28, 0.15);
+        border: 1px solid rgba(255, 184, 28, 0.5);
         border-radius: 4px;
-        padding: 4px 9px;
+        padding: 4px 10px;
         font-size: 0.78rem;
-        font-weight: 600;
+        font-weight: 700;
         margin-right: 6px;
         margin-top: 8px;
         margin-bottom: 14px;
-        color: #E2E8F0;
+        color: #FFB81C !important;
         letter-spacing: 0.5px;
     }
     .stat-pill-container {
@@ -81,8 +118,8 @@ st.markdown("""
         margin-top: 12px;
     }
     .stat-pill {
-        background: rgba(11, 25, 44, 0.85);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: #04142B;
+        border: 1px solid rgba(255, 184, 28, 0.3);
         border-radius: 8px;
         padding: 12px 16px;
         text-align: left;
@@ -90,30 +127,46 @@ st.markdown("""
     .stat-pill-label {
         font-size: 0.7rem;
         text-transform: uppercase;
-        color: #94A3B8;
-        font-weight: 600;
+        color: #94A3B8 !important;
+        font-weight: 700;
         letter-spacing: 0.6px;
     }
     .stat-pill-val {
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: #FFFFFF;
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #FFFFFF !important;
         margin-top: 3px;
     }
     .stat-pill-sub {
         font-size: 0.75rem;
-        color: #FFB81C;
+        color: #FFB81C !important;
         margin-top: 3px;
-        font-weight: 500;
+        font-weight: 600;
     }
-    
+
+    /* Roster Grid Container Boxes */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        border-color: rgba(255, 184, 28, 0.3) !important;
+        background-color: #061A3B !important;
+        border-radius: 8px !important;
+    }
+
+    /* Interactive Buttons */
     div[data-testid="stButton"] button {
-        border-color: rgba(255, 184, 28, 0.4) !important;
-        font-weight: 600 !important;
+        background-color: transparent !important;
+        border: 1.5px solid #FFB81C !important;
+        color: #FFB81C !important;
+        font-weight: 700 !important;
+        transition: all 0.2s ease-in-out;
     }
     div[data-testid="stButton"] button:hover {
-        border-color: #FFB81C !important;
-        color: #FFB81C !important;
+        background-color: #FFB81C !important;
+        color: #041E42 !important;
+    }
+
+    /* Headings */
+    h1, h2, h3, h4 {
+        color: #FFFFFF !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -180,7 +233,6 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
-        # Percentages
         sh_pct = s.get("shootingPctg", 0.0)
         sh_pct = round(sh_pct * 100, 4) if isinstance(sh_pct, float) and sh_pct <= 1.0 else round(float(sh_pct), 4)
 
@@ -199,13 +251,11 @@ def load_club_skater_stats(season, game_type):
 
         total_toi_min = toi_gp_min * gp
 
-        # Per-60 rate conversions
         p60 = round((pts / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
         sog60 = round((shots / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
         pm60 = round((plus_minus / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
         pim60 = round((pim / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
 
-        # Composite Effectiveness Ratings
         off_score = round(p60 + (sog60 * 0.25) + ((pp_goals / gp) * 1.5), 4) if gp > 0 else 0.0
         def_score = round((pm60 * 1.5) + (toi_gp_min * 0.1) + ((sh_goals / gp) * 2.0) - (pim60 * 0.2), 4) if gp > 0 else 0.0
         pp_score = round(((pp_goals / gp) * 3.0) + (sog60 * 0.1), 4) if gp > 0 else 0.0
@@ -247,7 +297,6 @@ def load_club_skater_stats(season, game_type):
         df = df[df["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
     return df
 
-# --- Subtle Institutional Outlier Styling (Min 5 GP filter) ---
 def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0.15):
     styler_df = pd.DataFrame('', index=data_df.index, columns=data_df.columns)
     eligible_mask = data_df["GP"] >= min_gp
@@ -271,9 +320,9 @@ def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0
             if pd.isna(val):
                 continue
             if val >= high_thresh:
-                styler_df.loc[idx, col] = 'background-color: rgba(30, 81, 40, 0.45); color: #E8F5E9; font-weight: 600;'
+                styler_df.loc[idx, col] = 'background-color: rgba(30, 81, 40, 0.65); color: #E8F5E9; font-weight: 600;'
             elif val <= low_thresh:
-                styler_df.loc[idx, col] = 'background-color: rgba(120, 20, 20, 0.40); color: #FFEBEE; font-weight: 600;'
+                styler_df.loc[idx, col] = 'background-color: rgba(120, 20, 20, 0.60); color: #FFEBEE; font-weight: 600;'
                 
     return styler_df
 
@@ -295,7 +344,6 @@ else:
 
     p = df[df["PlayerId"] == st.session_state["selected_player_id"]].iloc[0]
 
-    # Executive Spotlight Showcase
     spotlight_html = f"""
     <div class="spotlight-card">
         <div style="display: flex; gap: 28px; align-items: center; flex-wrap: wrap;">
@@ -313,7 +361,7 @@ else:
                             <span class="badge">SOG: {p['SOG']}</span>
                         </div>
                     </div>
-                    <img src="{PREDS_LOGO_URL}" style="width: 55px; opacity: 0.9;" alt="Predators">
+                    <img src="{PREDS_LOGO_URL}" style="width: 60px; opacity: 0.9;" alt="Predators">
                 </div>
                 <div class="stat-pill-container">
                     <div class="stat-pill">
