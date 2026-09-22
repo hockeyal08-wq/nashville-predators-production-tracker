@@ -40,6 +40,47 @@ st.markdown("""
         max-width: 95% !important;
     }
 
+    /* ============================================================ */
+    /* SELECTBOX & WIDGET THEME: MATCHING GOLD ROUNDED RECTANGLES   */
+    /* ============================================================ */
+    
+    /* Selectbox Input Box Container */
+    div[data-baseweb="select"] > div {
+        background-color: #061F47 !important;
+        border: 2px solid #FFB81C !important;
+        border-radius: 10px !important;
+        color: #FFFFFF !important;
+    }
+    
+    /* Selectbox Selected Text & Inner Elements */
+    div[data-baseweb="select"] * {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+    }
+    
+    /* Dropdown Arrow Icon */
+    div[data-baseweb="select"] svg {
+        fill: #FFB81C !important;
+    }
+    
+    /* Dropdown Options Popup Menu */
+    div[data-baseweb="popover"] ul,
+    div[data-baseweb="menu"] {
+        background-color: #061F47 !important;
+        border: 1.5px solid #FFB81C !important;
+        border-radius: 8px !important;
+    }
+    div[data-baseweb="menu"] li {
+        color: #FFFFFF !important;
+        font-weight: 600 !important;
+    }
+    div[data-baseweb="menu"] li:hover {
+        background-color: #FFB81C !important;
+        color: #041E42 !important;
+    }
+
     /* Header Container */
     .header-container {
         display: flex;
@@ -178,14 +219,6 @@ st.markdown("""
         border: 1px solid rgba(255, 184, 28, 0.3);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
     }
-
-    /* Sample size disclaimer pill */
-    .sample-disclaimer {
-        color: #FFB81C;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 12px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -203,10 +236,19 @@ st.markdown(f"""
 # --- Sidebar Controls ---
 st.sidebar.header("Filter Settings")
 
+# Format '20252026' into '25/26'
+season_display_map = {
+    "20262027": "26/27",
+    "20252026": "25/26",
+    "20242025": "24/25",
+    "20232024": "23/24"
+}
+
 selected_season = st.sidebar.selectbox(
     "Season",
-    options=["20262027", "20252026", "20242025", "20232024"],
-    index=0
+    options=list(season_display_map.keys()),
+    index=0,
+    format_func=lambda s: season_display_map.get(s, s)
 )
 
 game_type_label = st.sidebar.radio(
@@ -251,12 +293,14 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
+        # Raw percentage decimals
         sh_pct = s.get("shootingPctg", 0.0)
         sh_pct = float(sh_pct) if sh_pct is not None else 0.0
 
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = float(fo_pct) if fo_pct is not None else 0.0
 
+        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
@@ -325,7 +369,7 @@ if not df.empty:
 
 # --- Spotlight Header ---
 if df.empty:
-    st.info(f"No {game_type_label.lower()} data recorded for {selected_season[:4]}-{selected_season[4:]}.")
+    st.info(f"No {game_type_label.lower()} data recorded for {season_display_map.get(selected_season, selected_season)}.")
 else:
     if "selected_player_id" not in st.session_state or st.session_state["selected_player_id"] not in df["PlayerId"].values:
         st.session_state["selected_player_id"] = int(df.iloc[0]["PlayerId"])
@@ -490,3 +534,4 @@ if not df.empty:
             ]
             lim_view = limited_df[cols].sort_values(by="GP", ascending=False).reset_index(drop=True)
             st.dataframe(lim_view, column_config=base_column_config, use_container_width=True, hide_index=True)
+Steps to Apply:
