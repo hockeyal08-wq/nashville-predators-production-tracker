@@ -1,4 +1,3 @@
-cat << 'EOF' > app.py
 import streamlit as st
 import pandas as pd
 import requests
@@ -10,7 +9,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom executive styling: Navy/Gold palette, subtle borders, clean typography
+# --- Executive Nashville Predators Branding Palette ---
 st.markdown("""
 <style>
     .reportview-container .main .block-container {
@@ -181,12 +180,14 @@ def load_club_skater_stats(season, game_type):
         sh_goals = s.get("shorthandedGoals", 0)
         gw_goals = s.get("gameWinningGoals", 0)
 
+        # Percentages
         sh_pct = s.get("shootingPctg", 0.0)
         sh_pct = round(sh_pct * 100, 4) if isinstance(sh_pct, float) and sh_pct <= 1.0 else round(float(sh_pct), 4)
 
         fo_pct = s.get("faceoffWinningPctg", 0.0)
         fo_pct = round(fo_pct * 100, 4) if isinstance(fo_pct, float) and fo_pct <= 1.0 else round(float(fo_pct), 4)
 
+        # TOI Parsing
         toi_raw = s.get("timeOnIcePerGame") or s.get("avgTimeOnIcePerGame") or s.get("avgToi") or 0
         if isinstance(toi_raw, (int, float)):
             toi_gp_min = toi_raw / 60.0
@@ -198,11 +199,13 @@ def load_club_skater_stats(season, game_type):
 
         total_toi_min = toi_gp_min * gp
 
+        # Per-60 rate conversions
         p60 = round((pts / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
         sog60 = round((shots / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
         pm60 = round((plus_minus / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
         pim60 = round((pim / total_toi_min) * 60, 4) if total_toi_min > 0 else 0.0
 
+        # Composite Effectiveness Ratings
         off_score = round(p60 + (sog60 * 0.25) + ((pp_goals / gp) * 1.5), 4) if gp > 0 else 0.0
         def_score = round((pm60 * 1.5) + (toi_gp_min * 0.1) + ((sh_goals / gp) * 2.0) - (pim60 * 0.2), 4) if gp > 0 else 0.0
         pp_score = round(((pp_goals / gp) * 3.0) + (sog60 * 0.1), 4) if gp > 0 else 0.0
@@ -244,6 +247,7 @@ def load_club_skater_stats(season, game_type):
         df = df[df["GP"] > 0].sort_values(by="PTS", ascending=False).reset_index(drop=True)
     return df
 
+# --- Subtle Institutional Outlier Styling (Min 5 GP filter) ---
 def apply_outlier_styling(data_df, cols_to_style, min_gp=5, high_q=0.85, low_q=0.15):
     styler_df = pd.DataFrame('', index=data_df.index, columns=data_df.columns)
     eligible_mask = data_df["GP"] >= min_gp
@@ -282,6 +286,7 @@ if not df.empty:
     elif position_filter == "Defensemen":
         df = df[df["Pos"] == "D"].reset_index(drop=True)
 
+# --- Spotlight Header ---
 if df.empty:
     st.info(f"No {game_type_label.lower()} data recorded for {selected_season[:4]}-{selected_season[4:]}.")
 else:
@@ -290,6 +295,7 @@ else:
 
     p = df[df["PlayerId"] == st.session_state["selected_player_id"]].iloc[0]
 
+    # Executive Spotlight Showcase
     spotlight_html = f"""
     <div class="spotlight-card">
         <div style="display: flex; gap: 28px; align-items: center; flex-wrap: wrap;">
@@ -337,6 +343,7 @@ else:
     """
     st.markdown(spotlight_html, unsafe_allow_html=True)
 
+    # --- Interactive Roster Selector Grid ---
     st.markdown("#### Roster Selection")
     num_cols = 6
     for i in range(0, len(df), num_cols):
@@ -356,6 +363,7 @@ else:
 
 st.divider()
 
+# --- Tabbed Analytical Views with 4-Decimal Precision ---
 st.subheader("Roster Performance & Advanced Indices")
 st.caption("Benchmark Tiers: Muted Emerald = Top 15% percentile | Subdued Crimson = Bottom 15% percentile (Minimum 5 GP required)")
 
@@ -422,4 +430,3 @@ if not df.empty:
             .format(format_4dec)
         )
         st.dataframe(styled_comp, use_container_width=True, hide_index=True)
-EOF
